@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_111847) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_31_200002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_111847) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "categories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "server_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["server_id", "position"], name: "index_categories_on_server_id_and_position"
+    t.index ["server_id"], name: "index_categories_on_server_id"
+  end
+
+  create_table "channel_memberships", force: :cascade do |t|
+    t.bigint "channel_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_read_at"
+    t.boolean "muted", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["channel_id"], name: "index_channel_memberships_on_channel_id"
+    t.index ["user_id", "channel_id"], name: "index_channel_memberships_on_user_id_and_channel_id", unique: true
+    t.index ["user_id"], name: "index_channel_memberships_on_user_id"
+  end
+
+  create_table "channels", force: :cascade do |t|
+    t.bigint "category_id"
+    t.integer "channel_type", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.boolean "is_private", default: false, null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "server_id", null: false
+    t.string "topic"
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_channels_on_category_id"
+    t.index ["server_id", "category_id", "position"], name: "index_channels_on_server_id_and_category_id_and_position"
+    t.index ["server_id", "name"], name: "index_channels_on_server_id_and_name", unique: true
+    t.index ["server_id"], name: "index_channels_on_server_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -91,6 +130,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_111847) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "categories", "servers"
+  add_foreign_key "channel_memberships", "channels"
+  add_foreign_key "channel_memberships", "users"
+  add_foreign_key "channels", "categories"
+  add_foreign_key "channels", "servers"
   add_foreign_key "memberships", "servers"
   add_foreign_key "memberships", "users"
   add_foreign_key "servers", "users", column: "owner_id"

@@ -1,0 +1,35 @@
+<%# Desktop channel sidebar — 240px, matches .references/cold_wave_dm_view.html sidebar pattern %>
+<div class="w-60 flex-shrink-0 border-r border-bunker-825 flex flex-col h-full">
+  <%# Server header %>
+  <div class="px-3.5 py-3 border-b border-bunker-825 flex items-center justify-between">
+    <div class="flex-1 min-w-0">
+      <h2 class="font-syne text-[14px] font-bold text-bunker-100 truncate"><%= server.name %></h2>
+      <div class="text-[9px] tracking-[0.1em] mt-0.5 text-bunker-600">
+        <span class="text-granny-smith-apple-600">//</span> <%= server.users.count %> member<%= server.users.count == 1 ? "" : "s" %>
+      </div>
+    </div>
+    <% if current_membership&.can_manage_server? %>
+      <%= link_to settings_server_path(server),
+        class: "w-7 h-7 rounded flex items-center justify-center border border-bunker-775 text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 transition-colors duration-100 no-underline" do %>
+        <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# Channel list %>
+  <div class="flex-1 overflow-y-auto py-2">
+    <% categories.each do |category| %>
+      <%= render "servers/channel_sidebar_category", category: category, server: server, current_channel: current_channel, mobile: false %>
+    <% end %>
+  </div>
+
+  <%# Add category — moderator+ %>
+  <% if current_membership&.can_manage_channels? %>
+    <div class="px-3 py-2 border-t border-bunker-825">
+      <%= render "categories/form", server: server %>
+    </div>
+  <% end %>
+</div>

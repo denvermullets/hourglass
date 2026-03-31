@@ -11,6 +11,8 @@ Rails.application.routes.draw do
       get 'settings/danger', to: 'servers#settings_danger', as: :settings_danger
     end
     resource :membership, only: [:destroy]
+    resources :categories, only: %i[create update destroy]
+    resources :channels, only: %i[show create update destroy]
   end
   post 'servers/join', to: 'memberships#create', as: :join_server
 

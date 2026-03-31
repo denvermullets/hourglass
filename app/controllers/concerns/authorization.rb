@@ -26,6 +26,10 @@ module Authorization
     redirect_to server_path(@server), alert: "You don't have permission to do that."
   end
 
+  def require_moderator!
+    require_role!(:moderator)
+  end
+
   def require_admin!
     require_role!(:admin)
   end
