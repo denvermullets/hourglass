@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["editor", "hiddenInput", "placeholder"]
-  static values = { placeholder: String }
+  static values = { placeholder: String, content: String }
 
   async connect() {
     this._ready = false
@@ -86,6 +86,18 @@ export default class extends Controller {
     registerRichText(this.editor)
     registerMarkdownShortcuts(this.editor, TRANSFORMERS)
     registerCodeHighlighting(this.editor)
+
+    // Pre-populate editor with existing HTML content (used for editing messages)
+    if (this.hasContentValue && this.contentValue) {
+      this.editor.update(() => {
+        const parser = new DOMParser()
+        const dom = parser.parseFromString(this.contentValue, "text/html")
+        const nodes = this.htmlModule.$generateNodesFromDOM(this.editor, dom)
+        const root = this.lexical.$getRoot()
+        root.clear()
+        nodes.forEach(node => root.append(node))
+      })
+    }
 
     this._cleanups = []
 
