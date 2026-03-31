@@ -1,0 +1,31 @@
+<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5" do %>
+  <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bunker-825 flex items-center justify-center">
+    <span class="text-[11px] font-syne font-bold text-bunker-400 uppercase"><%= message.user.username[0] %></span>
+  </div>
+
+  <div class="flex-1 min-w-0">
+    <div class="flex items-baseline gap-2 mb-1">
+      <span class="font-syne text-[11px] font-bold text-bunker-100"><%= message.user.username %></span>
+      <span class="text-[9px] text-bunker-700">editing</span>
+    </div>
+
+    <%= form_with model: message,
+                  url: server_channel_message_path(server, channel, message),
+                  method: :patch,
+                  class: "flex flex-col gap-1.5",
+                  data: { controller: "message-form", action: "turbo:submit-end->message-form#reset" } do |f| %>
+      <%= f.text_area :body,
+            rows: 2,
+            class: "bg-bunker-875 border border-bunker-825 rounded px-3 py-2 text-[11px] text-bunker-100 font-dm-mono focus:outline-none focus:border-granny-smith-apple-600 resize-none transition-colors duration-150",
+            data: { message_form_target: "input", action: "keydown->message-form#submit" } %>
+      <div class="flex gap-2">
+        <%= f.submit "save",
+              class: "text-[9px] text-granny-smith-apple-300 hover:text-granny-smith-apple-600 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer font-dm-mono" %>
+        <%= link_to "cancel",
+              server_channel_message_path(server, channel, message),
+              class: "text-[9px] text-bunker-600 hover:text-bunker-400 transition-colors duration-100 no-underline font-dm-mono",
+              data: { turbo_method: :get } %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

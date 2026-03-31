@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_200002) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_31_200003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -94,6 +94,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_200002) do
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
+  create_table "messages", force: :cascade do |t|
+    t.text "body", null: false
+    t.bigint "channel_id"
+    t.bigint "conversation_id"
+    t.datetime "created_at", null: false
+    t.datetime "deleted_at"
+    t.datetime "edited_at"
+    t.integer "message_type", default: 0, null: false
+    t.bigint "parent_message_id"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["channel_id", "created_at"], name: "index_messages_on_channel_id_and_created_at"
+    t.index ["channel_id"], name: "index_messages_on_channel_id"
+    t.index ["conversation_id"], name: "index_messages_on_conversation_id"
+    t.index ["parent_message_id"], name: "index_messages_on_parent_message_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
   create_table "servers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -137,6 +155,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_200002) do
   add_foreign_key "channels", "servers"
   add_foreign_key "memberships", "servers"
   add_foreign_key "memberships", "users"
+  add_foreign_key "messages", "channels"
+  add_foreign_key "messages", "messages", column: "parent_message_id"
+  add_foreign_key "messages", "users"
   add_foreign_key "servers", "users", column: "owner_id"
   add_foreign_key "sessions", "users"
 end

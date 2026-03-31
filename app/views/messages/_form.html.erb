@@ -1,0 +1,12 @@
+<%= form_with scope: :message, url: server_channel_messages_path(server, channel),
+             id: "message_form",
+             class: "flex gap-2 items-end",
+             data: { controller: "message-form", action: "turbo:submit-end->message-form#reset" } do |f| %>
+  <%= f.text_area :body,
+        placeholder: "Message ##{channel.name}",
+        rows: 1,
+        class: "flex-1 bg-bunker-875 border border-bunker-825 rounded px-3 py-2.5 text-[11px] text-bunker-100 font-dm-mono placeholder:text-bunker-700 focus:outline-none focus:border-granny-smith-apple-600 resize-none transition-colors duration-150",
+        data: { message_form_target: "input", action: "keydown->message-form#submit" } %>
+  <%= f.submit "send",
+        class: "bg-transparent border border-bunker-825 rounded px-3 py-2.5 text-[9px] text-bunker-600 hover:text-granny-smith-apple-300 hover:border-granny-smith-apple-600 transition-colors duration-150 cursor-pointer font-dm-mono uppercase tracking-[0.1em]" %>
+<% end %>

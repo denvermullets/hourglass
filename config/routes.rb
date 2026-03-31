@@ -12,7 +12,9 @@ Rails.application.routes.draw do
     end
     resource :membership, only: [:destroy]
     resources :categories, only: %i[create update destroy]
-    resources :channels, only: %i[show create update destroy]
+    resources :channels, only: %i[show create update destroy] do
+      resources :messages, only: %i[index show create edit update destroy]
+    end
   end
   post 'servers/join', to: 'memberships#create', as: :join_server
 

@@ -1,0 +1,25 @@
+<% previous_date = nil %>
+<% @messages.each do |message| %>
+  <% if message.created_at.to_date != previous_date %>
+    <%= turbo_stream.prepend "messages" do %>
+      <%= render "messages/date_separator", date: message.created_at.to_date %>
+    <% end %>
+    <% previous_date = message.created_at.to_date %>
+  <% end %>
+  <%= turbo_stream.prepend "messages" do %>
+    <%= render "messages/message", message: message %>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "load_older" do %>
+  <% if @has_older %>
+    <div id="load_older" class="text-center py-3" data-messages-scroll-target="loadOlder">
+      <%= link_to "load older messages",
+            server_channel_messages_path(@messages.first.channel.server, @messages.first.channel, before: @messages.first.created_at.iso8601(6), format: :turbo_stream),
+            data: { turbo_stream: true },
+            class: "text-[9px] text-bunker-600 hover:text-bunker-400 transition-colors duration-100 no-underline" %>
+    </div>
+  <% else %>
+    <div id="load_older"></div>
+  <% end %>
+<% end %>
