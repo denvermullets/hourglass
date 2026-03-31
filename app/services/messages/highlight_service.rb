@@ -7,7 +7,8 @@ class Messages::HighlightService < Service
     @html.gsub(%r{<pre([^>]*)>(.*?)</pre>}m) do |_match|
       attrs = ::Regexp.last_match(1)
       code_html = ::Regexp.last_match(2)
-      language = attrs[/data-highlight-language="([^"]*)"/, 1]
+      language = attrs[/data-highlight-language="([^"]*)"/, 1] ||
+                 attrs[/data-language="([^"]*)"/, 1]
       plain_text = extract_plain_text(code_html)
 
       next empty_code_block if plain_text.blank?

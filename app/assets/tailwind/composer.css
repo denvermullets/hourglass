@@ -58,6 +58,36 @@
   box-sizing: border-box;
 }
 
+/* Code block language picker */
+.code-lang-picker {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--color-bunker-875);
+  border: 1px solid var(--color-bunker-825);
+  border-radius: 3px;
+  color: var(--color-bunker-600);
+  font-family: var(--font-dm-mono);
+  font-size: 9px;
+  padding: 1px 2px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.code-lang-picker:hover {
+  color: var(--color-bunker-300);
+  border-color: var(--color-bunker-700);
+}
+.code-lang-picker:focus {
+  border-color: var(--color-granny-smith-apple-600);
+  color: var(--color-bunker-200);
+}
+.code-lang-picker option {
+  background: var(--color-bunker-925);
+  color: var(--color-bunker-200);
+}
+
 /* Lexical editor content area */
 [data-message-composer-target="editor"] {
   min-width: 0;

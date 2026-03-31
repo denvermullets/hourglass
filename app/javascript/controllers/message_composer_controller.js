@@ -36,19 +36,20 @@ export default class extends Controller {
     this.htmlModule = html
 
     const {
-      createEditor, $getRoot, $getSelection, $isRangeSelection,
-      KEY_ENTER_COMMAND, FORMAT_TEXT_COMMAND, COMMAND_PRIORITY_HIGH,
-      $createParagraphNode
+      createEditor, $getSelection, $isRangeSelection,
+      KEY_ENTER_COMMAND, COMMAND_PRIORITY_HIGH
     } = lexical
 
     const { registerRichText, HeadingNode, QuoteNode } = richText
     const { registerMarkdownShortcuts, TRANSFORMERS } = markdown
-    const { CodeNode, CodeHighlightNode, $createCodeNode, registerCodeHighlighting } = code
+    const { CodeNode, CodeHighlightNode, $createCodeNode, $isCodeNode, registerCodeHighlighting } = code
     const { LinkNode, AutoLinkNode } = link
     const { ListNode, ListItemNode } = list
 
-    // Store for use in codeBlock action
+    // Store for use in codeBlock action and language picker
     this._createCodeNode = $createCodeNode
+    this._isCodeNode = $isCodeNode
+    this._CodeNode = CodeNode
 
     this.editor = createEditor({
       namespace: "MessageComposer",
@@ -104,13 +105,14 @@ export default class extends Controller {
       )
     )
 
-    // Track active formats for toolbar button states
+    // Track active formats for toolbar button states and code block language picker
     this._cleanups.push(
       this.editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
           const selection = $getSelection()
           if ($isRangeSelection(selection)) {
             this._updateToolbarState(selection)
+            this._updateLanguagePicker(selection)
           }
           this._updatePlaceholder()
         })
@@ -123,6 +125,7 @@ export default class extends Controller {
 
   disconnect() {
     this.isDisconnecting = true
+    this._removeLanguagePicker()
 
     if (this._cleanups) {
       this._cleanups.forEach(cleanup => cleanup())
@@ -256,6 +259,98 @@ export default class extends Controller {
         button.classList.remove("active")
       }
     }
+  }
+
+  _updateLanguagePicker(selection) {
+    const anchorNode = selection.anchor.getNode()
+    // Walk up the tree to find a CodeNode ancestor
+    let codeNode = null
+    let node = anchorNode
+    while (node) {
+      if (this._isCodeNode(node)) {
+        codeNode = node
+        break
+      }
+      node = node.getParent()
+    }
+
+    if (!codeNode) {
+      this._removeLanguagePicker()
+      return
+    }
+
+    const codeNodeKey = codeNode.getKey()
+    // Don't rebuild if already showing for this node
+    if (this._langPickerNodeKey === codeNodeKey) return
+
+    this._removeLanguagePicker()
+    this._langPickerNodeKey = codeNodeKey
+
+    const codeDomElement = this.editor.getElementByKey(codeNodeKey)
+    if (!codeDomElement) return
+
+    // Place picker in the editor's relative parent, positioned over the code block
+    const editorWrapper = this.editorTarget.parentElement
+    const wrapperRect = editorWrapper.getBoundingClientRect()
+    const codeRect = codeDomElement.getBoundingClientRect()
+
+    const picker = document.createElement("select")
+    picker.className = "code-lang-picker"
+    picker.innerHTML = this._languageOptions(codeNode.getLanguage())
+    picker.style.top = `${codeRect.top - wrapperRect.top + 4}px`
+    picker.style.right = "4px"
+
+    picker.addEventListener("mousedown", (e) => {
+      e.stopPropagation()
+    })
+    picker.addEventListener("change", (e) => {
+      const lang = e.target.value
+      this.editor.update(() => {
+        const node = this.lexical.$getNodeByKey(codeNodeKey)
+        if (node && this._isCodeNode(node)) {
+          node.setLanguage(lang || null)
+        }
+      })
+    })
+
+    editorWrapper.appendChild(picker)
+    this._langPicker = picker
+  }
+
+  _removeLanguagePicker() {
+    if (this._langPicker) {
+      this._langPicker.remove()
+      this._langPicker = null
+      this._langPickerNodeKey = null
+    }
+  }
+
+  _languageOptions(current) {
+    const langs = [
+      ["", "auto"],
+      ["javascript", "js"],
+      ["typescript", "ts"],
+      ["ruby", "ruby"],
+      ["python", "python"],
+      ["html", "html"],
+      ["css", "css"],
+      ["json", "json"],
+      ["sql", "sql"],
+      ["bash", "bash"],
+      ["go", "go"],
+      ["rust", "rust"],
+      ["java", "java"],
+      ["c", "c"],
+      ["cpp", "c++"],
+      ["yaml", "yaml"],
+      ["markdown", "md"],
+      ["xml", "xml"],
+      ["plaintext", "plain"]
+    ]
+    return langs.map(([value, label]) => {
+      const selected = value === (current || "") ? " selected" : ""
+      return `<option value="${value}"${selected}>${label}</option>`
+    }).join("")
   }
 
   _updatePlaceholder() {
