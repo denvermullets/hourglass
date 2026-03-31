@@ -1,0 +1,10 @@
+<% if flash[:alert] %>
+  <div class="flex items-center gap-2 rounded px-3 py-2 mb-4 text-xs" style="background: var(--auth-red2); border: 1px solid var(--auth-red); color: var(--auth-red);">
+    <span>// <%= flash[:alert] %></span>
+  </div>
+<% end %>
+<% if flash[:notice] %>
+  <div class="flex items-center gap-2 rounded px-3 py-2 mb-4 text-xs" style="background: var(--auth-accent3); border: 1px solid var(--auth-accent2); color: var(--auth-accent);">
+    <span>// <%= flash[:notice] %></span>
+  </div>
+<% end %>

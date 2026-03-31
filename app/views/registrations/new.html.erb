@@ -1,0 +1,136 @@
+<% content_for(:brand_description) do %>
+  create your account to get started.<br>it takes about a minute.
+<% end %>
+<% content_for(:brand_footer) do %>
+  step 1 of 1 &middot; credentials &amp; profile
+<% end %>
+
+<div>
+  <div class="mb-6">
+    <div class="text-[8px] tracking-[0.2em] flex items-center gap-1" style="color: var(--auth-fg3);">
+      <span style="color: var(--auth-fg4);">//</span> account
+    </div>
+    <h1 class="font-syne text-[22px] font-bold tracking-tight mt-1" style="color: var(--auth-fg);">sign up</h1>
+    <p class="text-[10px] mt-1 leading-relaxed" style="color: var(--auth-fg3);">create your account.</p>
+  </div>
+
+  <%= render "shared/auth_flash" %>
+
+  <%= form_with model: @user, url: registration_path, class: "flex flex-col gap-3.5" do |form| %>
+    <%# Username %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
+        <span style="color: var(--auth-accent2);">$</span> username <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      </label>
+      <%= form.text_field :username,
+        required: true,
+        autofocus: true,
+        autocomplete: "username",
+        placeholder: "your_handle",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
+        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:username].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
+        onfocus: "this.style.borderColor='var(--auth-accent2)'",
+        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+      <% if @user.errors[:username].any? %>
+        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:username].first %></div>
+      <% else %>
+        <div class="text-[9px] leading-relaxed" style="color: var(--auth-fg3);">lowercase, no spaces &middot; this is how others see you</div>
+      <% end %>
+    </div>
+
+    <%# Email %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
+        <span style="color: var(--auth-accent2);">$</span> email <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      </label>
+      <%= form.email_field :email_address,
+        required: true,
+        autocomplete: "email",
+        placeholder: "you@example.com",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
+        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:email_address].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
+        onfocus: "this.style.borderColor='var(--auth-accent2)'",
+        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+      <% if @user.errors[:email_address].any? %>
+        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:email_address].first %></div>
+      <% end %>
+    </div>
+
+    <%# Password %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
+        <span style="color: var(--auth-accent2);">$</span> password <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      </label>
+      <%= form.password_field :password,
+        required: true,
+        autocomplete: "new-password",
+        placeholder: "min 8 characters",
+        maxlength: 72,
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
+        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:password].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
+        onfocus: "this.style.borderColor='var(--auth-accent2)'",
+        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+      <% if @user.errors[:password].any? %>
+        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:password].first %></div>
+      <% end %>
+    </div>
+
+    <%# Password confirmation %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
+        <span style="color: var(--auth-accent2);">$</span> password_confirmation <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      </label>
+      <%= form.password_field :password_confirmation,
+        required: true,
+        autocomplete: "new-password",
+        placeholder: "confirm password",
+        maxlength: 72,
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
+        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:password_confirmation].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
+        onfocus: "this.style.borderColor='var(--auth-accent2)'",
+        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+      <% if @user.errors[:password_confirmation].any? %>
+        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:password_confirmation].first %></div>
+      <% end %>
+    </div>
+
+    <%# Display name (optional) %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
+        <span style="color: var(--auth-accent2);">$</span> display_name
+      </label>
+      <%= form.text_field :display_name,
+        placeholder: "optional \u2014 defaults to username",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
+        style: "background: var(--auth-bg3); border: 1px solid var(--auth-line2); color: var(--auth-fg2);",
+        onfocus: "this.style.borderColor='var(--auth-accent2)'",
+        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+    </div>
+
+    <%# Bio (optional) %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
+        <span style="color: var(--auth-accent2);">$</span> bio
+      </label>
+      <%= form.text_area :bio,
+        rows: 2,
+        placeholder: "tell us about yourself...",
+        maxlength: 160,
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7",
+        style: "background: var(--auth-bg3); border: 1px solid var(--auth-line2); color: var(--auth-fg2);",
+        onfocus: "this.style.borderColor='var(--auth-accent2)'",
+        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+      <div class="text-[9px] leading-relaxed" style="color: var(--auth-fg3);">shown on your profile &middot; max 160 chars</div>
+    </div>
+
+    <%= form.submit "// create account \u2192",
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150",
+      style: "background: transparent; border: 1px solid var(--auth-accent2); color: var(--auth-accent);",
+      onmouseover: "this.style.background='var(--auth-accent2)'; this.style.color='var(--auth-bg)'",
+      onmouseout: "this.style.background='transparent'; this.style.color='var(--auth-accent)'" %>
+
+    <div class="text-[9px] text-center" style="color: var(--auth-fg3);">
+      already have an account? <%= link_to "sign in", new_session_path, style: "color: var(--auth-accent2); text-decoration: none;" %>
+    </div>
+  <% end %>
+</div>
