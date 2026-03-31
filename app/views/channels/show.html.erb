@@ -1,0 +1,55 @@
+<div class="flex-1 flex flex-col lg:flex-row">
+  <%# Desktop sidebar %>
+  <div class="hidden lg:flex">
+    <%= render "servers/channel_sidebar", server: @server, categories: @categories, current_channel: @channel %>
+  </div>
+
+  <%# Channel content %>
+  <div class="flex-1 flex flex-col min-w-0">
+    <%# Channel header %>
+    <div class="px-4 lg:px-5 py-3 border-b border-bunker-825 flex items-center gap-2.5 flex-shrink-0">
+      <%# Mobile back button %>
+      <%= link_to server_path(@server), class: "lg:hidden text-[10px] text-granny-smith-apple-600 no-underline flex-shrink-0" do %>
+        &larr; back
+      <% end %>
+
+      <span class="text-bunker-600 text-[12px] flex-shrink-0">
+        <% if @channel.voice? %>
+          <svg class="w-3.5 h-3.5 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        <% else %>
+          #
+        <% end %>
+      </span>
+      <span class="font-syne text-[13px] lg:text-[15px] font-bold text-bunker-100"><%= @channel.name %></span>
+
+      <% if @channel.topic.present? %>
+        <span class="hidden lg:inline text-bunker-825 mx-1">|</span>
+        <span class="hidden lg:inline text-[10px] text-bunker-600 truncate"><%= @channel.topic %></span>
+      <% end %>
+
+      <div class="ml-auto flex gap-1.5">
+        <% if current_membership&.can_manage_channels? %>
+          <%= link_to "edit", server_channel_path(@server, @channel),
+            class: "hidden text-[9px] text-bunker-600 hover:text-bunker-400 transition-colors duration-100 no-underline" %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @channel.topic.present? %>
+      <div class="lg:hidden px-4 py-2 border-b border-bunker-825">
+        <div class="text-[9px] text-bunker-600"><%= @channel.topic %></div>
+      </div>
+    <% end %>
+
+    <%# Message area placeholder %>
+    <div class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <div class="text-[11px] text-bunker-600 mb-1">welcome to <span class="text-bunker-400">#<%= @channel.name %></span></div>
+        <div class="text-[9px] text-bunker-700">messages coming soon.</div>
+      </div>
+    </div>
+  </div>
+</div>

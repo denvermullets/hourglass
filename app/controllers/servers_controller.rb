@@ -26,7 +26,9 @@ class ServersController < ApplicationController
     render :new, status: :unprocessable_entity
   end
 
-  def show; end
+  def show
+    @categories = @server.categories.ordered.includes(:channels)
+  end
 
   def settings
     @tab = 'general'
