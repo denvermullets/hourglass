@@ -1,0 +1,7 @@
+general:
+  name: general
+  server: one
+  category: general
+  channel_type: 0
+  position: 0
+  is_private: false

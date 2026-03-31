@@ -1,0 +1,21 @@
+one:
+  body: Hello, world!
+  user: one
+  channel: general
+  message_type: 0
+  created_at: <%= 1.hour.ago %>
+
+two:
+  body: Hey there!
+  user: two
+  channel: general
+  message_type: 0
+  created_at: <%= 30.minutes.ago %>
+
+deleted:
+  body: This was deleted
+  user: one
+  channel: general
+  message_type: 0
+  deleted_at: <%= 10.minutes.ago %>
+  created_at: <%= 20.minutes.ago %>

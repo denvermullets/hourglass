@@ -1,0 +1,40 @@
+<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5 rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id } do %>
+  <% if message.deleted? %>
+    <div class="flex-1 text-[11px] text-bunker-700 italic">
+      [message deleted]
+    </div>
+  <% else %>
+    <%# Avatar %>
+    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bunker-825 flex items-center justify-center">
+      <span class="text-[11px] font-syne font-bold text-bunker-400 uppercase"><%= message.user.username[0] %></span>
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <%# Header: username + timestamp %>
+      <div class="flex items-baseline gap-2">
+        <span class="font-syne text-[11px] font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
+        <span class="text-[9px] text-bunker-700"><%= message.created_at.strftime("%-m/%-d/%Y %-I:%M %p") %></span>
+        <% if message.edited? %>
+          <span class="text-[9px] text-bunker-700">(edited)</span>
+        <% end %>
+      </div>
+
+      <%# Body %>
+      <div class="text-[11px] text-bunker-400 break-words whitespace-pre-wrap"><%= message.body %></div>
+    </div>
+
+    <%# Actions (visible on hover, controlled by Stimulus for author check) %>
+    <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-start gap-1 pt-1 message-actions hidden"
+         data-author-only>
+      <%= button_to "edit",
+            edit_server_channel_message_path(message.channel.server, message.channel, message),
+            method: :get,
+            class: "text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
+      <%= button_to "delete",
+            server_channel_message_path(message.channel.server, message.channel, message),
+            method: :delete,
+            class: "text-[9px] text-bunker-700 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer",
+            data: { turbo_confirm: "Delete this message?" } %>
+    </div>
+  <% end %>
+<% end %>
