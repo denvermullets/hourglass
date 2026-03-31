@@ -1,0 +1,8 @@
+<span id="server_<%= server_id %>_presence" class="flex items-center gap-1">
+  <span class="flex gap-0.5">
+    <% online_count.clamp(0, 3).times do %>
+      <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-300"></span>
+    <% end %>
+  </span>
+  <%= online_count %> online
+</span>
