@@ -10,16 +10,29 @@ export default class extends Controller {
   }
 
   showAuthorActions() {
-    this.element.querySelectorAll("[data-author-only]").forEach((el) => {
-      const messageEl = el.closest("[data-message-author-id]")
-      if (!messageEl) return
-
+    this.element.querySelectorAll("[data-message-author-id]").forEach((messageEl) => {
       const authorId = parseInt(messageEl.dataset.messageAuthorId, 10)
-      if (authorId === this.currentUserValue) {
-        el.classList.remove("hidden")
-      } else {
-        el.classList.add("hidden")
-      }
+      const isAuthor = authorId === this.currentUserValue
+
+      // Show/hide edit/delete actions
+      messageEl.querySelectorAll("[data-author-only]").forEach((el) => {
+        if (isAuthor) {
+          el.classList.remove("hidden")
+        } else {
+          el.classList.add("hidden")
+        }
+      })
+
+      // Color username: green for current user, blue for others
+      messageEl.querySelectorAll("[data-author-name]").forEach((el) => {
+        if (isAuthor) {
+          el.classList.remove("text-jordy-blue-400")
+          el.classList.add("text-granny-smith-apple-300")
+        } else {
+          el.classList.remove("text-granny-smith-apple-300")
+          el.classList.add("text-jordy-blue-400")
+        }
+      })
     })
   }
 
