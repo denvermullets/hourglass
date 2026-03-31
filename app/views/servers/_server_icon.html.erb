@@ -1,0 +1,12 @@
+<%# Renders a server icon — image or initials fallback
+    Locals: server (required), size: "sm" | "md" | "lg" (default: "md") %>
+<% size ||= "md" %>
+<% size_classes = { "sm" => "w-[28px] h-[28px] rounded-md text-[8px]", "md" => "w-[34px] h-[34px] rounded-lg text-[9px]", "lg" => "w-[48px] h-[48px] rounded-xl text-[13px]" }[size] %>
+
+<div class="<%= size_classes %> bg-bunker-875 border border-bunker-775 flex items-center justify-center text-bunker-600 flex-shrink-0 overflow-hidden">
+  <% if server.icon.attached? %>
+    <%= image_tag server.icon, alt: server.name, class: "w-full h-full object-cover" %>
+  <% else %>
+    <%= server.name[0, 2].upcase %>
+  <% end %>
+</div>
