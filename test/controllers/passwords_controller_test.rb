@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class PasswordsControllerTest < ActionDispatch::IntegrationTest
-  setup { @user = User.take }
+  setup { @user = users(:one) }
 
   test 'new' do
     get new_password_path
@@ -41,7 +41,8 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
 
   test 'update' do
     assert_changes -> { @user.reload.password_digest } do
-      put password_path(@user.password_reset_token), params: { password: 'new', password_confirmation: 'new' }
+      put password_path(@user.password_reset_token),
+          params: { password: 'newpassword123', password_confirmation: 'newpassword123' }
       assert_redirected_to new_session_path
     end
 
