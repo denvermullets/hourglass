@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Hourglass" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Hourglass">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="font-dm-mono" style="background: var(--auth-bg);">
+    <div class="flex min-h-screen">
+      <%# Left brand panel %>
+      <div class="hidden lg:flex w-[340px] flex-shrink-0 flex-col justify-between p-10 pb-8" style="border-right: 1px solid var(--auth-line);">
+        <div>
+          <div class="font-syne text-4xl font-extrabold tracking-tight" style="color: var(--auth-fg);">
+            hour<span style="color: var(--auth-accent);">.</span>glass
+          </div>
+          <div class="text-[9px] tracking-[0.16em] mt-2" style="color: var(--auth-fg3);">
+            <span style="color: var(--auth-accent2);">// </span>time to build
+          </div>
+          <div class="text-xs mt-7 leading-7 font-light" style="color: var(--auth-fg3);">
+            <%= content_for?(:brand_description) ? yield(:brand_description) : "a simple way to track where your time goes." %>
+          </div>
+        </div>
+        <div class="text-[9px] leading-7" style="color: var(--auth-fg4);">
+          <%= content_for?(:brand_footer) ? yield(:brand_footer) : "" %>
+        </div>
+      </div>
+
+      <%# Right content panel %>
+      <div class="flex-1 flex items-center justify-center p-10">
+        <div class="w-full max-w-[380px]">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

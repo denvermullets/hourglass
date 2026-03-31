@@ -1,0 +1,43 @@
+<% content_for(:brand_description) do %>
+  enter your email and we'll send you a link to reset your password.
+<% end %>
+
+<div>
+  <div class="mb-6">
+    <div class="text-[8px] tracking-[0.2em] flex items-center gap-1" style="color: var(--auth-fg3);">
+      <span style="color: var(--auth-fg4);">//</span> account
+    </div>
+    <h1 class="font-syne text-[22px] font-bold tracking-tight mt-1" style="color: var(--auth-fg);">forgot password</h1>
+    <p class="text-[10px] mt-1 leading-relaxed" style="color: var(--auth-fg3);">we'll email you reset instructions.</p>
+  </div>
+
+  <%= render "shared/auth_flash" %>
+
+  <%= form_with url: passwords_path, class: "flex flex-col gap-3.5" do |form| %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
+        <span style="color: var(--auth-accent2);">$</span> email <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      </label>
+      <%= form.email_field :email_address,
+        required: true,
+        autofocus: true,
+        autocomplete: "email",
+        placeholder: "you@example.com",
+        value: params[:email_address],
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
+        style: "background: var(--auth-bg3); border: 1px solid var(--auth-line2); color: var(--auth-fg2);",
+        onfocus: "this.style.borderColor='var(--auth-accent2)'",
+        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+    </div>
+
+    <%= form.submit "// send reset instructions \u2192",
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150",
+      style: "background: transparent; border: 1px solid var(--auth-accent2); color: var(--auth-accent);",
+      onmouseover: "this.style.background='var(--auth-accent2)'; this.style.color='var(--auth-bg)'",
+      onmouseout: "this.style.background='transparent'; this.style.color='var(--auth-accent)'" %>
+
+    <div class="text-[9px] text-center" style="color: var(--auth-fg3);">
+      remembered it? <%= link_to "sign in", new_session_path, style: "color: var(--auth-accent2); text-decoration: none;" %>
+    </div>
+  <% end %>
+</div>
