@@ -4,21 +4,26 @@ export default class extends Controller {
   static targets = ["container", "loadOlder"]
 
   connect() {
+    this._wasNearBottom = true
     this.scrollToBottom()
     this.observeNewMessages()
+    this._onScroll = () => { this._wasNearBottom = this.isNearBottom() }
+    this.containerTarget.addEventListener("scroll", this._onScroll, { passive: true })
   }
 
   scrollToBottom() {
     const container = this.containerTarget
     container.scrollTop = container.scrollHeight
+    this._wasNearBottom = true
   }
 
   observeNewMessages() {
     const messages = this.containerTarget.querySelector("#messages")
     if (!messages) return
 
-    this.mutationObserver = new MutationObserver(() => {
-      if (this.isNearBottom()) {
+    this.mutationObserver = new MutationObserver((mutations) => {
+      const hasNewNodes = mutations.some(m => m.addedNodes.length > 0)
+      if (hasNewNodes && this._wasNearBottom) {
         this.scrollToBottom()
       }
     })
@@ -43,5 +48,8 @@ export default class extends Controller {
 
   disconnect() {
     this.mutationObserver?.disconnect()
+    if (this._onScroll) {
+      this.containerTarget.removeEventListener("scroll", this._onScroll)
+    }
   }
 }

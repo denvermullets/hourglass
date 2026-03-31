@@ -5,7 +5,11 @@ class Messages::UpdateService < Service
   end
 
   def call
-    @message.update!(@params.merge(edited_at: Time.current))
+    sanitized_params = @params.merge(
+      body: Messages::SanitizeService.call(html: @params[:body])
+    )
+
+    @message.update!(sanitized_params.merge(edited_at: Time.current))
 
     Turbo::StreamsChannel.broadcast_replace_to(
       @message.channel,

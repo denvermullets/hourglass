@@ -6,8 +6,12 @@ class Messages::CreateService < Service
   end
 
   def call
+    sanitized_params = @params.merge(
+      body: Messages::SanitizeService.call(html: @params[:body])
+    )
+
     message = @channel.messages.create!(
-      @params.merge(user: @user, message_type: :regular)
+      sanitized_params.merge(user: @user, message_type: :regular)
     )
 
     broadcast_date_separator(message)
