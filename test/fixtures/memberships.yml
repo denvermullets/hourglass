@@ -1,0 +1,17 @@
+one_owner:
+  user: one
+  server: one
+  role: 0
+  joined_at: <%= 1.week.ago %>
+
+two_member_of_one:
+  user: two
+  server: one
+  role: 3
+  joined_at: <%= 3.days.ago %>
+
+two_owner:
+  user: two
+  server: two
+  role: 0
+  joined_at: <%= 1.week.ago %>

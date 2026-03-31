@@ -23,22 +23,22 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="font-dm-mono" style="background: var(--auth-bg);">
+  <body class="font-dm-mono bg-bunker-950">
     <div class="flex min-h-screen">
       <%# Left brand panel %>
-      <div class="hidden lg:flex w-[340px] flex-shrink-0 flex-col justify-between p-10 pb-8" style="border-right: 1px solid var(--auth-line);">
+      <div class="hidden lg:flex w-[340px] flex-shrink-0 flex-col justify-between p-10 pb-8 border-r border-bunker-825">
         <div>
-          <div class="font-syne text-4xl font-extrabold tracking-tight" style="color: var(--auth-fg);">
-            hour<span style="color: var(--auth-accent);">.</span>glass
+          <div class="font-syne text-4xl font-extrabold tracking-tight text-bunker-100">
+            hour<span class="text-granny-smith-apple-300">.</span>glass
           </div>
-          <div class="text-[9px] tracking-[0.16em] mt-2" style="color: var(--auth-fg3);">
-            <span style="color: var(--auth-accent2);">// </span>time to build
+          <div class="text-[9px] tracking-[0.16em] mt-2 text-bunker-600">
+            <span class="text-granny-smith-apple-600">// </span>time to build
           </div>
-          <div class="text-xs mt-7 leading-7 font-light" style="color: var(--auth-fg3);">
+          <div class="text-xs mt-7 leading-7 font-light text-bunker-600">
             <%= content_for?(:brand_description) ? yield(:brand_description) : "a simple way to track where your time goes." %>
           </div>
         </div>
-        <div class="text-[9px] leading-7" style="color: var(--auth-fg4);">
+        <div class="text-[9px] leading-7 text-bunker-700">
           <%= content_for?(:brand_footer) ? yield(:brand_footer) : "" %>
         </div>
       </div>

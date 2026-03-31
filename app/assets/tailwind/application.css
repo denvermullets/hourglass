@@ -1,25 +1,5 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --auth-bg: var(--color-bunker-950);
-    --auth-bg2: #191c22;
-    --auth-bg3: #1f232b;
-    --auth-line: #272b34;
-    --auth-line2: #303540;
-    --auth-fg: var(--color-bunker-100);
-    --auth-fg2: var(--color-bunker-400);
-    --auth-fg3: var(--color-bunker-600);
-    --auth-fg4: var(--color-bunker-700);
-    --auth-accent: var(--color-granny-smith-apple-300);
-    --auth-accent2: var(--color-granny-smith-apple-600);
-    --auth-accent3: #1e3d2a;
-    --auth-blue: var(--color-jordy-blue-400);
-    --auth-red: #e87a7a;
-    --auth-red2: #4a2020;
-  }
-}
-
 @theme {
   --font-syne: "Syne", sans-serif;
   --font-dm-mono: "DM Mono", monospace;
@@ -32,9 +12,13 @@
   --color-bunker-500: #647693;
   --color-bunker-600: #505e79;
   --color-bunker-700: #414c63;
+  --color-bunker-775: #303540;
   --color-bunker-800: #394253;
+  --color-bunker-825: #272b34;
+  --color-bunker-875: #1f232b;
   --color-bunker-900: #333947;
-  /* bunker-950 is main dark blue */
+  --color-bunker-925: #191c22;
+  /* bunker-950 is main dark bg */
   --color-bunker-950: #111318;
 
   --color-granny-smith-apple-50: #f1fcf4;
@@ -48,6 +32,7 @@
   --color-granny-smith-apple-700: #1a7b3c;
   --color-granny-smith-apple-800: #1a6133;
   --color-granny-smith-apple-900: #17502c;
+  --color-granny-smith-apple-925: #1e3d2a;
   --color-granny-smith-apple-950: #072c16;
 
   --color-jordy-blue-50: #f0f7fe;
@@ -62,4 +47,7 @@
   --color-jordy-blue-800: #234eaa;
   --color-jordy-blue-900: #224486;
   --color-jordy-blue-950: #192b52;
+
+  --color-danger-400: #e87a7a;
+  --color-danger-800: #4a2020;
 }

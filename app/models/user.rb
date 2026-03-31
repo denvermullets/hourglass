@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :memberships, dependent: :destroy
+  has_many :servers, through: :memberships
+  has_many :owned_servers, class_name: 'Server', foreign_key: :owner_id, dependent: :restrict_with_error
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :username, with: ->(u) { u.strip.downcase }

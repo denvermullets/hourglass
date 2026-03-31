@@ -1,0 +1,38 @@
+class Server < ApplicationRecord
+  belongs_to :owner, class_name: 'User'
+  has_many :memberships, dependent: :destroy
+  has_many :users, through: :memberships
+
+  has_one_attached :icon
+
+  validates :name, presence: true, length: { maximum: 100 }
+  validates :description, length: { maximum: 1000 }, allow_blank: true
+  validates :invite_code, presence: true, uniqueness: true
+
+  before_validation :generate_invite_code, on: :create
+
+  def regenerate_invite_code!
+    update!(invite_code: self.class.send(:generate_unique_invite_code))
+  end
+
+  def membership_for(user)
+    memberships.find_by(user: user)
+  end
+
+  private
+
+  def generate_invite_code
+    self.invite_code ||= self.class.send(:generate_unique_invite_code)
+  end
+
+  class << self
+    private
+
+    def generate_unique_invite_code
+      loop do
+        code = SecureRandom.alphanumeric(8)
+        break code unless exists?(invite_code: code)
+      end
+    end
+  end
+end

@@ -1,0 +1,23 @@
+<div class="flex-1 flex flex-col">
+  <%# Header %>
+  <div class="px-4 lg:px-6 py-4 border-b border-bunker-825 flex items-center gap-3">
+    <%= link_to server_path(@server), class: "text-[10px] text-granny-smith-apple-600 no-underline" do %>
+      &larr; back
+    <% end %>
+    <div>
+      <h1 class="font-syne text-[17px] lg:text-[20px] font-bold text-bunker-100 tracking-tight">server settings</h1>
+      <div class="text-[8px] tracking-[0.16em] mt-1 text-bunker-600">
+        <span class="text-granny-smith-apple-600">//</span> <%= @server.name %>
+      </div>
+    </div>
+  </div>
+
+  <%# Tabs + panel — all inside one Turbo Frame so active state updates %>
+  <div class="flex-1 flex min-h-0">
+    <%= render "servers/settings/tabs_and_panel",
+      server: @server,
+      tab: "general",
+      panel_partial: "servers/settings/general_content",
+      panel_locals: { server: @server } %>
+  </div>
+</div>

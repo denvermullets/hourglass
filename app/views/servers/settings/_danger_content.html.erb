@@ -1,0 +1,14 @@
+<div class="max-w-[480px]">
+  <% if membership&.can_delete_server? %>
+    <div class="rounded border border-danger-800 bg-bunker-925 p-4">
+      <div class="text-[11px] text-danger-400 mb-2">delete server</div>
+      <div class="text-[9px] text-bunker-600 mb-3">this action is permanent and cannot be undone. all data will be lost.</div>
+      <%= button_to "// delete server", server_path(server),
+        method: :delete,
+        class: "px-3 py-1.5 rounded text-[10px] border border-danger-800 text-danger-400 hover:bg-danger-800 cursor-pointer transition-colors duration-150 bg-transparent",
+        data: { turbo_confirm: "Are you sure? This will permanently delete #{server.name} and all its data." } %>
+    </div>
+  <% else %>
+    <div class="text-[9px] text-bunker-600">only the server owner can delete this server.</div>
+  <% end %>
+</div>

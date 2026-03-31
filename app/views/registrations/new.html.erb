@@ -7,11 +7,11 @@
 
 <div>
   <div class="mb-6">
-    <div class="text-[8px] tracking-[0.2em] flex items-center gap-1" style="color: var(--auth-fg3);">
-      <span style="color: var(--auth-fg4);">//</span> account
+    <div class="text-[8px] tracking-[0.2em] flex items-center gap-1 text-bunker-600">
+      <span class="text-bunker-700">//</span> account
     </div>
-    <h1 class="font-syne text-[22px] font-bold tracking-tight mt-1" style="color: var(--auth-fg);">sign up</h1>
-    <p class="text-[10px] mt-1 leading-relaxed" style="color: var(--auth-fg3);">create your account.</p>
+    <h1 class="font-syne text-[22px] font-bold tracking-tight mt-1 text-bunker-100">sign up</h1>
+    <p class="text-[10px] mt-1 leading-relaxed text-bunker-600">create your account.</p>
   </div>
 
   <%= render "shared/auth_flash" %>
@@ -19,118 +19,109 @@
   <%= form_with model: @user, url: registration_path, class: "flex flex-col gap-3.5" do |form| %>
     <%# Username %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
-        <span style="color: var(--auth-accent2);">$</span> username <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+        <span class="text-granny-smith-apple-600">$</span> username <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.text_field :username,
         required: true,
         autofocus: true,
         autocomplete: "username",
         placeholder: "your_handle",
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
-        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:username].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
-        onfocus: "this.style.borderColor='var(--auth-accent2)'",
-        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border text-bunker-400 #{@user.errors[:username].any? ? 'border-danger-800' : 'border-bunker-775'}",
+        onfocus: "this.classList.remove('border-bunker-775','border-danger-800');this.classList.add('border-granny-smith-apple-600')",
+        onblur: "this.classList.remove('border-granny-smith-apple-600');this.classList.add('border-bunker-775')" %>
       <% if @user.errors[:username].any? %>
-        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:username].first %></div>
+        <div class="text-[9px] leading-relaxed text-danger-400">// <%= @user.errors[:username].first %></div>
       <% else %>
-        <div class="text-[9px] leading-relaxed" style="color: var(--auth-fg3);">lowercase, no spaces &middot; this is how others see you</div>
+        <div class="text-[9px] leading-relaxed text-bunker-600">lowercase, no spaces &middot; this is how others see you</div>
       <% end %>
     </div>
 
     <%# Email %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
-        <span style="color: var(--auth-accent2);">$</span> email <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+        <span class="text-granny-smith-apple-600">$</span> email <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.email_field :email_address,
         required: true,
         autocomplete: "email",
         placeholder: "you@example.com",
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
-        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:email_address].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
-        onfocus: "this.style.borderColor='var(--auth-accent2)'",
-        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border text-bunker-400 #{@user.errors[:email_address].any? ? 'border-danger-800' : 'border-bunker-775'}",
+        onfocus: "this.classList.remove('border-bunker-775','border-danger-800');this.classList.add('border-granny-smith-apple-600')",
+        onblur: "this.classList.remove('border-granny-smith-apple-600');this.classList.add('border-bunker-775')" %>
       <% if @user.errors[:email_address].any? %>
-        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:email_address].first %></div>
+        <div class="text-[9px] leading-relaxed text-danger-400">// <%= @user.errors[:email_address].first %></div>
       <% end %>
     </div>
 
     <%# Password %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
-        <span style="color: var(--auth-accent2);">$</span> password <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+        <span class="text-granny-smith-apple-600">$</span> password <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.password_field :password,
         required: true,
         autocomplete: "new-password",
         placeholder: "min 8 characters",
         maxlength: 72,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
-        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:password].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
-        onfocus: "this.style.borderColor='var(--auth-accent2)'",
-        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border text-bunker-400 #{@user.errors[:password].any? ? 'border-danger-800' : 'border-bunker-775'}",
+        onfocus: "this.classList.remove('border-bunker-775','border-danger-800');this.classList.add('border-granny-smith-apple-600')",
+        onblur: "this.classList.remove('border-granny-smith-apple-600');this.classList.add('border-bunker-775')" %>
       <% if @user.errors[:password].any? %>
-        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:password].first %></div>
+        <div class="text-[9px] leading-relaxed text-danger-400">// <%= @user.errors[:password].first %></div>
       <% end %>
     </div>
 
     <%# Password confirmation %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
-        <span style="color: var(--auth-accent2);">$</span> password_confirmation <span style="color: var(--auth-red); opacity: 0.8;">*</span>
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+        <span class="text-granny-smith-apple-600">$</span> password_confirmation <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.password_field :password_confirmation,
         required: true,
         autocomplete: "new-password",
         placeholder: "confirm password",
         maxlength: 72,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
-        style: "background: var(--auth-bg3); border: 1px solid #{@user.errors[:password_confirmation].any? ? 'var(--auth-red2)' : 'var(--auth-line2)'}; color: var(--auth-fg2);",
-        onfocus: "this.style.borderColor='var(--auth-accent2)'",
-        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border text-bunker-400 #{@user.errors[:password_confirmation].any? ? 'border-danger-800' : 'border-bunker-775'}",
+        onfocus: "this.classList.remove('border-bunker-775','border-danger-800');this.classList.add('border-granny-smith-apple-600')",
+        onblur: "this.classList.remove('border-granny-smith-apple-600');this.classList.add('border-bunker-775')" %>
       <% if @user.errors[:password_confirmation].any? %>
-        <div class="text-[9px] leading-relaxed" style="color: var(--auth-red);">// <%= @user.errors[:password_confirmation].first %></div>
+        <div class="text-[9px] leading-relaxed text-danger-400">// <%= @user.errors[:password_confirmation].first %></div>
       <% end %>
     </div>
 
     <%# Display name (optional) %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
-        <span style="color: var(--auth-accent2);">$</span> display_name
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+        <span class="text-granny-smith-apple-600">$</span> display_name
       </label>
       <%= form.text_field :display_name,
         placeholder: "optional \u2014 defaults to username",
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150",
-        style: "background: var(--auth-bg3); border: 1px solid var(--auth-line2); color: var(--auth-fg2);",
-        onfocus: "this.style.borderColor='var(--auth-accent2)'",
-        onblur: "this.style.borderColor='var(--auth-line2)'" %>
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400",
+        onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
+        onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
     </div>
 
     <%# Bio (optional) %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5" style="color: var(--auth-fg3);">
-        <span style="color: var(--auth-accent2);">$</span> bio
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+        <span class="text-granny-smith-apple-600">$</span> bio
       </label>
       <%= form.text_area :bio,
         rows: 2,
         placeholder: "tell us about yourself...",
         maxlength: 160,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7",
-        style: "background: var(--auth-bg3); border: 1px solid var(--auth-line2); color: var(--auth-fg2);",
-        onfocus: "this.style.borderColor='var(--auth-accent2)'",
-        onblur: "this.style.borderColor='var(--auth-line2)'" %>
-      <div class="text-[9px] leading-relaxed" style="color: var(--auth-fg3);">shown on your profile &middot; max 160 chars</div>
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7 bg-bunker-875 border border-bunker-775 text-bunker-400",
+        onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
+        onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
+      <div class="text-[9px] leading-relaxed text-bunker-600">shown on your profile &middot; max 160 chars</div>
     </div>
 
     <%= form.submit "// create account \u2192",
-      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150",
-      style: "background: transparent; border: 1px solid var(--auth-accent2); color: var(--auth-accent);",
-      onmouseover: "this.style.background='var(--auth-accent2)'; this.style.color='var(--auth-bg)'",
-      onmouseout: "this.style.background='transparent'; this.style.color='var(--auth-accent)'" %>
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
 
-    <div class="text-[9px] text-center" style="color: var(--auth-fg3);">
-      already have an account? <%= link_to "sign in", new_session_path, style: "color: var(--auth-accent2); text-decoration: none;" %>
+    <div class="text-[9px] text-center text-bunker-600">
+      already have an account? <%= link_to "sign in", new_session_path, class: "text-granny-smith-apple-600 no-underline" %>
     </div>
   <% end %>
 </div>
