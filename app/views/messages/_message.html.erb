@@ -20,7 +20,7 @@
       </div>
 
       <%# Body %>
-      <div class="text-[11px] text-bunker-400 break-words whitespace-pre-wrap"><%= message.body %></div>
+      <div class="text-[11px] text-bunker-400 break-words message-content"><%= sanitize_message(message.body) %></div>
     </div>
 
     <%# Actions (visible on hover, controlled by Stimulus for author check) %>

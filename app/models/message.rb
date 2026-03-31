@@ -6,7 +6,8 @@ class Message < ApplicationRecord
 
   enum :message_type, { regular: 0, system: 1, user_join: 2, user_leave: 3 }
 
-  validates :body, presence: true, length: { maximum: 4000 }
+  validates :body, presence: true, length: { maximum: 10_000 }
+  validate :body_text_length
 
   scope :ordered, -> { order(created_at: :asc) }
   scope :not_deleted, -> { where(deleted_at: nil) }
@@ -21,5 +22,14 @@ class Message < ApplicationRecord
 
   def owned_by?(user)
     user_id == user.id
+  end
+
+  private
+
+  def body_text_length
+    stripped = ActionController::Base.helpers.strip_tags(body).to_s.strip
+    return unless stripped.length > 4000
+
+    errors.add(:body, 'is too long (maximum is 4000 characters)')
   end
 end

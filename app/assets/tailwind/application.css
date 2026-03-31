@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./composer.css";
 
 @theme {
   --font-syne: "Syne", sans-serif;

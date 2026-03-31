@@ -1,0 +1,163 @@
+/* Composer toolbar buttons */
+.toolbar-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-dm-mono);
+  color: var(--color-bunker-600);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color 0.1s, background-color 0.1s;
+}
+.toolbar-btn:hover {
+  color: var(--color-bunker-300);
+  background: var(--color-bunker-875);
+}
+.toolbar-btn.active {
+  color: var(--color-granny-smith-apple-300);
+  background: var(--color-granny-smith-apple-925);
+}
+
+/* Lexical editor theme classes */
+.editor-bold { font-weight: bold; }
+.editor-italic { font-style: italic; }
+.editor-strikethrough { text-decoration: line-through; }
+.editor-underline { text-decoration: underline; }
+.editor-code {
+  background: var(--color-bunker-875);
+  color: var(--color-granny-smith-apple-300);
+  padding: 0 4px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-family: var(--font-dm-mono);
+}
+.editor-link {
+  color: var(--color-jordy-blue-400);
+  text-decoration: underline;
+}
+.editor-code-block {
+  display: block;
+  width: 100%;
+  background: var(--color-bunker-925);
+  border: 1px solid var(--color-bunker-825);
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 10px;
+  font-family: var(--font-dm-mono);
+  color: var(--color-bunker-200);
+  margin: 4px 0;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+  min-height: 2em;
+  box-sizing: border-box;
+}
+
+/* Lexical editor content area */
+[data-message-composer-target="editor"] {
+  min-width: 0;
+}
+[data-message-composer-target="editor"] p {
+  margin: 0;
+}
+[data-message-composer-target="editor"] p + p {
+  margin-top: 4px;
+}
+
+/* Message display content styles */
+.message-content p {
+  margin: 0;
+}
+.message-content p + p {
+  margin-top: 4px;
+}
+.message-content strong {
+  font-weight: bold;
+  color: var(--color-bunker-300);
+}
+.message-content em {
+  font-style: italic;
+}
+.message-content s {
+  text-decoration: line-through;
+  color: var(--color-bunker-600);
+}
+.message-content code {
+  background: var(--color-bunker-875);
+  color: var(--color-granny-smith-apple-300);
+  padding: 0 4px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-family: var(--font-dm-mono);
+}
+.message-content pre {
+  background: var(--color-bunker-925);
+  border: 1px solid var(--color-bunker-825);
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 10px;
+  font-family: var(--font-dm-mono);
+  color: var(--color-bunker-200);
+  margin: 4px 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.message-content pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.message-content a {
+  color: var(--color-jordy-blue-400);
+  text-decoration: underline;
+}
+.message-content a:hover {
+  color: var(--color-jordy-blue-300);
+}
+
+/* Rouge syntax highlighting tokens */
+.highlight .c,
+.highlight .cm,
+.highlight .c1,
+.highlight .cs { color: var(--color-bunker-600); font-style: italic; } /* comments */
+.highlight .k,
+.highlight .kd,
+.highlight .kn,
+.highlight .kp,
+.highlight .kr,
+.highlight .kt { color: var(--color-jordy-blue-400); } /* keywords */
+.highlight .s,
+.highlight .s1,
+.highlight .s2,
+.highlight .sb,
+.highlight .sc,
+.highlight .sd,
+.highlight .sh,
+.highlight .sx { color: var(--color-granny-smith-apple-300); } /* strings */
+.highlight .na,
+.highlight .nb,
+.highlight .nc,
+.highlight .no { color: var(--color-jordy-blue-300); } /* names */
+.highlight .nf,
+.highlight .ni,
+.highlight .nn { color: var(--color-granny-smith-apple-400); } /* functions */
+.highlight .m,
+.highlight .mi,
+.highlight .mf,
+.highlight .mh,
+.highlight .mo { color: var(--color-granny-smith-apple-200); } /* numbers */
+.highlight .o,
+.highlight .ow { color: var(--color-bunker-300); } /* operators */
+.highlight .p { color: var(--color-bunker-400); } /* punctuation */
+.highlight .se { color: var(--color-danger-400); } /* string escape */
+.highlight .sr { color: var(--color-danger-400); } /* regex */
+.highlight .ss { color: var(--color-granny-smith-apple-300); } /* symbol */
+.highlight .err { color: var(--color-danger-400); } /* error */
