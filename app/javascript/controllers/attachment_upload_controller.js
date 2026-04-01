@@ -111,6 +111,32 @@ export default class extends Controller {
     this._renderPreviewStrip()
   }
 
+  // Remove an existing attachment (during message editing)
+  removeExistingFile(event) {
+    const fileId = event.currentTarget.dataset.fileId
+    const thumb = event.currentTarget.closest("[data-existing-file]")
+    if (thumb) thumb.remove()
+
+    // Add hidden input to mark this file for purging
+    const input = document.createElement("input")
+    input.type = "hidden"
+    input.name = "message[purge_file_ids][]"
+    input.value = fileId
+    this.element.appendChild(input)
+
+    // Hide the strip if no files remain (existing or pending)
+    this._updateStripVisibility()
+  }
+
+  _updateStripVisibility() {
+    if (!this.hasPreviewStripTarget) return
+    const hasExisting = this.previewStripTarget.querySelector("[data-existing-file]")
+    const hasPending = this.pendingFiles.length > 0
+    if (!hasExisting && !hasPending) {
+      this.previewStripTarget.classList.add("hidden")
+    }
+  }
+
   reset() {
     this.pendingFiles.forEach(pf => {
       if (pf.previewUrl) URL.revokeObjectURL(pf.previewUrl)
@@ -166,35 +192,38 @@ export default class extends Controller {
   _renderPreviewStrip() {
     if (!this.hasPreviewStripTarget) return
 
-    if (this.pendingFiles.length === 0) {
+    const hasExisting = this.previewStripTarget.querySelector("[data-existing-file]")
+
+    if (this.pendingFiles.length === 0 && !hasExisting) {
       this.previewStripTarget.classList.add("hidden")
-      this.previewStripTarget.innerHTML = ""
+      // Only clear if no existing files
+      if (!hasExisting) this.previewStripTarget.innerHTML = ""
       return
     }
 
     this.previewStripTarget.classList.remove("hidden")
 
-    let html = ""
+    // Remove old pending thumbs and the "+" button, but keep existing file thumbs
+    this.previewStripTarget.querySelectorAll("[data-pending-file], [data-add-more]").forEach(el => el.remove())
+
+    // Append new pending file thumbs
     this.pendingFiles.forEach(entry => {
-      if (entry.file.type.startsWith("image/") && entry.previewUrl) {
-        html += this._imageThumbHtml(entry)
-      } else {
-        html += this._fileThumbHtml(entry)
-      }
+      const html = entry.file.type.startsWith("image/") && entry.previewUrl
+        ? this._imageThumbHtml(entry)
+        : this._fileThumbHtml(entry)
+      this.previewStripTarget.insertAdjacentHTML("beforeend", html)
     })
 
     // Add "+" button
-    html += `
-      <button type="button" data-action="click->attachment-upload#openFilePicker"
+    this.previewStripTarget.insertAdjacentHTML("beforeend", `
+      <button type="button" data-action="click->attachment-upload#openFilePicker" data-add-more
               class="flex items-center justify-center w-[52px] h-[52px] border border-dashed border-bunker-825 rounded cursor-pointer flex-shrink-0 hover:border-bunker-700 transition-colors duration-150">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-bunker-700" stroke-width="1.5" stroke-linecap="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
       </button>
-    `
-
-    this.previewStripTarget.innerHTML = html
+    `)
   }
 
   _imageThumbHtml(entry) {
@@ -203,7 +232,7 @@ export default class extends Controller {
       : ""
 
     return `
-      <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative overflow-hidden border border-bunker-825 bg-bunker-875">
+      <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative overflow-hidden border border-bunker-825 bg-bunker-875" data-pending-file>
         <img src="${entry.previewUrl}" class="w-full h-full object-cover" />
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"
                 class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-400 cursor-pointer leading-none hover:text-bunker-100">&times;</button>
@@ -220,7 +249,7 @@ export default class extends Controller {
       : ""
 
     return `
-      <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative border border-bunker-825 bg-bunker-875 flex flex-col items-center justify-center gap-0.5">
+      <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative border border-bunker-825 bg-bunker-875 flex flex-col items-center justify-center gap-0.5" data-pending-file>
         <span class="text-[8px] font-medium ${extColor}">${ext}</span>
         <span class="text-[6px] text-bunker-700 text-center px-0.5 truncate max-w-full">${entry.file.name}</span>
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"

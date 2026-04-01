@@ -83,6 +83,6 @@ class MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:body, :parent_message_id, files: [])
+    params.require(:message).permit(:body, :parent_message_id, files: [], purge_file_ids: [])
   end
 end
