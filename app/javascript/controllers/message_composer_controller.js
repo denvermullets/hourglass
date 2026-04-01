@@ -1,8 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
+import { MentionNode, $createMentionNode } from "lexical/mention_node"
 
 export default class extends Controller {
   static targets = ["editor", "hiddenInput", "placeholder"]
-  static values = { placeholder: String, content: String }
+  static values = { placeholder: String, content: String, serverId: String }
 
   async connect() {
     this._ready = false
@@ -80,7 +81,8 @@ export default class extends Controller {
         LinkNode,
         AutoLinkNode,
         ListNode,
-        ListItemNode
+        ListItemNode,
+        MentionNode
       ],
       onError: (error) => console.error("Lexical error:", error)
     })
@@ -110,6 +112,12 @@ export default class extends Controller {
       this.editor.registerCommand(
         KEY_ENTER_COMMAND,
         (event) => {
+          // If mention dropdown is open, select the active mention
+          if (this._mentionDropdown) {
+            event?.preventDefault()
+            this._selectActiveMention()
+            return true
+          }
           if (event && !event.shiftKey) {
             event.preventDefault()
             this._submitMessage()
@@ -121,7 +129,7 @@ export default class extends Controller {
       )
     )
 
-    // Track active formats for toolbar button states and code block language picker
+    // Track active formats for toolbar button states, code block language picker, and mentions
     this._cleanups.push(
       this.editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
@@ -129,10 +137,54 @@ export default class extends Controller {
           if ($isRangeSelection(selection)) {
             this._updateToolbarState(selection)
             this._updateLanguagePicker(selection)
+            this._checkMentionTrigger(selection)
           }
           this._updatePlaceholder()
         })
       })
+    )
+
+    // Intercept arrow keys, Tab, and Escape for mention dropdown navigation
+    this._cleanups.push(
+      this.editor.registerCommand(
+        lexical.KEY_ARROW_DOWN_COMMAND,
+        (event) => this._handleMentionNav(event, "down"),
+        lexical.COMMAND_PRIORITY_HIGH
+      )
+    )
+    this._cleanups.push(
+      this.editor.registerCommand(
+        lexical.KEY_ARROW_UP_COMMAND,
+        (event) => this._handleMentionNav(event, "up"),
+        lexical.COMMAND_PRIORITY_HIGH
+      )
+    )
+    this._cleanups.push(
+      this.editor.registerCommand(
+        lexical.KEY_TAB_COMMAND,
+        (event) => {
+          if (this._mentionDropdown) {
+            event.preventDefault()
+            this._selectActiveMention()
+            return true
+          }
+          return false
+        },
+        lexical.COMMAND_PRIORITY_HIGH
+      )
+    )
+    this._cleanups.push(
+      this.editor.registerCommand(
+        lexical.KEY_ESCAPE_COMMAND,
+        () => {
+          if (this._mentionDropdown) {
+            this._hideMentionDropdown()
+            return true
+          }
+          return false
+        },
+        lexical.COMMAND_PRIORITY_HIGH
+      )
     )
 
     this._ready = true
@@ -142,6 +194,7 @@ export default class extends Controller {
   disconnect() {
     this.isDisconnecting = true
     this._removeLanguagePicker()
+    this._hideMentionDropdown()
 
     if (this._autoLinkCleanup) {
       this._autoLinkCleanup()
@@ -417,5 +470,213 @@ export default class extends Controller {
       const textContent = root.getTextContent()
       this.placeholderTarget.style.display = textContent.length === 0 ? "" : "none"
     })
+  }
+
+  // --- @Mention autocomplete ---
+
+  _checkMentionTrigger(selection) {
+    if (!selection.isCollapsed()) {
+      this._hideMentionDropdown()
+      return
+    }
+
+    const anchor = selection.anchor
+    const node = anchor.getNode()
+    const textContent = node.getTextContent()
+    const offset = anchor.offset
+
+    // Look backwards from cursor for @ trigger
+    const textBeforeCursor = textContent.substring(0, offset)
+    const match = textBeforeCursor.match(/@(\w{0,20})$/)
+
+    if (!match) {
+      this._hideMentionDropdown()
+      return
+    }
+
+    const query = match[1]
+    this._mentionQuery = query
+    this._mentionNodeKey = node.getKey()
+    this._mentionOffset = offset
+
+    // Get cursor position for dropdown placement
+    const nativeSelection = window.getSelection()
+    if (!nativeSelection || nativeSelection.rangeCount === 0) return
+
+    const range = nativeSelection.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
+
+    if (query.length >= 1) {
+      this._fetchMembers(query).then(members => {
+        if (members.length > 0) {
+          this._showMentionDropdown(members, rect)
+        } else {
+          this._hideMentionDropdown()
+        }
+      })
+    } else {
+      // Show all members when just "@" is typed
+      this._fetchMembers("").then(members => {
+        if (members.length > 0) {
+          this._showMentionDropdown(members, rect)
+        }
+      })
+    }
+  }
+
+  _showMentionDropdown(members, anchorRect) {
+    this._hideMentionDropdown()
+
+    const dropdown = document.createElement("div")
+    dropdown.className = "mention-autocomplete"
+    this._mentionActiveIndex = 0
+
+    members.forEach((member, index) => {
+      const item = document.createElement("div")
+      item.className = `mention-autocomplete-item${index === 0 ? " active" : ""}`
+      item.dataset.username = member.username
+
+      const nameSpan = document.createElement("span")
+      nameSpan.textContent = `@${member.username}`
+
+      item.appendChild(nameSpan)
+
+      if (member.display_name && member.display_name !== member.username) {
+        const displaySpan = document.createElement("span")
+        displaySpan.className = "display-name"
+        displaySpan.textContent = member.display_name
+        item.appendChild(displaySpan)
+      }
+
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        this._insertMention(member.username)
+      })
+
+      item.addEventListener("mouseenter", () => {
+        this._setActiveIndex(index)
+      })
+
+      dropdown.appendChild(item)
+    })
+
+    this._mentionMembers = members
+
+    // Position fixed on document.body to avoid overflow-hidden clipping
+    dropdown.style.position = "fixed"
+    dropdown.style.left = `${anchorRect.left}px`
+    dropdown.style.bottom = `${window.innerHeight - anchorRect.top + 4}px`
+
+    document.body.appendChild(dropdown)
+    this._mentionDropdown = dropdown
+  }
+
+  _hideMentionDropdown() {
+    if (this._mentionDropdown) {
+      this._mentionDropdown.remove()
+      this._mentionDropdown = null
+      this._mentionMembers = null
+      this._mentionActiveIndex = 0
+    }
+  }
+
+  _handleMentionNav(event, direction) {
+    if (!this._mentionDropdown || !this._mentionMembers) return false
+
+    event.preventDefault()
+    const items = this._mentionDropdown.querySelectorAll(".mention-autocomplete-item")
+    const max = items.length - 1
+
+    if (direction === "down") {
+      this._setActiveIndex(Math.min(this._mentionActiveIndex + 1, max))
+    } else {
+      this._setActiveIndex(Math.max(this._mentionActiveIndex - 1, 0))
+    }
+
+    return true
+  }
+
+  _setActiveIndex(index) {
+    const items = this._mentionDropdown?.querySelectorAll(".mention-autocomplete-item")
+    if (!items) return
+
+    items.forEach((item, i) => {
+      item.classList.toggle("active", i === index)
+    })
+    this._mentionActiveIndex = index
+
+    // Scroll active item into view
+    items[index]?.scrollIntoView({ block: "nearest" })
+  }
+
+  _selectActiveMention() {
+    if (!this._mentionMembers || this._mentionActiveIndex == null) return
+    const member = this._mentionMembers[this._mentionActiveIndex]
+    if (member) {
+      this._insertMention(member.username)
+    }
+  }
+
+  _insertMention(username) {
+    this._hideMentionDropdown()
+
+    const nodeKey = this._mentionNodeKey
+    const offset = this._mentionOffset
+    const query = this._mentionQuery
+
+    this.editor.update(() => {
+      const node = this.lexical.$getNodeByKey(nodeKey)
+      if (!node) return
+
+      const textContent = node.getTextContent()
+      // Find the @ trigger position
+      const triggerStart = offset - query.length - 1 // -1 for the @
+
+      // Split the text node and insert mention
+      const mentionNode = $createMentionNode(username)
+      const spaceNode = this.lexical.$createTextNode(" ")
+
+      if (triggerStart === 0 && offset === textContent.length) {
+        // The entire node is the @query
+        node.replace(mentionNode)
+        mentionNode.insertAfter(spaceNode)
+      } else if (triggerStart === 0) {
+        // @ is at start of node
+        const remaining = node.getTextContent().substring(offset)
+        node.setTextContent(remaining)
+        node.insertBefore(mentionNode)
+        mentionNode.insertAfter(spaceNode)
+      } else {
+        // @ is in middle of text
+        const before = textContent.substring(0, triggerStart)
+        const after = textContent.substring(offset)
+        node.setTextContent(before)
+        node.insertAfter(spaceNode)
+        node.insertAfter(mentionNode)
+        if (after) {
+          const afterNode = this.lexical.$createTextNode(after)
+          spaceNode.insertAfter(afterNode)
+        }
+      }
+
+      spaceNode.select()
+    })
+  }
+
+  async _fetchMembers(query) {
+    if (!this.hasServerIdValue || !this.serverIdValue) return []
+
+    try {
+      const url = `/servers/${this.serverIdValue}/members?q=${encodeURIComponent(query)}`
+      const response = await fetch(url, {
+        headers: { "Accept": "application/json" }
+      })
+
+      if (!response.ok) return []
+      return await response.json()
+    } catch {
+      return []
+    }
   }
 }

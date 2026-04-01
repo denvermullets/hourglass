@@ -17,8 +17,18 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :notifications, only: [:index] do
+    member do
+      patch :mark_read
+    end
+    collection do
+      patch :mark_all_read
+    end
+  end
+
   resources :servers do
     member do
+      get :members
       get :settings
       get 'settings/general', to: 'servers#settings_general', as: :settings_general
       get 'settings/invite', to: 'servers#settings_invite', as: :settings_invite

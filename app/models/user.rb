@@ -23,6 +23,8 @@ class User < ApplicationRecord
   has_many :channel_memberships, dependent: :destroy
   has_many :joined_channels, through: :channel_memberships, source: :channel
   has_many :messages, dependent: :nullify
+  has_many :notifications, dependent: :destroy
+  has_many :triggered_notifications, class_name: 'Notification', foreign_key: :actor_id, dependent: :nullify
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :username, with: ->(u) { u.strip.downcase }
@@ -58,5 +60,9 @@ class User < ApplicationRecord
 
   def notification_setting(key)
     resolved_settings.dig('notifications', key.to_s)
+  end
+
+  def unread_notification_count
+    notifications.unread.count
   end
 end

@@ -95,7 +95,7 @@
       </div>
 
       <%# Message input (pinned to bottom) %>
-      <div class="px-4 lg:px-5 py-3 border-t border-bunker-825 flex-shrink-0">
+      <div class="px-4 lg:px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:pb-3 border-t border-bunker-825 flex-shrink-0 relative z-10 bg-bunker-950">
         <%= render "messages/form", server: @server, channel: @channel %>
       </div>
     </div>

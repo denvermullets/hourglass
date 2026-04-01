@@ -2,7 +2,7 @@
 <html data-theme="<%= Current.user&.theme || 'cold-wave' %>" data-sidebar="<%= Current.user&.sidebar_position || 'left' %>">
   <head>
     <title><%= content_for(:title) || "Hourglass" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Hourglass">
     <meta name="mobile-web-app-capable" content="yes">
@@ -23,7 +23,20 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-screen overflow-hidden">
+  <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-screen overflow-hidden" data-controller="notifications-channel notification-panel">
+    <%# Notification panel overlay %>
+    <div data-notification-panel-target="overlay"
+         data-action="click->notification-panel#close"
+         class="hidden fixed inset-0 bg-black/30 z-40"></div>
+
+    <%# Notification panel %>
+    <div data-notification-panel-target="panel"
+         class="hidden fixed top-0 right-0 h-full w-80 bg-bunker-925 border-l border-bunker-825 z-50 flex flex-col shadow-2xl">
+      <div data-notification-panel-target="content" class="flex flex-col h-full">
+        <%# Content loaded dynamically %>
+      </div>
+    </div>
+
     <div class="flex h-full sidebar-container">
       <%# Desktop icon rail — hidden on mobile %>
       <div class="hidden lg:flex">
@@ -31,7 +44,7 @@
       </div>
 
       <%# Main content area %>
-      <div class="flex-1 flex flex-col min-w-0 min-h-0 pb-16 lg:pb-0">
+      <div class="flex-1 flex flex-col min-w-0 min-h-0 pb-14 lg:pb-0">
         <%= render "shared/auth_flash" %>
         <%= yield %>
       </div>

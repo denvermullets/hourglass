@@ -14,7 +14,8 @@
                   method: :patch,
                   data: {
                     controller: "message-composer attachment-upload",
-                    message_composer_content_value: message.body
+                    message_composer_content_value: message.body,
+                    message_composer_server_id_value: server.id
                   } do |f| %>
       <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
       <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
