@@ -3,8 +3,12 @@
   <div class="border border-bunker-825 rounded-lg bg-bunker-875 px-4 py-3.5 relative after:content-[''] after:absolute after:left-[30px] after:bottom-[-1px] after:w-0.5 after:h-3.5 after:bg-bunker-825">
     <%# Header %>
     <div class="flex items-center gap-2.5 mb-2">
-      <div class="w-[30px] h-[30px] rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center flex-shrink-0">
-        <span class="text-[9px] font-syne font-bold text-granny-smith-apple-300 uppercase"><%= message.user.username[0..1] %></span>
+      <div class="w-[30px] h-[30px] rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <% if message.user.avatar.attached? %>
+          <%= image_tag message.user.avatar, alt: "", class: "w-full h-full object-cover" %>
+        <% else %>
+          <span class="text-[9px] font-syne font-bold text-granny-smith-apple-300 uppercase"><%= message.user.username[0..1] %></span>
+        <% end %>
       </div>
       <span class="text-[12px] font-medium text-granny-smith-apple-300"><%= message.user.username %></span>
       <span class="text-[9px] text-bunker-600 ml-auto"><%= message.created_at.strftime("%b %d · %H:%M:%S").downcase %></span>
