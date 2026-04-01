@@ -15,7 +15,7 @@
   <%= f.hidden_field :parent_message_id, value: parent_message.id %>
   <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
 
-  <div class="bg-bunker-950 border border-bunker-900 rounded-lg overflow-hidden focus-within:border-bunker-600 transition-colors duration-150">
+  <div class="bg-bunker-950 border border-bunker-900 rounded-lg overflow-clip focus-within:border-bunker-600 transition-colors duration-150">
     <%# Attachment preview strip %>
     <div data-attachment-upload-target="previewStrip"
          class="hidden border-b border-bunker-900 px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-none">
