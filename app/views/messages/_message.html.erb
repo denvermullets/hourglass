@@ -5,8 +5,12 @@
     </div>
   <% else %>
     <%# Avatar %>
-    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bunker-825 flex items-center justify-center">
-      <span class="text-[11px] font-syne font-bold text-bunker-400 uppercase"><%= message.user.username[0] %></span>
+    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bunker-825 flex items-center justify-center overflow-hidden">
+      <% if message.user.avatar.attached? %>
+        <%= image_tag message.user.avatar, class: "w-full h-full object-cover" %>
+      <% else %>
+        <span class="text-[11px] font-syne font-bold text-bunker-400 uppercase"><%= message.user.username[0] %></span>
+      <% end %>
     </div>
 
     <div class="flex-1 min-w-0">
