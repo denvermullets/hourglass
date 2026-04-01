@@ -72,6 +72,23 @@
       </div>
     </div>
 
+    <div class="h-px bg-bunker-825"></div>
+
+    <%# Sidebar position %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">sidebar position</h3>
+      <div class="space-y-2">
+        <% [["left", "Left (default)"], ["right", "Right"]].each do |value, label| %>
+          <label class="flex items-center gap-3 py-1.5 cursor-pointer">
+            <%= f.radio_button :sidebar_position, value,
+              checked: user.sidebar_position == value,
+              class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
+            <span class="text-[11px] text-bunker-400"><%= label %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
     <%# Submit %>
     <%= f.submit "// save appearance \u2192",
       class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>

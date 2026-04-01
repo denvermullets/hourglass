@@ -9,7 +9,8 @@ class User < ApplicationRecord
     },
     'appearance' => {
       'theme' => 'cold-wave',
-      'timestamp_format' => 'relative'
+      'timestamp_format' => 'relative',
+      'sidebar_position' => 'left'
     }
   }.freeze
 
@@ -49,6 +50,10 @@ class User < ApplicationRecord
 
   def timestamp_format
     resolved_settings.dig('appearance', 'timestamp_format') || 'relative'
+  end
+
+  def sidebar_position
+    resolved_settings.dig('appearance', 'sidebar_position') || 'left'
   end
 
   def notification_setting(key)

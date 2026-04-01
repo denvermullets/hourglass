@@ -93,6 +93,6 @@ class SettingsController < ApplicationController
   end
 
   def appearance_params
-    params.permit(:theme, :timestamp_format)
+    params.permit(:theme, :timestamp_format, :sidebar_position)
   end
 end

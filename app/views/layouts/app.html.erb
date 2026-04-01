@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="<%= Current.user&.theme || 'cold-wave' %>">
+<html data-theme="<%= Current.user&.theme || 'cold-wave' %>" data-sidebar="<%= Current.user&.sidebar_position || 'left' %>">
   <head>
     <title><%= content_for(:title) || "Hourglass" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -24,7 +24,7 @@
   </head>
 
   <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-screen overflow-hidden">
-    <div class="flex h-full">
+    <div class="flex h-full sidebar-container">
       <%# Desktop icon rail — hidden on mobile %>
       <div class="hidden lg:flex">
         <%= render "shared/icon_rail", current_server: defined?(@server) ? @server : nil %>

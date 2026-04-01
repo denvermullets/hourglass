@@ -179,3 +179,22 @@
   --color-emerald-900: #184f30;
   --color-emerald-950: #082b18;
 }
+
+/* Sidebar position — right-hand layout */
+@media (min-width: 1024px) {
+  [data-sidebar="right"] .sidebar-container {
+    flex-direction: row-reverse;
+  }
+
+  /* Swap border sides on icon rail and channel sidebar */
+  [data-sidebar="right"] nav[class*="border-r"] {
+    border-right: none;
+    border-left: 1px solid var(--color-bunker-825);
+  }
+
+  [data-sidebar="right"] .sidebar-container div[class*="border-r"] {
+    border-right: none;
+    border-left: 1px solid var(--color-bunker-825);
+  }
+
+}
