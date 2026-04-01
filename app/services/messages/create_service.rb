@@ -14,8 +14,13 @@ class Messages::CreateService < Service
       sanitized_params.merge(user: @user, message_type: :regular)
     )
 
-    broadcast_date_separator(message)
-    broadcast_append(message)
+    if message.parent_message_id.present?
+      broadcast_thread_reply(message)
+      broadcast_reply_indicator_update(message.parent_message)
+    else
+      broadcast_date_separator(message)
+      broadcast_append(message)
+    end
 
     message
   end
@@ -28,6 +33,44 @@ class Messages::CreateService < Service
       target: 'messages',
       partial: 'messages/message',
       locals: { message: message }
+    )
+  end
+
+  def broadcast_thread_reply(message)
+    Turbo::StreamsChannel.broadcast_append_to(
+      "thread_#{message.parent_message_id}",
+      target: 'thread_replies',
+      partial: 'threads/reply',
+      locals: { reply: message, server: @channel.server, channel: @channel }
+    )
+  end
+
+  def broadcast_reply_indicator_update(parent_message)
+    parent_message.reload
+    participant_count = parent_message.thread_participant_count
+
+    # Update reply indicator in main channel view
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @channel,
+      target: "reply_indicator_#{parent_message.id}",
+      partial: 'messages/reply_indicator',
+      locals: { message: parent_message }
+    )
+
+    # Update connector count in thread view
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "thread_#{parent_message.id}",
+      target: "thread_connector_#{parent_message.id}",
+      partial: 'threads/connector',
+      locals: { parent_message: parent_message }
+    )
+
+    # Update header meta in thread view
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "thread_#{parent_message.id}",
+      target: "thread_header_meta_#{parent_message.id}",
+      partial: 'threads/header_meta',
+      locals: { parent_message: parent_message, participant_count: participant_count }
     )
   end
 

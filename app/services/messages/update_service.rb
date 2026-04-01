@@ -11,12 +11,21 @@ class Messages::UpdateService < Service
 
     @message.update!(sanitized_params.merge(edited_at: Time.current))
 
-    Turbo::StreamsChannel.broadcast_replace_to(
-      @message.channel,
-      target: @message,
-      partial: 'messages/message',
-      locals: { message: @message }
-    )
+    if @message.parent_message_id.present?
+      Turbo::StreamsChannel.broadcast_replace_to(
+        "thread_#{@message.parent_message_id}",
+        target: @message,
+        partial: 'threads/reply',
+        locals: { reply: @message, server: @message.channel.server, channel: @message.channel }
+      )
+    else
+      Turbo::StreamsChannel.broadcast_replace_to(
+        @message.channel,
+        target: @message,
+        partial: 'messages/message',
+        locals: { message: @message }
+      )
+    end
 
     @message
   end

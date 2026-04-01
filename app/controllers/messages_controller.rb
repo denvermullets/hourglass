@@ -10,7 +10,7 @@ class MessagesController < ApplicationController
   before_action :require_author!, only: %i[edit update destroy]
 
   def index
-    scope = @channel.messages.not_deleted.includes(:user)
+    scope = @channel.messages.root_messages.not_deleted.includes(:user)
     scope = scope.where('created_at < ?', Time.zone.parse(params[:before])) if params[:before]
     messages = scope.order(created_at: :desc).limit(51)
     @has_older = messages.size > 50
@@ -83,6 +83,6 @@ class MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:body)
+    params.require(:message).permit(:body, :parent_message_id)
   end
 end

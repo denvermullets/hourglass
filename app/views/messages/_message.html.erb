@@ -21,20 +21,33 @@
 
       <%# Body %>
       <div class="text-[11px] text-bunker-400 break-words message-content"><%= sanitize_message(message.body) %></div>
+
+      <%# Reply indicator %>
+      <% if message.parent_message_id.nil? %>
+        <%= render "messages/reply_indicator", message: message %>
+      <% end %>
     </div>
 
     <%# Actions (visible on hover, controlled by Stimulus for author check) %>
-    <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-start gap-1 pt-1 message-actions hidden"
-         data-author-only>
-      <%= button_to "edit",
-            edit_server_channel_message_path(message.channel.server, message.channel, message),
-            method: :get,
-            class: "text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
-      <%= button_to "delete",
-            server_channel_message_path(message.channel.server, message.channel, message),
-            method: :delete,
-            class: "text-[9px] text-bunker-700 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer",
-            data: { turbo_confirm: "Delete this message?" } %>
+    <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-1 pt-1">
+      <%# Reply — visible to all users %>
+      <% if message.parent_message_id.nil? %>
+        <%= link_to "reply",
+              server_channel_message_thread_path(message.channel.server, message.channel, message),
+              class: "text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 no-underline" %>
+      <% end %>
+
+      <%# Edit/Delete — author only %>
+      <div class="hidden items-center gap-1" data-author-only>
+        <%= link_to "edit",
+              edit_server_channel_message_path(message.channel.server, message.channel, message),
+              class: "text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 no-underline",
+              data: { turbo_method: :get } %>
+        <%= link_to "delete",
+              server_channel_message_path(message.channel.server, message.channel, message),
+              class: "text-[9px] leading-none text-bunker-700 hover:text-danger-400 transition-colors duration-100 no-underline",
+              data: { turbo_method: :delete, turbo_confirm: "Delete this message?" } %>
+      </div>
     </div>
   <% end %>
 <% end %>
