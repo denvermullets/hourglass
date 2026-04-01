@@ -1,0 +1,47 @@
+<div class="max-w-md space-y-8">
+  <div>
+    <h2 class="font-syne text-[15px] font-bold text-bunker-100 tracking-tight mb-1">Account</h2>
+    <p class="text-[10px] text-bunker-600 mb-6">Manage your account details</p>
+  </div>
+
+  <%# Email %>
+  <div>
+    <h3 class="text-[11px] text-bunker-400 font-medium mb-3">email address</h3>
+    <%= form_with url: update_account_settings_path, method: :patch, class: "space-y-3", data: { turbo_frame: "_top" } do |f| %>
+      <%= f.email_field :email_address,
+        value: user.email_address,
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400 placeholder:text-bunker-700 focus:border-granny-smith-apple-600" %>
+      <%= f.submit "// update email \u2192",
+        class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+    <% end %>
+  </div>
+
+  <div class="h-px bg-bunker-825"></div>
+
+  <%# Password %>
+  <div>
+    <h3 class="text-[11px] text-bunker-400 font-medium mb-3">change password</h3>
+    <%= form_with url: update_password_settings_path, method: :patch, class: "space-y-3", data: { turbo_frame: "_top" } do |f| %>
+      <div>
+        <label class="text-[9px] tracking-[0.14em] text-bunker-600 block mb-1.5">current password</label>
+        <%= f.password_field :current_password,
+          autocomplete: "current-password",
+          class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400 focus:border-granny-smith-apple-600" %>
+      </div>
+      <div>
+        <label class="text-[9px] tracking-[0.14em] text-bunker-600 block mb-1.5">new password</label>
+        <%= f.password_field :new_password,
+          autocomplete: "new-password",
+          class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400 focus:border-granny-smith-apple-600" %>
+      </div>
+      <div>
+        <label class="text-[9px] tracking-[0.14em] text-bunker-600 block mb-1.5">confirm new password</label>
+        <%= f.password_field :new_password_confirmation,
+          autocomplete: "new-password",
+          class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400 focus:border-granny-smith-apple-600" %>
+      </div>
+      <%= f.submit "// change password \u2192",
+        class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+    <% end %>
+  </div>
+</div>

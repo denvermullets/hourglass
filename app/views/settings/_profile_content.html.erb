@@ -1,0 +1,66 @@
+<div class="max-w-md">
+  <h2 class="font-syne text-[15px] font-bold text-bunker-100 tracking-tight mb-1">Profile</h2>
+  <p class="text-[10px] text-bunker-600 mb-6">Manage your public profile</p>
+
+  <%= form_with url: update_profile_settings_path, method: :patch, class: "space-y-5", data: { turbo_frame: "_top" } do |f| %>
+    <%# Avatar %>
+    <div>
+      <label class="text-[9px] tracking-[0.14em] text-bunker-600 block mb-2">avatar</label>
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 rounded-lg bg-bunker-875 border border-bunker-775 flex items-center justify-center text-bunker-600 text-[14px] overflow-hidden">
+          <% if user.avatar.attached? %>
+            <%= image_tag user.avatar, class: "w-full h-full object-cover", alt: "#{user.username}'s avatar" %>
+          <% else %>
+            <%= user.username[0, 2].upcase %>
+          <% end %>
+        </div>
+        <div class="flex flex-col gap-2">
+          <%= f.file_field :avatar,
+            accept: "image/*",
+            class: "text-[10px] text-bunker-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border file:border-bunker-775 file:bg-bunker-875 file:text-bunker-400 file:text-[10px] file:cursor-pointer file:font-dm-mono hover:file:bg-bunker-825 file:transition-colors" %>
+          <% if user.avatar.attached? %>
+            <label class="inline-flex items-center gap-1.5 text-[10px] text-danger-400 cursor-pointer">
+              <%= f.check_box :remove_avatar, class: "hidden" %>
+              <span>remove avatar</span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# Username (read-only) %>
+    <div>
+      <label class="text-[9px] tracking-[0.14em] text-bunker-600 block mb-1.5">username</label>
+      <div class="w-full rounded px-3 py-2.5 font-dm-mono text-[11px] bg-bunker-875 border border-bunker-825 text-bunker-600">
+        <%= user.username %>
+      </div>
+    </div>
+
+    <%# Display name %>
+    <div>
+      <label for="display_name" class="text-[9px] tracking-[0.14em] text-bunker-600 block mb-1.5">display name</label>
+      <%= f.text_field :display_name,
+        value: user.display_name,
+        placeholder: "how you appear to others",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400 placeholder:text-bunker-700 focus:border-granny-smith-apple-600" %>
+    </div>
+
+    <%# Bio %>
+    <div>
+      <div class="flex justify-between items-center mb-1.5">
+        <label for="bio" class="text-[9px] tracking-[0.14em] text-bunker-600">bio</label>
+        <span class="text-[8px] text-bunker-700"><%= user.bio&.length || 0 %>/160</span>
+      </div>
+      <%= f.text_area :bio,
+        value: user.bio,
+        maxlength: 160,
+        rows: 3,
+        placeholder: "tell us about yourself",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400 placeholder:text-bunker-700 focus:border-granny-smith-apple-600 resize-none" %>
+    </div>
+
+    <%# Submit %>
+    <%= f.submit "// save changes \u2192",
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+  <% end %>
+</div>

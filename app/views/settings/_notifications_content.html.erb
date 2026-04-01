@@ -1,0 +1,81 @@
+<div class="max-w-md space-y-8">
+  <div>
+    <h2 class="font-syne text-[15px] font-bold text-bunker-100 tracking-tight mb-1">Notifications</h2>
+    <p class="text-[10px] text-bunker-600 mb-6">Choose what you get notified about</p>
+  </div>
+
+  <%= form_with url: update_notifications_settings_path, method: :patch, class: "space-y-6", data: { turbo_frame: "_top" } do |f| %>
+    <%# Toggle switches %>
+    <div class="space-y-3">
+      <% [
+        ["direct_messages", "Direct messages"],
+        ["mentions", "Mentions"],
+        ["thread_replies", "Thread replies"],
+        ["reactions", "Reactions to your messages"]
+      ].each do |key, label| %>
+        <label class="flex items-center justify-between py-2 cursor-pointer group">
+          <span class="text-[11px] text-bunker-400"><%= label %></span>
+          <div class="relative">
+            <%= f.check_box key,
+              { checked: user.notification_setting(key), class: "sr-only peer" },
+              "true", "false" %>
+            <div class="w-9 h-5 rounded-full transition-colors duration-200 bg-bunker-775 peer-checked:bg-granny-smith-apple-600"></div>
+            <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-bunker-400 transition-transform duration-200 peer-checked:translate-x-4 peer-checked:bg-bunker-100"></div>
+          </div>
+        </label>
+      <% end %>
+    </div>
+
+    <div class="h-px bg-bunker-825"></div>
+
+    <%# Email digest %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">email digest frequency</h3>
+      <div class="space-y-2">
+        <% [
+          ["never", "Never"],
+          ["daily", "Daily"],
+          ["weekly", "Weekly"],
+          ["real_time", "Real-time"]
+        ].each do |value, label| %>
+          <label class="flex items-center gap-3 py-1.5 cursor-pointer">
+            <%= f.radio_button :email_digest, value,
+              checked: user.notification_setting("email_digest") == value,
+              class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
+            <span class="text-[11px] text-bunker-400"><%= label %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="h-px bg-bunker-825"></div>
+
+    <%# Per-channel mute %>
+    <% if channel_memberships.any? %>
+      <div>
+        <h3 class="text-[11px] text-bunker-400 font-medium mb-3">channel notifications</h3>
+        <div class="space-y-2 max-h-60 overflow-y-auto">
+          <% channel_memberships.each do |cm| %>
+            <label class="flex items-center justify-between py-1.5 cursor-pointer">
+              <span class="text-[11px] text-bunker-400">
+                <span class="text-bunker-600">#</span> <%= cm.channel.name %>
+                <span class="text-[9px] text-bunker-700">(<%= cm.channel.server.name %>)</span>
+              </span>
+              <div class="relative">
+                <input type="checkbox" name="muted_channel_ids[]" value="<%= cm.channel_id %>"
+                  checked
+                  class="sr-only peer">
+                <div class="w-9 h-5 rounded-full transition-colors duration-200 bg-bunker-775 peer-checked:bg-danger-400"></div>
+                <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-bunker-400 transition-transform duration-200 peer-checked:translate-x-4 peer-checked:bg-bunker-100"></div>
+              </div>
+            </label>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Submit %>
+    <%= f.submit "// save preferences \u2192",
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+  <% end %>
+</div>

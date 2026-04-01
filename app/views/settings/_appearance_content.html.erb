@@ -1,0 +1,96 @@
+<%
+  themes = [
+    { id: "cold-wave", name: "Cold Wave", colors: ["#7ee8a2", "#1f232b", "#8493ac"] },
+    { id: "warm-paper", name: "Warm Paper", colors: ["#b84a1a", "#665146", "#ece8e0"] },
+    { id: "cool-linen", name: "Cool Linen", colors: ["#1a7a9a", "#4a5866", "#e8eaee"] },
+    { id: "phosphor-amber", name: "Phosphor Amber", colors: ["#e8a820", "#1a1408", "#5a4020"] },
+    { id: "phosphor-green", name: "Phosphor Green", colors: ["#7ae890", "#0e160e", "#2a5a32"] },
+    { id: "dusk", name: "Dusk", colors: ["#f07a70", "#1a1628", "#a59fda"] },
+    { id: "brutalist-newsprint", name: "Brutalist", colors: ["#e8d820", "#1e1c18", "#ddd8c8"] },
+    { id: "muted-sage", name: "Muted Sage", colors: ["#60d890", "#2e3c34", "#6a8070"] },
+    { id: "deep-navy", name: "Deep Navy", colors: ["#f08030", "#141e30", "#c8d8f0"] },
+    { id: "warm-dusk", name: "Warm Dusk", colors: ["#50e8c0", "#281820", "#ece0d8"] }
+  ]
+  current_theme = user.theme
+%>
+
+<div class="max-w-2xl" data-controller="theme-preview">
+  <h2 class="font-syne text-[15px] font-bold text-bunker-100 tracking-tight mb-1">Appearance</h2>
+  <p class="text-[10px] text-bunker-600 mb-6">Customize the look and feel</p>
+
+  <%= form_with url: update_appearance_settings_path, method: :patch, class: "space-y-8", data: { turbo_frame: "_top" } do |f| %>
+    <%# Theme switcher %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">theme</h3>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <% themes.each do |theme| %>
+          <label class="relative cursor-pointer group">
+            <input type="radio" name="theme" value="<%= theme[:id] %>"
+              checked
+              class="sr-only peer"
+              data-action="change->theme-preview#preview"
+              data-theme-preview-target="radio">
+            <div class="rounded-lg border-2 p-4 transition-all duration-150
+              peer-checked:border-granny-smith-apple-600
+              border-bunker-775 hover:border-bunker-600
+              bg-bunker-875">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] text-bunker-400 font-medium"><%= theme[:name] %></span>
+                <div class="w-5 h-5 rounded-full border-2 border-bunker-600"></div>
+              </div>
+              <div class="flex gap-2">
+                <% theme[:colors].each do |color| %>
+                  <div class="w-6 h-6 rounded-full border border-bunker-775" style="background-color: <%= color %>"></div>
+                <% end %>
+              </div>
+            </div>
+            <%# Checkmark overlay for selected state %>
+            <div class="absolute top-4 right-4 w-5 h-5 rounded-full bg-granny-smith-apple-600 items-center justify-center hidden peer-checked:flex">
+              <svg class="w-3 h-3 text-bunker-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="h-px bg-bunker-825"></div>
+
+    <%# Timestamp format %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">timestamp format</h3>
+      <div class="space-y-2">
+        <% [["relative", "Relative (2 hours ago)"], ["absolute", "Absolute (Apr 1, 2026 12:30 PM)"]].each do |value, label| %>
+          <label class="flex items-center gap-3 py-1.5 cursor-pointer">
+            <%= f.radio_button :timestamp_format, value,
+              checked: user.timestamp_format == value,
+              class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
+            <span class="text-[11px] text-bunker-400"><%= label %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="h-px bg-bunker-825"></div>
+
+    <%# Sidebar position %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">sidebar position</h3>
+      <div class="space-y-2">
+        <% [["left", "Left (default)"], ["right", "Right"]].each do |value, label| %>
+          <label class="flex items-center gap-3 py-1.5 cursor-pointer">
+            <%= f.radio_button :sidebar_position, value,
+              checked: user.sidebar_position == value,
+              class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
+            <span class="text-[11px] text-bunker-400"><%= label %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Submit %>
+    <%= f.submit "// save appearance \u2192",
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+  <% end %>
+</div>

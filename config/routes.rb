@@ -3,6 +3,20 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resource :registration, only: %i[new create]
 
+  resource :settings, only: [:show] do
+    member do
+      get :profile
+      get :account
+      get :notifications
+      get :appearance
+      patch :update_profile
+      patch :update_account
+      patch :update_password
+      patch :update_notifications
+      patch :update_appearance
+    end
+  end
+
   resources :servers do
     member do
       get :settings

@@ -24,11 +24,11 @@
     <span class="text-[7px] tracking-[0.08em]">search</span>
   </div>
 
-  <%# Profile (placeholder) %>
-  <div class="flex flex-col items-center gap-0.5 px-2.5 text-bunker-600 cursor-pointer">
+  <%# Profile / Settings %>
+  <%= link_to settings_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'settings' ? 'text-granny-smith-apple-300' : 'text-bunker-600'}" do %>
     <div class="w-[18px] h-[18px] rounded flex items-center justify-center text-[6px] bg-bunker-875 border border-bunker-775">
       <%= Current.user.username[0, 2].upcase %>
     </div>
     <span class="text-[7px] tracking-[0.08em]">you</span>
-  </div>
+  <% end %>
 </nav>
