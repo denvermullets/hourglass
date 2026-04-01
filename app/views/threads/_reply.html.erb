@@ -1,0 +1,40 @@
+<%= tag.div id: dom_id(reply), class: "group flex gap-3 py-2.5 border-b border-bunker-825 last:border-b-0", data: { message_author_id: reply.user_id } do %>
+  <% if reply.deleted? %>
+    <div class="flex-1 text-[11px] text-bunker-700 italic">
+      [message deleted]
+    </div>
+  <% else %>
+    <%# Avatar %>
+    <div class="flex-shrink-0 w-[30px] h-[30px] rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center mt-0.5">
+      <span class="text-[9px] font-syne font-bold text-bunker-400 uppercase"><%= reply.user.username[0..1] %></span>
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <%# Header %>
+      <div class="flex items-baseline gap-2.5 mb-1">
+        <span class="text-[12px] font-medium message-username" data-author-name><%= reply.user.username %></span>
+        <span class="text-[9px] text-bunker-600 tracking-[0.06em]"><%= reply.created_at.strftime("%H:%M:%S") %></span>
+        <% if reply.edited? %>
+          <span class="text-[9px] text-bunker-700">(edited)</span>
+        <% end %>
+      </div>
+
+      <%# Body %>
+      <div class="text-[12px] text-bunker-400 leading-[1.8] font-light message-content"><%= sanitize_message(reply.body) %></div>
+    </div>
+
+    <%# Actions %>
+    <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-start gap-1 pt-1 message-actions hidden"
+         data-author-only>
+      <%= button_to "edit",
+            edit_server_channel_message_path(server, channel, reply),
+            method: :get,
+            class: "text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
+      <%= button_to "delete",
+            server_channel_message_path(server, channel, reply),
+            method: :delete,
+            class: "text-[9px] text-bunker-700 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer",
+            data: { turbo_confirm: "Delete this reply?" } %>
+    </div>
+  <% end %>
+<% end %>

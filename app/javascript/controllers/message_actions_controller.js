@@ -18,7 +18,9 @@ export default class extends Controller {
       messageEl.querySelectorAll("[data-author-only]").forEach((el) => {
         if (isAuthor) {
           el.classList.remove("hidden")
+          el.classList.add("flex")
         } else {
+          el.classList.remove("flex")
           el.classList.add("hidden")
         }
       })

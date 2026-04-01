@@ -1,0 +1,25 @@
+<%# Collapsed sidebar — icon strip only, 56px wide, dimmed %>
+<div class="w-14 flex-shrink-0 border-r border-bunker-825 flex flex-col bg-bunker-875 opacity-60">
+  <%# Server header %>
+  <div class="py-3 border-b border-bunker-825 flex flex-col items-center gap-1.5">
+    <span class="font-syne text-[13px] font-extrabold text-bunker-100 tracking-tight">
+      s<span class="text-granny-smith-apple-300">.</span>
+    </span>
+  </div>
+
+  <%# Channel icons %>
+  <div class="flex-1 overflow-y-auto flex flex-col items-center py-2 gap-0.5">
+    <% categories.each_with_index do |category, i| %>
+      <% if i > 0 %>
+        <div class="w-7 h-px bg-bunker-825 my-1"></div>
+      <% end %>
+      <% category.channels.sort_by(&:position).each do |channel| %>
+        <%= link_to server_channel_path(server, channel),
+          class: "w-9 h-7 rounded-md flex items-center justify-center text-[9px] no-underline #{channel == current_channel ? 'bg-bunker-825 border border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-775 hover:text-bunker-400'}",
+          data: { turbo_frame: "_top" } do %>
+          <%= channel.voice? ? "v" : "#" %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

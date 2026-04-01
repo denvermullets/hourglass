@@ -10,7 +10,7 @@ class ChannelsController < ApplicationController
 
   def show
     @categories = @server.categories.ordered.includes(:channels)
-    messages = @channel.messages.not_deleted.includes(:user).order(created_at: :desc).limit(51)
+    messages = @channel.messages.root_messages.not_deleted.includes(:user).order(created_at: :desc).limit(51)
     @has_older = messages.size > 50
     @messages = messages.first(50).reverse
     @message_count = @channel.messages.not_deleted.count

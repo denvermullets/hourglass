@@ -1,0 +1,7 @@
+<div id="thread_header_meta_<%= parent_message.id %>" class="text-[9px] text-bunker-600 mt-0.5">
+  <span class="text-bunker-400"><%= parent_message.replies_count %> <%= "reply".pluralize(parent_message.replies_count) %></span>
+  · started by <span class="text-bunker-400"><%= parent_message.user.username %></span>
+  <% if participant_count > 0 %>
+    · <span class="text-bunker-400"><%= participant_count %> <%= "participant".pluralize(participant_count) %></span>
+  <% end %>
+</div>

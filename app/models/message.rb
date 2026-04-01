@@ -1,7 +1,7 @@
 class Message < ApplicationRecord
   belongs_to :user
   belongs_to :channel, optional: true
-  belongs_to :parent_message, class_name: 'Message', optional: true
+  belongs_to :parent_message, class_name: 'Message', optional: true, counter_cache: :replies_count
   has_many :replies, class_name: 'Message', foreign_key: :parent_message_id, dependent: :nullify
 
   enum :message_type, { regular: 0, system: 1, user_join: 2, user_leave: 3 }
@@ -11,6 +11,7 @@ class Message < ApplicationRecord
 
   scope :ordered, -> { order(created_at: :asc) }
   scope :not_deleted, -> { where(deleted_at: nil) }
+  scope :root_messages, -> { where(parent_message_id: nil) }
 
   def deleted?
     deleted_at.present?
@@ -22,6 +23,10 @@ class Message < ApplicationRecord
 
   def owned_by?(user)
     user_id == user.id
+  end
+
+  def thread_participant_count
+    replies.not_deleted.select(:user_id).distinct.count
   end
 
   private

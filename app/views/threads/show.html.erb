@@ -1,0 +1,60 @@
+<div class="flex-1 flex flex-col lg:flex-row min-h-0">
+  <%# Collapsed sidebar — desktop only %>
+  <div class="hidden lg:flex">
+    <%= render "threads/collapsed_sidebar", server: @server, categories: @categories, current_channel: @channel %>
+  </div>
+
+  <%# Thread content %>
+  <div class="flex-1 flex flex-col min-w-0 min-h-0">
+    <%# Thread header %>
+    <div class="px-4 lg:px-7 py-3.5 border-b border-bunker-825 flex-shrink-0 flex items-center gap-3">
+      <%# Back button %>
+      <%= link_to server_channel_path(@server, @channel),
+        class: "text-[10px] text-granny-smith-apple-600 no-underline flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 border border-bunker-825 rounded hover:border-granny-smith-apple-600 transition-colors duration-100" do %>
+        &larr; back
+      <% end %>
+
+      <div class="w-px h-[18px] bg-bunker-825 flex-shrink-0"></div>
+
+      <div class="flex-1 min-w-0">
+        <%# Breadcrumb %>
+        <div class="text-[8px] text-bunker-600 tracking-[0.12em] flex items-center gap-1.5">
+          <span># <%= @channel.name %></span>
+          <span class="text-bunker-775">/</span>
+          <span class="text-granny-smith-apple-600">thread · <%= @parent_message.created_at.strftime("%b %d · %H:%M").downcase %></span>
+        </div>
+        <div class="font-syne text-[16px] font-bold text-bunker-100 mt-0.5 tracking-tight">thread</div>
+        <%= render "threads/header_meta", parent_message: @parent_message, participant_count: @participant_count %>
+      </div>
+    </div>
+
+    <%# Thread body — scrollable area %>
+    <div class="flex-1 flex flex-col min-h-0 overflow-hidden"
+         data-controller="messages-scroll message-actions"
+         data-message-actions-current-user-value="<%= Current.user.id %>">
+
+      <%# Turbo Stream subscription for thread updates %>
+      <%= turbo_stream_from "thread_#{@parent_message.id}" %>
+
+      <div class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
+        <%# Root message %>
+        <%= render "threads/root_message", message: @parent_message, channel: @channel %>
+
+        <%# Connector %>
+        <%= render "threads/connector", parent_message: @parent_message %>
+
+        <%# Replies %>
+        <div id="thread_replies" class="px-4 lg:px-7 pb-4">
+          <% @replies.each do |reply| %>
+            <%= render "threads/reply", reply: reply, server: @server, channel: @channel %>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Thread composer %>
+      <div class="px-4 lg:px-7 py-3 border-t border-bunker-825 flex-shrink-0">
+        <%= render "threads/form", server: @server, channel: @channel, parent_message: @parent_message %>
+      </div>
+    </div>
+  </div>
+</div>
