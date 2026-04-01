@@ -9,12 +9,17 @@
     <% display_images.each_with_index do |image, index| %>
       <% is_first_of_three = images.size >= 3 && index == 0 %>
       <% is_last_visible = index == display_images.size - 1 && images.size > 4 %>
-      <%= link_to rails_blob_path(image, disposition: :inline), target: "_blank", rel: "noopener",
-                  class: "block relative bg-bunker-875 border border-bunker-825 rounded overflow-hidden group/img #{'col-span-2' if is_first_of_three}" do %>
-        <%= image_tag rails_representation_path(image.variant(resize_to_fill: [400, 300])),
+      <% is_single = images.size == 1 %>
+      <% full_src = rails_representation_path(image.variant(resize_to_limit: [800, 600])) %>
+      <div class="block relative bg-bunker-875 border border-bunker-825 rounded overflow-hidden group/img cursor-zoom-in <%= 'col-span-2' if is_first_of_three %>"
+           data-controller="lightbox"
+           data-lightbox-src-value="<%= rails_representation_path(image.variant(resize_to_limit: [1200, 900])) %>"
+           data-lightbox-alt-value="<%= image.filename %>"
+           data-action="click->lightbox#open">
+        <%= image_tag full_src,
                       alt: image.filename.to_s,
                       class: "w-full h-full object-cover",
-                      style: "height: #{is_first_of_three ? '140px' : '140px'}",
+                      style: "height: #{is_single ? '280px' : (is_first_of_three ? '200px' : '140px')}",
                       loading: "lazy" %>
         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity duration-150 flex items-center justify-center">
           <span class="text-white text-lg">&#x2922;</span>
@@ -24,7 +29,7 @@
             <span class="font-syne text-xl font-bold text-bunker-100">+<%= images.size - 4 %></span>
           </div>
         <% end %>
-      <% end %>
+      </div>
     <% end %>
   </div>
   <div class="text-[9px] text-bunker-700 mt-1">

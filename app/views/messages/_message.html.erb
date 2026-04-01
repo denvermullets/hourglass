@@ -1,4 +1,4 @@
-<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5 rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id } do %>
+<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5 rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, controller: "long-press" } do %>
   <% if message.deleted? %>
     <div class="flex-1 text-[11px] text-bunker-700 italic">
       [message deleted]
@@ -39,8 +39,9 @@
       <% end %>
     </div>
 
-    <%# Actions (visible on hover, controlled by Stimulus for author check) %>
-    <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-1 pt-1">
+    <%# Actions (hover on desktop, long-press on mobile) %>
+    <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-1 pt-1"
+         data-long-press-target="actions">
       <%# Reply — visible to all users %>
       <% if message.parent_message_id.nil? %>
         <%= link_to "reply",
