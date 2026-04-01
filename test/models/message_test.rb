@@ -1,10 +1,10 @@
 require 'test_helper'
 
 class MessageTest < ActiveSupport::TestCase
-  test 'validates body presence' do
+  test 'validates body or files present' do
     message = Message.new(user: users(:one), channel: channels(:general))
     assert_not message.valid?
-    assert message.errors[:body].any?
+    assert(message.errors[:base].any? { |e| e.include?('body or attachments') })
   end
 
   test 'validates body max length' do

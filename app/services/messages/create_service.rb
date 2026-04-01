@@ -14,6 +14,9 @@ class Messages::CreateService < Service
       sanitized_params.merge(user: @user, message_type: :regular)
     )
 
+    # Eager load attachments before broadcasting to avoid N+1
+    message.files.load if message.files.attached?
+
     if message.parent_message_id.present?
       broadcast_thread_reply(message)
       broadcast_reply_indicator_update(message.parent_message)

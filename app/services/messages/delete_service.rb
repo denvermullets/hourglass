@@ -5,6 +5,7 @@ class Messages::DeleteService < Service
 
   def call
     @message.update!(deleted_at: Time.current)
+    @message.files.purge_later if @message.files.attached?
 
     @message.parent_message_id.present? ? broadcast_thread_delete : broadcast_channel_delete
 

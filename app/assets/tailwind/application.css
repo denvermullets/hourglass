@@ -51,4 +51,13 @@
 
   --color-danger-400: #e87a7a;
   --color-danger-800: #4a2020;
+  --color-danger-950: #1e1010;
+
+  --color-purple-400: #b49ef0;
+  --color-purple-800: #4a3a8a;
+  --color-purple-950: #1e1830;
+
+  --color-yellow-400: #e8c87a;
+  --color-yellow-800: #5a4010;
+  --color-yellow-950: #2a1e08;
 }

@@ -13,16 +13,44 @@
                   url: server_channel_message_path(server, channel, message),
                   method: :patch,
                   data: {
-                    controller: "message-composer",
+                    controller: "message-composer attachment-upload",
                     message_composer_content_value: message.body
                   } do |f| %>
       <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
+      <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
 
       <div class="bg-bunker-875 border border-bunker-825 rounded-lg overflow-hidden focus-within:border-granny-smith-apple-600 transition-colors duration-150">
+        <%# Existing attachments + new attachment preview strip %>
+        <div data-attachment-upload-target="previewStrip"
+             class="<%= message.files.attached? ? '' : 'hidden' %> border-b border-bunker-825 px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-none"
+             data-existing-rendered="true">
+          <% if message.files.attached? %>
+            <% message.files.each do |file| %>
+              <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative overflow-hidden border border-bunker-825 bg-bunker-875" data-existing-file="<%= file.id %>">
+                <% if file.content_type.start_with?('image/') %>
+                  <%= image_tag rails_representation_path(file.variant(resize_to_fill: [104, 104])),
+                               alt: file.filename.to_s,
+                               class: "w-full h-full object-cover" %>
+                <% else %>
+                  <div class="w-full h-full flex flex-col items-center justify-center gap-0.5">
+                    <span class="text-[8px] font-medium text-bunker-400"><%= File.extname(file.filename.to_s).delete('.').upcase %></span>
+                    <span class="text-[6px] text-bunker-700 text-center px-0.5 truncate max-w-full"><%= file.filename %></span>
+                  </div>
+                <% end %>
+                <button type="button"
+                        data-action="click->attachment-upload#removeExistingFile"
+                        data-file-id="<%= file.id %>"
+                        class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-400 cursor-pointer leading-none hover:text-bunker-100">&times;</button>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+
         <%# Lexical editor area %>
         <div class="relative">
           <div data-message-composer-target="editor"
                contenteditable="true"
+               data-action="paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
                class="min-h-[60px] max-h-[400px] overflow-y-auto px-3 py-2.5 text-[11px] text-bunker-100 font-dm-mono focus:outline-none">
           </div>
         </div>
@@ -40,13 +68,22 @@
           <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#codeBlock"
                   class="toolbar-btn" title="Code Block">{}</button>
 
+          <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->attachment-upload#openFilePicker"
+                  class="toolbar-btn" title="Attach file">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </button>
+
           <div class="ml-auto flex gap-2 items-center">
             <%= f.submit "save",
                   class: "text-[9px] text-granny-smith-apple-300 hover:text-granny-smith-apple-600 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer font-dm-mono" %>
             <%= link_to "cancel",
                   server_channel_message_path(server, channel, message),
                   class: "text-[9px] text-bunker-600 hover:text-bunker-400 transition-colors duration-100 no-underline font-dm-mono",
-                  data: { turbo_method: :get } %>
+                  data: { turbo_method: :get, turbo_prefetch: false } %>
           </div>
         </div>
       </div>
