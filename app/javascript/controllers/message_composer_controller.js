@@ -227,7 +227,8 @@ export default class extends Controller {
 
   _submitMessage() {
     const html = this._serializeToHtml()
-    if (this._isEmpty(html)) return
+    const hasFiles = this.element.querySelectorAll('input[name="message[files][]"]').length > 0
+    if (this._isEmpty(html) && !hasFiles) return
 
     this.hiddenInputTarget.value = html
     this.element.requestSubmit()

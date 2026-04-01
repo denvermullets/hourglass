@@ -1,0 +1,70 @@
+<% images = message.image_attachments %>
+<% videos = message.video_attachments %>
+<% other_files = message.file_attachments %>
+
+<%# Image grid %>
+<% if images.any? %>
+  <div class="grid gap-1 mt-2 max-w-[380px] rounded-md overflow-hidden <%= image_grid_class(images.size) %>">
+    <% display_images = images.first(4) %>
+    <% display_images.each_with_index do |image, index| %>
+      <% is_first_of_three = images.size >= 3 && index == 0 %>
+      <% is_last_visible = index == display_images.size - 1 && images.size > 4 %>
+      <%= link_to rails_blob_path(image, disposition: :inline), target: "_blank", rel: "noopener",
+                  class: "block relative bg-bunker-875 border border-bunker-825 rounded overflow-hidden group/img #{'col-span-2' if is_first_of_three}" do %>
+        <%= image_tag image.variant(resize_to_fill: [400, 300]),
+                      class: "w-full h-full object-cover",
+                      style: "height: #{is_first_of_three ? '140px' : '140px'}",
+                      loading: "lazy" %>
+        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity duration-150 flex items-center justify-center">
+          <span class="text-white text-lg">&#x2922;</span>
+        </div>
+        <% if is_last_visible %>
+          <div class="absolute inset-0 bg-bunker-950/75 flex items-center justify-center">
+            <span class="font-syne text-xl font-bold text-bunker-100">+<%= images.size - 4 %></span>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="text-[9px] text-bunker-700 mt-1">
+    <% if images.size == 1 %>
+      <%= images.first.filename %> &middot; <%= human_file_size(images.first.byte_size) %>
+    <% else %>
+      <%= images.size %> images
+    <% end %>
+  </div>
+<% end %>
+
+<%# Video thumbnails %>
+<% videos.each do |video| %>
+  <div class="relative rounded-md overflow-hidden mt-2 max-w-[380px] bg-bunker-875 border border-bunker-825 cursor-pointer group/vid">
+    <video preload="metadata" class="w-full" style="max-height: 240px">
+      <source src="<%= rails_blob_path(video, disposition: :inline) %>" type="<%= video.content_type %>">
+    </video>
+    <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-80 group-hover/vid:opacity-100 transition-opacity duration-150"
+         onclick="this.parentElement.querySelector('video').play(); this.style.display='none'">
+      <div class="w-12 h-12 rounded-full bg-bunker-950/80 border border-bunker-825 flex items-center justify-center">
+        <div class="w-0 h-0 border-solid ml-1" style="border-width: 9px 0 9px 16px; border-color: transparent transparent transparent var(--color-bunker-400)"></div>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-bunker-950/90 to-transparent flex items-center justify-between">
+      <span class="text-[9px] text-bunker-400"><%= video.filename %></span>
+      <span class="text-[9px] text-bunker-700"><%= human_file_size(video.byte_size) %></span>
+    </div>
+  </div>
+<% end %>
+
+<%# File pills %>
+<% other_files.each do |file| %>
+  <%= link_to rails_blob_path(file, disposition: :attachment),
+              class: "flex items-center gap-3 border border-bunker-825 rounded-md px-3.5 py-2.5 bg-bunker-925 max-w-[340px] mt-2 no-underline hover:border-bunker-775 transition-colors duration-150" do %>
+    <div class="w-9 h-9 rounded-[5px] flex items-center justify-center flex-shrink-0 text-[9px] font-medium tracking-[0.06em] border <%= file_icon_classes(file) %>">
+      <%= file_extension_label(file) %>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-[11px] text-bunker-100 truncate"><%= file.filename %></div>
+      <div class="text-[9px] text-bunker-700 mt-0.5"><%= file_extension_label(file) %> &middot; <%= human_file_size(file.byte_size) %></div>
+    </div>
+    <div class="text-[9px] text-granny-smith-apple-600 flex-shrink-0">&darr;</div>
+  <% end %>
+<% end %>

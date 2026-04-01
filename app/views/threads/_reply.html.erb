@@ -20,7 +20,14 @@
       </div>
 
       <%# Body %>
-      <div class="text-[12px] text-bunker-400 leading-[1.8] font-light message-content"><%= sanitize_message(reply.body) %></div>
+      <% if reply.body.present? %>
+        <div class="text-[12px] text-bunker-400 leading-[1.8] font-light message-content"><%= sanitize_message(reply.body) %></div>
+      <% end %>
+
+      <%# Attachments %>
+      <% if reply.files.attached? %>
+        <%= render "messages/attachments", message: reply %>
+      <% end %>
     </div>
 
     <%# Actions %>

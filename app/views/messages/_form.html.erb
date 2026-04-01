@@ -1,17 +1,24 @@
 <%= form_with scope: :message, url: server_channel_messages_path(server, channel),
              id: "message_form",
              data: {
-               controller: "message-composer",
-               action: "turbo:submit-end->message-composer#reset",
+               controller: "message-composer attachment-upload",
+               action: "turbo:submit-end->message-composer#reset turbo:submit-end->attachment-upload#reset",
                message_composer_placeholder_value: "// message ##{channel.name}"
              } do |f| %>
   <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
+  <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
 
   <div class="bg-bunker-950 border border-bunker-900 rounded-lg overflow-hidden focus-within:border-bunker-600 transition-colors duration-150">
+    <%# Attachment preview strip %>
+    <div data-attachment-upload-target="previewStrip"
+         class="hidden border-b border-bunker-900 px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-none">
+    </div>
+
     <%# Lexical editor area %>
     <div class="relative">
       <div data-message-composer-target="editor"
            contenteditable="true"
+           data-action="paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
            class="min-h-[36px] max-h-[200px] overflow-y-auto px-3 py-2.5 text-[11px] text-bunker-100 font-dm-mono focus:outline-none">
       </div>
       <div data-message-composer-target="placeholder"
@@ -32,6 +39,15 @@
               class="toolbar-btn" title="Inline Code">&lt;/&gt;</button>
       <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#codeBlock"
               class="toolbar-btn" title="Code Block">{}</button>
+
+      <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->attachment-upload#openFilePicker"
+              class="toolbar-btn" title="Attach file">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+      </button>
 
       <span class="ml-auto text-[9px] text-bunker-700 font-dm-mono hidden sm:inline">
         <span class="text-granny-smith-apple-600">md</span> supported
