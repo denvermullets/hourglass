@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 gem "rails", "~> 8.1.3"
 
+gem "aws-sdk-s3", require: false
 gem "bcrypt", "~> 3.1.22"
 gem "bootsnap", require: false
 gem "image_processing", "~> 1.2"
