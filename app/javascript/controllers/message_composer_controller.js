@@ -43,10 +43,13 @@ export default class extends Controller {
     const { registerRichText, HeadingNode, QuoteNode } = richText
     const { registerMarkdownShortcuts, TRANSFORMERS } = markdown
     const { CodeNode, CodeHighlightNode, $createCodeNode, $isCodeNode, registerCodeHighlighting } = code
-    const { LinkNode, AutoLinkNode } = link
+    const { LinkNode, AutoLinkNode, $createAutoLinkNode, $isAutoLinkNode, $isLinkNode } = link
     const { ListNode, ListItemNode } = list
 
-    // Store for use in codeBlock action and language picker
+    // Store for use in auto-link and codeBlock action
+    this._$createAutoLinkNode = $createAutoLinkNode
+    this._$isAutoLinkNode = $isAutoLinkNode
+    this._$isLinkNode = $isLinkNode
     this._createCodeNode = $createCodeNode
     this._isCodeNode = $isCodeNode
     this._CodeNode = CodeNode
@@ -86,6 +89,7 @@ export default class extends Controller {
     registerRichText(this.editor)
     registerMarkdownShortcuts(this.editor, TRANSFORMERS)
     registerCodeHighlighting(this.editor)
+    this._registerAutoLink(lexical)
 
     // Pre-populate editor with existing HTML content (used for editing messages)
     if (this.hasContentValue && this.contentValue) {
@@ -139,6 +143,10 @@ export default class extends Controller {
     this.isDisconnecting = true
     this._removeLanguagePicker()
 
+    if (this._autoLinkCleanup) {
+      this._autoLinkCleanup()
+      this._autoLinkCleanup = null
+    }
     if (this._cleanups) {
       this._cleanups.forEach(cleanup => cleanup())
       this._cleanups = null
@@ -224,6 +232,41 @@ export default class extends Controller {
   }
 
   // Private
+
+  _registerAutoLink(lexical) {
+    const URL_REGEX = /(?<![=\w])https?:\/\/[^\s<>)"']+/g
+    const { $isTextNode, $createTextNode, TextNode } = lexical
+
+    this._autoLinkCleanup = this.editor.registerNodeTransform(TextNode, (textNode) => {
+      if (!$isTextNode(textNode) || !textNode.isSimpleText()) return
+
+      const parent = textNode.getParent()
+      if (this._$isAutoLinkNode(parent) || this._$isLinkNode(parent)) return
+
+      const text = textNode.getTextContent()
+      const match = URL_REGEX.exec(text)
+      URL_REGEX.lastIndex = 0
+      if (!match) return
+
+      const url = match[0]
+      const start = match.index
+      const end = start + url.length
+
+      let targetNode = textNode
+      if (start > 0) {
+        targetNode = textNode.splitText(start)[1]
+      }
+      if (end < text.length) {
+        targetNode.splitText(url.length)
+      }
+
+      const linkNode = this._$createAutoLinkNode(url, { rel: "noopener noreferrer", target: "_blank" })
+      const linkText = $createTextNode(url)
+      linkText.setFormat(targetNode.getFormat())
+      linkNode.append(linkText)
+      targetNode.replace(linkNode)
+    })
+  }
 
   _submitMessage() {
     const html = this._serializeToHtml()
