@@ -34,20 +34,22 @@ class Messages::CreateService < Service
   private
 
   def broadcast_append(message)
+    fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)
     Turbo::StreamsChannel.broadcast_append_to(
       @channel,
       target: 'messages',
       partial: 'messages/message',
-      locals: { message: message }
+      locals: { message: fresh_message }
     )
   end
 
   def broadcast_thread_reply(message)
+    fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)
     Turbo::StreamsChannel.broadcast_append_to(
       "thread_#{message.parent_message_id}",
       target: 'thread_replies',
       partial: 'threads/reply',
-      locals: { reply: message, server: @channel.server, channel: @channel }
+      locals: { reply: fresh_message, server: @channel.server, channel: @channel }
     )
   end
 
