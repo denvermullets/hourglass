@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_01_124703) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_01_204515) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -113,6 +113,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_01_124703) do
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "actor_id", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "data", default: {}, null: false
+    t.bigint "notifiable_id", null: false
+    t.string "notifiable_type", null: false
+    t.integer "notification_type", default: 0, null: false
+    t.datetime "read_at"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at"
+    t.index ["user_id", "notification_type", "notifiable_type", "notifiable_id"], name: "idx_notifications_dedup"
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "servers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -160,6 +178,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_01_124703) do
   add_foreign_key "messages", "channels"
   add_foreign_key "messages", "messages", column: "parent_message_id"
   add_foreign_key "messages", "users"
+  add_foreign_key "notifications", "users"
+  add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "servers", "users", column: "owner_id"
   add_foreign_key "sessions", "users"
 end

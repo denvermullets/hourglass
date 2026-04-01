@@ -20,10 +20,13 @@ class Messages::CreateService < Service
     if message.parent_message_id.present?
       broadcast_thread_reply(message)
       broadcast_reply_indicator_update(message.parent_message)
+      notify_thread_reply(message)
     else
       broadcast_date_separator(message)
       broadcast_append(message)
     end
+
+    detect_mentions(message)
 
     message
   end
@@ -31,20 +34,22 @@ class Messages::CreateService < Service
   private
 
   def broadcast_append(message)
+    fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)
     Turbo::StreamsChannel.broadcast_append_to(
       @channel,
       target: 'messages',
       partial: 'messages/message',
-      locals: { message: message }
+      locals: { message: fresh_message }
     )
   end
 
   def broadcast_thread_reply(message)
+    fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)
     Turbo::StreamsChannel.broadcast_append_to(
       "thread_#{message.parent_message_id}",
       target: 'thread_replies',
       partial: 'threads/reply',
-      locals: { reply: message, server: @channel.server, channel: @channel }
+      locals: { reply: fresh_message, server: @channel.server, channel: @channel }
     )
   end
 
@@ -74,6 +79,32 @@ class Messages::CreateService < Service
       target: "thread_header_meta_#{parent_message.id}",
       partial: 'threads/header_meta',
       locals: { parent_message: parent_message, participant_count: participant_count }
+    )
+  end
+
+  def detect_mentions(message)
+    Mentions::DetectService.call(message: message)
+  end
+
+  def notify_thread_reply(message)
+    parent_author = message.parent_message.user
+    return if parent_author == @user
+
+    preview = ActionController::Base.helpers.strip_tags(message.body).to_s.truncate(100)
+
+    Notifications::CreateService.call(
+      user: parent_author,
+      actor: @user,
+      notification_type: :reply,
+      notifiable: message,
+      data: {
+        'channel_name' => @channel.name,
+        'server_name' => @channel.server.name,
+        'server_id' => @channel.server_id,
+        'channel_id' => @channel.id,
+        'message_id' => message.id,
+        'preview' => preview
+      }
     )
   end
 

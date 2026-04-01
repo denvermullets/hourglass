@@ -4,8 +4,8 @@ class ServersController < ApplicationController
   layout 'app'
 
   before_action :set_server,
-                only: %i[show edit update destroy settings settings_general settings_invite settings_danger]
-  before_action :require_membership!, only: [:show]
+                only: %i[show edit update destroy settings settings_general settings_invite settings_danger members]
+  before_action :require_membership!, only: %i[show members]
   before_action :require_admin!,
                 only: %i[settings settings_general settings_invite settings_danger edit update]
   before_action :require_owner!, only: [:destroy]
@@ -24,6 +24,15 @@ class ServersController < ApplicationController
   rescue ActiveRecord::RecordInvalid => e
     @server = e.record
     render :new, status: :unprocessable_entity
+  end
+
+  def members
+    users = @server.users
+                   .where('username ILIKE ?', "#{params[:q]}%")
+                   .where.not(id: Current.user.id)
+                   .limit(10)
+
+    render json: users.map { |u| { username: u.username, display_name: u.display_name } }
   end
 
   def show

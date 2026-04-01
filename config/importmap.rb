@@ -7,6 +7,7 @@ pin '@hotwired/stimulus', to: 'stimulus.min.js'
 pin '@hotwired/stimulus-loading', to: 'stimulus-loading.js'
 pin '@rails/activestorage', to: 'activestorage.esm.js'
 pin_all_from 'app/javascript/controllers', under: 'controllers'
+pin_all_from 'app/javascript/lexical', under: 'lexical'
 
 # Lexical rich text editor
 pin 'lexical', to: 'https://esm.sh/lexical@0.21.0'
