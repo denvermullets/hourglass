@@ -191,3 +191,58 @@
 .highlight .sr { color: var(--color-danger-400); } /* regex */
 .highlight .ss { color: var(--color-granny-smith-apple-300); } /* symbol */
 .highlight .err { color: var(--color-danger-400); } /* error */
+
+/* @mention styles */
+.mention {
+  color: var(--color-jordy-blue-400);
+  background: color-mix(in srgb, var(--color-jordy-blue-400) 12%, transparent);
+  padding: 0 3px;
+  border-radius: 3px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mention-self {
+  color: var(--color-granny-smith-apple-300);
+  background: color-mix(in srgb, var(--color-granny-smith-apple-300) 12%, transparent);
+}
+
+/* @mention in editor */
+.editor-mention {
+  color: var(--color-jordy-blue-400);
+  font-weight: 500;
+}
+
+/* Mention autocomplete dropdown */
+.mention-autocomplete {
+  position: fixed;
+  background: var(--color-bunker-925);
+  border: 1px solid var(--color-bunker-825);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  min-width: 180px;
+}
+
+.mention-autocomplete-item {
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--color-bunker-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mention-autocomplete-item:hover,
+.mention-autocomplete-item.active {
+  background: var(--color-bunker-875);
+  color: var(--color-bunker-100);
+}
+
+.mention-autocomplete-item .display-name {
+  color: var(--color-bunker-600);
+  font-size: 9px;
+}

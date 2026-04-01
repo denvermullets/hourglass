@@ -8,7 +8,8 @@
              data: {
                controller: "message-composer attachment-upload",
                action: "turbo:submit-end->message-composer#reset turbo:submit-end->attachment-upload#reset",
-               message_composer_placeholder_value: "// reply to thread"
+               message_composer_placeholder_value: "// reply to thread",
+               message_composer_server_id_value: server.id
              } do |f| %>
   <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
   <%= f.hidden_field :parent_message_id, value: parent_message.id %>

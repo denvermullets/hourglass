@@ -16,13 +16,22 @@
     <span class="text-[7px] tracking-[0.08em]">dms</span>
   </div>
 
-  <%# Search (placeholder) %>
-  <div class="flex flex-col items-center gap-0.5 px-2.5 text-bunker-600 cursor-pointer">
-    <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-    </svg>
-    <span class="text-[7px] tracking-[0.08em]">search</span>
-  </div>
+  <%# Notifications %>
+  <button class="flex flex-col items-center gap-0.5 px-2.5 text-bunker-600 cursor-pointer relative bg-transparent border-0"
+    data-action="click->notification-panel#toggle">
+    <div class="relative">
+      <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span id="notification_badge_mobile">
+        <% if Current.user&.unread_notification_count.to_i > 0 %>
+          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-granny-smith-apple-600"></span>
+        <% end %>
+      </span>
+    </div>
+    <span class="text-[7px] tracking-[0.08em]">alerts</span>
+  </button>
 
   <%# Profile / Settings %>
   <%= link_to settings_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'settings' ? 'text-granny-smith-apple-300' : 'text-bunker-600'}" do %>

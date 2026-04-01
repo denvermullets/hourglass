@@ -8,6 +8,7 @@ module MessagesHelper
       attributes: Messages::SanitizeService::ALLOWED_ATTRIBUTES
     )
 
-    Messages::HighlightService.call(html: sanitized)
+    highlighted = Messages::HighlightService.call(html: sanitized)
+    Mentions::HighlightService.call(html: highlighted, current_user: Current.user)
   end
 end

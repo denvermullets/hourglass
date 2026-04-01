@@ -23,7 +23,20 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-screen overflow-hidden">
+  <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-screen overflow-hidden" data-controller="notifications-channel notification-panel">
+    <%# Notification panel overlay %>
+    <div data-notification-panel-target="overlay"
+         data-action="click->notification-panel#close"
+         class="hidden fixed inset-0 bg-black/30 z-40"></div>
+
+    <%# Notification panel %>
+    <div data-notification-panel-target="panel"
+         class="hidden fixed top-0 right-0 h-full w-80 bg-bunker-925 border-l border-bunker-825 z-50 flex flex-col shadow-2xl">
+      <div data-notification-panel-target="content" class="flex flex-col h-full">
+        <%# Content loaded dynamically %>
+      </div>
+    </div>
+
     <div class="flex h-full sidebar-container">
       <%# Desktop icon rail — hidden on mobile %>
       <div class="hidden lg:flex">

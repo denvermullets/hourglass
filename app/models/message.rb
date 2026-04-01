@@ -3,6 +3,7 @@ class Message < ApplicationRecord
   belongs_to :channel, optional: true
   belongs_to :parent_message, class_name: 'Message', optional: true, counter_cache: :replies_count
   has_many :replies, class_name: 'Message', foreign_key: :parent_message_id, dependent: :nullify
+  has_many :notifications, as: :notifiable, dependent: :destroy
 
   has_many_attached :files
 

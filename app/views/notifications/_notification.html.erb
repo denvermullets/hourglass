@@ -1,0 +1,54 @@
+<% data = notification.data || {} %>
+<% url = if data["server_id"] && data["channel_id"] && data["message_id"]
+           server_channel_message_path(data["server_id"], data["channel_id"], data["message_id"])
+         elsif data["server_id"] && data["channel_id"]
+           server_channel_path(data["server_id"], data["channel_id"])
+         else
+           notifications_path
+         end %>
+
+<div id="<%= dom_id(notification) %>" class="group">
+  <a href="<%= url %>"
+     data-notification-link
+     data-notification-id="<%= notification.id %>"
+     class="flex items-start gap-2.5 px-3 py-2.5 no-underline transition-colors hover:bg-bunker-875 <%= 'opacity-60' if notification.read? %>">
+
+    <%# Unread indicator %>
+    <div class="flex-shrink-0 mt-1.5">
+      <% if notification.read? %>
+        <div class="w-1.5 h-1.5 rounded-full bg-bunker-800"></div>
+      <% else %>
+        <div class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-500"></div>
+      <% end %>
+    </div>
+
+    <%# Content %>
+    <div class="flex-1 min-w-0">
+      <p class="text-[10px] text-bunker-300 leading-relaxed m-0">
+        <span class="font-bold text-bunker-200"><%= notification.actor.username %></span>
+        <% case notification.notification_type %>
+        <% when "mention" %>
+          mentioned you in <span class="text-jordy-blue-400">#<%= data["channel_name"] %></span>
+        <% when "reply" %>
+          replied to your thread in <span class="text-jordy-blue-400">#<%= data["channel_name"] %></span>
+        <% when "reaction" %>
+          reacted <%= data["emoji"] %> to your message
+        <% when "dm" %>
+          sent you a message
+        <% when "channel_invite" %>
+          invited you to <span class="text-jordy-blue-400">#<%= data["channel_name"] %></span>
+        <% when "system" %>
+          <%= data["message"] %>
+        <% end %>
+      </p>
+
+      <% if data["preview"].present? %>
+        <p class="text-[9px] text-bunker-600 mt-0.5 truncate m-0"><%= data["preview"] %></p>
+      <% end %>
+
+      <time class="text-[8px] text-bunker-700 mt-0.5 block">
+        <%= time_ago_in_words(notification.created_at) %> ago
+      </time>
+    </div>
+  </a>
+</div>
