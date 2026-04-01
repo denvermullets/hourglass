@@ -113,12 +113,9 @@ class Notifications::StreamBuilder
 
     def notification_url(data)
       helpers = Rails.application.routes.url_helpers
-      if data['server_id'] && data['channel_id'] && data['message_id']
-        helpers.server_channel_message_path(
-          data['server_id'], data['channel_id'], data['message_id']
-        )
-      elsif data['server_id'] && data['channel_id']
-        helpers.server_channel_path(data['server_id'], data['channel_id'])
+      if data['server_id'] && data['channel_id']
+        path = helpers.server_channel_path(data['server_id'], data['channel_id'])
+        data['message_id'] ? "#{path}#message_#{data['message_id']}" : path
       else
         helpers.notifications_path
       end
