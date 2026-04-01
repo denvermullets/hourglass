@@ -1,5 +1,5 @@
 <%# Mobile bottom navigation — matches .references/cold_wave_mobile.html %>
-<nav class="fixed bottom-0 left-0 right-0 border-t border-bunker-825 bg-bunker-950 py-2 flex justify-around items-center z-50">
+<nav class="fixed bottom-0 left-0 right-0 border-t border-bunker-825 bg-bunker-950 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-50">
   <%# Servers %>
   <%= link_to servers_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'servers' && action_name == 'index' ? 'text-granny-smith-apple-300' : 'text-bunker-600'}" do %>
     <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
