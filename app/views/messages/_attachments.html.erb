@@ -11,7 +11,7 @@
       <% is_last_visible = index == display_images.size - 1 && images.size > 4 %>
       <%= link_to rails_blob_path(image, disposition: :inline), target: "_blank", rel: "noopener",
                   class: "block relative bg-bunker-875 border border-bunker-825 rounded overflow-hidden group/img #{'col-span-2' if is_first_of_three}" do %>
-        <%= image_tag image.variant(resize_to_fill: [400, 300]),
+        <%= image_tag rails_representation_path(image.variant(resize_to_fill: [400, 300])),
                       class: "w-full h-full object-cover",
                       style: "height: #{is_first_of_three ? '140px' : '140px'}",
                       loading: "lazy" %>
