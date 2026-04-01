@@ -22,5 +22,5 @@ production:
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    url: <%= ENV['DATABASE_URL'] %>
+    url: <%= ENV['CABLE_DATABASE_URL'] %>
     migrations_paths: db/cable_migrate
