@@ -20,7 +20,7 @@
       <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
       <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
 
-      <div class="bg-bunker-875 border border-bunker-825 rounded-lg overflow-hidden focus-within:border-granny-smith-apple-600 transition-colors duration-150">
+      <div class="bg-bunker-875 border border-bunker-825 rounded-lg overflow-clip focus-within:border-granny-smith-apple-600 transition-colors duration-150">
         <%# Existing attachments + new attachment preview strip %>
         <div data-attachment-upload-target="previewStrip"
              class="<%= message.files.attached? ? '' : 'hidden' %> border-b border-bunker-825 px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-none"
