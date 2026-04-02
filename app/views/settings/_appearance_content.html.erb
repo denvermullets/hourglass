@@ -61,6 +61,60 @@
 
     <div class="h-px bg-bunker-825"></div>
 
+    <%# Text size %>
+    <%
+      text_sizes = [
+        ["xs", "XS", "compact"],
+        ["sm", "S", "default"],
+        ["md", "M", "comfortable"],
+        ["lg", "L", "large"]
+      ]
+      size_font = { 'xs' => '11px', 'sm' => '13px', 'md' => '14px', 'lg' => '16px' }
+    %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">text size — desktop</h3>
+      <div class="grid grid-cols-4 gap-2">
+        <% text_sizes.each do |value, label, desc| %>
+          <label class="relative cursor-pointer">
+            <%= tag.input type: "radio", name: "text_size", value: value,
+              checked: value == user.text_size || nil,
+              class: "sr-only peer",
+              data: { action: "change->theme-preview#previewTextSize" } %>
+            <div class="rounded-lg border-2 p-3 text-center transition-all duration-150
+              peer-checked:border-granny-smith-apple-600
+              border-bunker-775 hover:border-bunker-600
+              bg-bunker-875">
+              <span class="font-syne font-bold text-bunker-100" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <div class="text-[8px] text-bunker-600 mt-1"><%= desc %></div>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3 mt-4">text size — mobile</h3>
+      <div class="grid grid-cols-4 gap-2">
+        <% text_sizes.each do |value, label, desc| %>
+          <label class="relative cursor-pointer">
+            <%= tag.input type: "radio", name: "text_size_mobile", value: value,
+              checked: value == user.text_size_mobile || nil,
+              class: "sr-only peer",
+              data: { action: "change->theme-preview#previewTextSizeMobile" } %>
+            <div class="rounded-lg border-2 p-3 text-center transition-all duration-150
+              peer-checked:border-granny-smith-apple-600
+              border-bunker-775 hover:border-bunker-600
+              bg-bunker-875">
+              <span class="font-syne font-bold text-bunker-100" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <div class="text-[8px] text-bunker-600 mt-1"><%= desc %></div>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="h-px bg-bunker-825"></div>
+
     <%# Timestamp format %>
     <div>
       <h3 class="text-[11px] text-bunker-400 font-medium mb-3">timestamp format</h3>

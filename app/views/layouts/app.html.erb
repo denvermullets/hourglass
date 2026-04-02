@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="<%= Current.user&.theme || 'cold-wave' %>" data-sidebar="<%= Current.user&.sidebar_position || 'left' %>">
+<html data-theme="<%= Current.user&.theme || 'cold-wave' %>" data-sidebar="<%= Current.user&.sidebar_position || 'left' %>" data-text-size="<%= Current.user&.text_size || 'xs' %>" data-text-size-mobile="<%= Current.user&.text_size_mobile || 'xs' %>">
   <head>
     <title><%= content_for(:title) || "Hourglass" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -44,7 +44,7 @@
       </div>
 
       <%# Main content area %>
-      <div class="flex-1 flex flex-col min-w-0 min-h-0 pb-14 lg:pb-0">
+      <div class="flex-1 flex flex-col min-w-0 min-h-0 pb-14 lg:pb-0 text-scaled">
         <%= render "shared/auth_flash" %>
         <%= yield %>
       </div>
