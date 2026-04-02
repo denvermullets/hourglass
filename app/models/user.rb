@@ -10,7 +10,9 @@ class User < ApplicationRecord
     'appearance' => {
       'theme' => 'cold-wave',
       'timestamp_format' => 'relative',
-      'sidebar_position' => 'left'
+      'sidebar_position' => 'left',
+      'text_size' => 'xs',
+      'text_size_mobile' => 'xs'
     }
   }.freeze
 
@@ -58,11 +60,38 @@ class User < ApplicationRecord
     resolved_settings.dig('appearance', 'sidebar_position') || 'left'
   end
 
+  def text_size
+    resolved_settings.dig('appearance', 'text_size') || 'xs'
+  end
+
+  def text_size_mobile
+    resolved_settings.dig('appearance', 'text_size_mobile') || 'xs'
+  end
+
   def notification_setting(key)
     resolved_settings.dig('notifications', key.to_s)
   end
 
   def unread_notification_count
     notifications.unread.count
+  end
+
+  def unread_channels?
+    channels = Channel.joins(:server)
+                      .where(servers: { id: servers.select(:id) })
+                      .where.not(last_message_at: nil)
+                      .pluck(:id, :last_message_at)
+
+    return false if channels.empty?
+
+    read_times = ChannelMembership
+                 .where(user: self, channel_id: channels.map(&:first))
+                 .pluck(:channel_id, :last_read_at)
+                 .to_h
+
+    channels.any? do |ch_id, last_msg_at|
+      last_read = read_times[ch_id]
+      last_read.nil? || last_msg_at > last_read
+    end
   end
 end

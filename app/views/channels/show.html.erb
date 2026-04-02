@@ -3,7 +3,7 @@
      data-presence-server-id-value="<%= @server.id %>">
   <%# Desktop sidebar %>
   <div class="hidden lg:flex">
-    <%= render "servers/channel_sidebar", server: @server, categories: @categories, current_channel: @channel %>
+    <%= render "servers/channel_sidebar", server: @server, categories: @categories, current_channel: @channel, unread_channel_ids: @unread_channel_ids %>
   </div>
 
   <%# Channel content %>
@@ -59,6 +59,10 @@
       <%# Turbo Stream subscriptions for real-time updates %>
       <%= turbo_stream_from @channel %>
       <%= turbo_stream_from "server_#{@server.id}_presence" %>
+      <%= turbo_stream_from "user_#{Current.user.id}_unread" %>
+
+      <%# Mark channel as read after page loads (lazy frame avoids prefetch triggering) %>
+      <%= turbo_frame_tag "mark_read", src: mark_read_server_channel_path(@server, @channel), loading: :lazy %>
 
       <%# Scrollable message container %>
       <div class="flex-1 overflow-y-auto" data-messages-scroll-target="container">

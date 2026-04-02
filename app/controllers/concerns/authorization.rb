@@ -37,4 +37,25 @@ module Authorization
   def require_owner!
     require_role!(:owner)
   end
+
+  def unread_channel_ids_for_server(server)
+    channels_with_messages = server.channels
+                                   .where.not(last_message_at: nil)
+                                   .pluck(:id, :last_message_at)
+                                   .to_h
+
+    return Set.new if channels_with_messages.empty?
+
+    read_times = ChannelMembership
+                 .where(user: Current.user, channel_id: channels_with_messages.keys)
+                 .pluck(:channel_id, :last_read_at)
+                 .to_h
+
+    unread = Set.new
+    channels_with_messages.each do |ch_id, last_msg_at|
+      last_read = read_times[ch_id]
+      unread.add(ch_id) if last_read.nil? || last_msg_at > last_read
+    end
+    unread
+  end
 end

@@ -1,7 +1,8 @@
+<%= turbo_stream_from "user_#{Current.user.id}_unread" %>
 <div class="flex-1 flex flex-col lg:flex-row sidebar-container">
   <%# Desktop sidebar — hidden on mobile %>
   <div class="hidden lg:flex">
-    <%= render "servers/channel_sidebar", server: @server, categories: @categories, current_channel: nil %>
+    <%= render "servers/channel_sidebar", server: @server, categories: @categories, current_channel: nil, unread_channel_ids: @unread_channel_ids %>
   </div>
 
   <%# Mobile channel list %>
@@ -30,7 +31,7 @@
     <%# Mobile channel list — matches cold_wave_mobile.html reference %>
     <div class="flex-1 overflow-y-auto">
       <% @categories.each do |category| %>
-        <%= render "servers/channel_sidebar_category", category: category, server: @server, current_channel: nil, mobile: true %>
+        <%= render "servers/channel_sidebar_category", category: category, server: @server, current_channel: nil, mobile: true, unread_channel_ids: @unread_channel_ids %>
       <% end %>
 
       <% if current_membership&.can_manage_channels? %>

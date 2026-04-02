@@ -1,4 +1,4 @@
-<div class="flex-1 flex flex-col">
+<div class="flex-1 flex flex-col min-h-0">
   <%# Header %>
   <div class="px-4 lg:px-6 py-4 border-b border-bunker-825 flex items-center gap-3">
     <%= link_to servers_path, class: "text-[10px] text-granny-smith-apple-600 no-underline" do %>
@@ -13,7 +13,7 @@
   </div>
 
   <%# Tabs + panel %>
-  <div class="flex-1 flex min-h-0">
+  <div class="flex-1 flex flex-col min-h-0">
     <%= render "settings/tabs_and_panel",
       tab: @tab,
       panel_partial: @panel_partial,

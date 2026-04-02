@@ -1,88 +1,51 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Long-press on mobile to reveal message actions (reply, edit, delete).
+// Tap on mobile to toggle message actions (reply, edit, delete).
 // On desktop, hover still works via CSS group-hover.
 export default class extends Controller {
   static targets = ["actions"]
 
   connect() {
-    this.pressTimer = null
-    this.isLongPress = false
-
-    // Only attach touch listeners — desktop uses CSS hover
-    this.element.addEventListener("touchstart", this.startPress, { passive: true })
-    this.element.addEventListener("touchend", this.endPress)
-    this.element.addEventListener("touchmove", this.cancelPress, { passive: true })
-    this.element.addEventListener("contextmenu", this.preventContext)
+    this.element.addEventListener("click", this.toggle)
   }
 
   disconnect() {
-    this.element.removeEventListener("touchstart", this.startPress)
-    this.element.removeEventListener("touchend", this.endPress)
-    this.element.removeEventListener("touchmove", this.cancelPress)
-    this.element.removeEventListener("contextmenu", this.preventContext)
-    clearTimeout(this.pressTimer)
+    this.element.removeEventListener("click", this.toggle)
   }
 
-  startPress = (e) => {
-    this.isLongPress = false
-    this.pressTimer = setTimeout(() => {
-      this.isLongPress = true
-      this.showActions()
-    }, 500)
-  }
+  toggle = (e) => {
+    // Only on touch devices — desktop uses CSS hover
+    if (!matchMedia("(hover: none)").matches) return
 
-  endPress = (e) => {
-    clearTimeout(this.pressTimer)
-    // If it was a long press, prevent the tap from navigating
-    if (this.isLongPress) {
-      e.preventDefault()
-    }
-  }
+    // Don't intercept taps on links/buttons (reply, edit, delete, thread links)
+    if (e.target.closest("a, button")) return
 
-  cancelPress = () => {
-    clearTimeout(this.pressTimer)
-  }
+    e.preventDefault()
 
-  preventContext = (e) => {
-    if (this.isLongPress) {
-      e.preventDefault()
-    }
-  }
+    const isVisible = this.hasActionsTarget &&
+      this.actionsTarget.classList.contains("mobile-actions-visible")
 
-  showActions() {
-    // Haptic feedback if available
-    if (navigator.vibrate) navigator.vibrate(30)
+    // Dismiss all open action bars first
+    dismissAll()
 
-    // Hide any other open action bars first
-    document.querySelectorAll("[data-long-press-target='actions'].mobile-actions-visible").forEach((el) => {
-      el.classList.remove("mobile-actions-visible")
-      el.style.removeProperty("opacity")
-    })
-
-    if (this.hasActionsTarget) {
+    // Toggle this one
+    if (!isVisible && this.hasActionsTarget) {
       this.actionsTarget.classList.add("mobile-actions-visible")
       this.actionsTarget.style.opacity = "1"
     }
   }
-
-  // Dismiss when tapping elsewhere (called from a global listener)
-  static dismissAll() {
-    document.querySelectorAll("[data-long-press-target='actions'].mobile-actions-visible").forEach((el) => {
-      el.classList.remove("mobile-actions-visible")
-      el.style.removeProperty("opacity")
-    })
-  }
 }
 
-// Dismiss open action bars when tapping outside a message
-document.addEventListener("touchstart", (e) => {
+function dismissAll() {
+  document.querySelectorAll("[data-long-press-target='actions'].mobile-actions-visible").forEach((el) => {
+    el.classList.remove("mobile-actions-visible")
+    el.style.removeProperty("opacity")
+  })
+}
+
+// Dismiss when tapping outside any message
+document.addEventListener("click", (e) => {
   if (!e.target.closest("[data-controller~='long-press']")) {
-    const LongPress = window.Stimulus?.getControllerForElementAndIdentifier?.(document.body, "long-press")
-    // Fallback: just remove the classes directly
-    document.querySelectorAll("[data-long-press-target='actions'].mobile-actions-visible").forEach((el) => {
-      el.classList.remove("mobile-actions-visible")
-      el.style.removeProperty("opacity")
-    })
+    dismissAll()
   }
-}, { passive: true })
+})

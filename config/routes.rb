@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     resource :membership, only: [:destroy]
     resources :categories, only: %i[create update destroy]
     resources :channels, only: %i[show create update destroy] do
+      get :mark_read, on: :member
       resources :messages, only: %i[index show create edit update destroy] do
         resource :thread, only: [:show], controller: 'threads'
       end

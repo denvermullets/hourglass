@@ -180,6 +180,18 @@
   --color-emerald-950: #082b18;
 }
 
+/* Text size — desktop uses data-text-size, mobile uses data-text-size-mobile */
+@media (min-width: 1024px) {
+  [data-text-size="sm"] .text-scaled { zoom: 1.12; }
+  [data-text-size="md"] .text-scaled { zoom: 1.25; }
+  [data-text-size="lg"] .text-scaled { zoom: 1.4; }
+}
+@media (max-width: 1023px) {
+  [data-text-size-mobile="sm"] .text-scaled { zoom: 1.12; }
+  [data-text-size-mobile="md"] .text-scaled { zoom: 1.25; }
+  [data-text-size-mobile="lg"] .text-scaled { zoom: 1.4; }
+}
+
 /* Sidebar position — right-hand layout */
 @media (min-width: 1024px) {
   [data-sidebar="right"] .sidebar-container {

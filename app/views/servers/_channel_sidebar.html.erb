@@ -22,7 +22,7 @@
   <%# Channel list %>
   <div class="flex-1 overflow-y-auto py-2">
     <% categories.each do |category| %>
-      <%= render "servers/channel_sidebar_category", category: category, server: server, current_channel: current_channel, mobile: false %>
+      <%= render "servers/channel_sidebar_category", category: category, server: server, current_channel: current_channel, mobile: false, unread_channel_ids: local_assigns[:unread_channel_ids] %>
     <% end %>
   </div>
 
