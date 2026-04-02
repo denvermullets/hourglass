@@ -2,7 +2,8 @@ class Server < ApplicationRecord
   belongs_to :owner, class_name: 'User'
   has_many :memberships, dependent: :destroy
   has_many :users, through: :memberships
-  has_many :categories, -> { order(position: :asc) }, dependent: :destroy
+  has_many :categories, -> { active.order(position: :asc) }, dependent: :destroy
+  has_many :all_categories, -> { order(position: :asc) }, class_name: 'Category', dependent: false
   has_many :channels, dependent: :destroy
 
   has_one_attached :icon
@@ -15,6 +16,18 @@ class Server < ApplicationRecord
 
   def regenerate_invite_code!
     update!(invite_code: self.class.send(:generate_unique_invite_code))
+  end
+
+  def permission(key)
+    settings.dig('permissions', key.to_s)
+  end
+
+  def members_can_create_channels?
+    permission('members_can_create_channels') == true
+  end
+
+  def members_can_create_categories?
+    permission('members_can_create_categories') == true
   end
 
   def membership_for(user)

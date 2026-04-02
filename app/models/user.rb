@@ -78,6 +78,7 @@ class User < ApplicationRecord
 
   def unread_channels?
     channels = Channel.joins(:server)
+                      .visible_to(self)
                       .where(servers: { id: servers.select(:id) })
                       .where.not(last_message_at: nil)
                       .pluck(:id, :last_message_at)

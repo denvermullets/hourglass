@@ -40,6 +40,7 @@ module Authorization
 
   def unread_channel_ids_for_server(server)
     channels_with_messages = server.channels
+                                   .visible_to(Current.user)
                                    .where.not(last_message_at: nil)
                                    .pluck(:id, :last_message_at)
                                    .to_h

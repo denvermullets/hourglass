@@ -34,7 +34,7 @@
         <%= render "servers/channel_sidebar_category", category: category, server: @server, current_channel: nil, mobile: true, unread_channel_ids: @unread_channel_ids %>
       <% end %>
 
-      <% if current_membership&.can_manage_channels? %>
+      <% if current_membership&.can_create_categories? %>
         <div class="px-4 py-3 border-t border-bunker-825">
           <%= render "categories/form", server: @server %>
         </div>

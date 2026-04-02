@@ -7,7 +7,7 @@
              id: "thread_message_form",
              data: {
                controller: "message-composer attachment-upload",
-               action: "turbo:submit-end->message-composer#reset turbo:submit-end->attachment-upload#reset",
+               action: "submit->message-composer#handleSubmit turbo:submit-end->message-composer#reset turbo:submit-end->attachment-upload#reset",
                message_composer_placeholder_value: "// reply to thread",
                message_composer_server_id_value: server.id
              } do |f| %>
@@ -61,7 +61,7 @@
       </span>
 
       <%= f.submit "send",
-            class: "ml-2 bg-transparent text-[9px] text-bunker-600 hover:text-granny-smith-apple-300 transition-colors duration-150 cursor-pointer font-dm-mono uppercase tracking-[0.1em] border-0 p-0" %>
+            class: "sm:ml-2 ml-auto bg-transparent text-[9px] text-bunker-600 hover:text-granny-smith-apple-300 transition-colors duration-150 cursor-pointer font-dm-mono uppercase tracking-[0.1em] border-0 p-0" %>
     </div>
   </div>
 <% end %>

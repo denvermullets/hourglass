@@ -4,7 +4,7 @@ class CategoriesController < ApplicationController
   layout 'app'
 
   before_action :set_server
-  before_action :set_category, only: %i[update destroy]
+  before_action :set_category, only: %i[update destroy reorder archive unarchive]
   before_action :require_membership!
   before_action :require_moderator!
 
@@ -28,6 +28,21 @@ class CategoriesController < ApplicationController
     redirect_to server_path(@server)
   end
 
+  def reorder
+    Categories::ReorderService.call(category: @category, direction: params[:direction].to_sym)
+    redirect_to settings_channels_server_path(@server)
+  end
+
+  def archive
+    Categories::ArchiveService.call(category: @category)
+    redirect_to settings_channels_server_path(@server)
+  end
+
+  def unarchive
+    Categories::UnarchiveService.call(category: @category)
+    redirect_to settings_channels_server_path(@server)
+  end
+
   private
 
   def set_server
@@ -35,7 +50,7 @@ class CategoriesController < ApplicationController
   end
 
   def set_category
-    @category = @server.categories.find(params[:id])
+    @category = @server.all_categories.find(params[:id])
   end
 
   def category_params

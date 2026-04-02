@@ -31,6 +31,14 @@ class Membership < ApplicationRecord
     owner?
   end
 
+  def can_create_channels?
+    at_least?(:moderator) || server.members_can_create_channels?
+  end
+
+  def can_create_categories?
+    at_least?(:moderator) || server.members_can_create_categories?
+  end
+
   private
 
   def set_joined_at
