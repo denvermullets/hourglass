@@ -27,6 +27,7 @@ class Messages::CreateService < Service
     end
 
     detect_mentions(message)
+    broadcast_unread_indicators(message)
 
     message
   end
@@ -106,6 +107,26 @@ class Messages::CreateService < Service
         'preview' => preview
       }
     )
+  end
+
+  def broadcast_unread_indicators(message)
+    @channel.update_column(:last_message_at, message.created_at)
+
+    member_ids = @channel.server.memberships
+                         .where.not(user_id: @user.id)
+                         .pluck(:user_id)
+
+    member_ids.each do |user_id|
+      Turbo::StreamsChannel.broadcast_replace_to(
+        "user_#{user_id}_unread",
+        target: "unread_indicator_channel_#{@channel.id}",
+        html: <<~HTML
+          <span id="unread_indicator_channel_#{@channel.id}" class="flex-shrink-0 ml-auto flex items-center">
+            <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-400 block"></span>
+          </span>
+        HTML
+      )
+    end
   end
 
   def broadcast_date_separator(message)
