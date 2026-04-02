@@ -48,8 +48,10 @@
 
         <%# Replies %>
         <div id="thread_replies" class="px-4 lg:px-7 pb-4">
+          <% previous_reply = nil %>
           <% @replies.each do |reply| %>
-            <%= render "threads/reply", reply: reply, server: @server, channel: @channel %>
+            <%= render "threads/reply", reply: reply, server: @server, channel: @channel, grouped: grouped_with_previous?(reply, previous_reply) %>
+            <% previous_reply = reply %>
           <% end %>
         </div>
       </div>

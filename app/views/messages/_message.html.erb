@@ -1,27 +1,35 @@
-<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5 rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, controller: "long-press" } do %>
+<% grouped = local_assigns.fetch(:grouped, false) %>
+<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 #{ grouped ? '-mt-0.5' : 'py-1.5' } rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
   <% if message.deleted? %>
     <div class="flex-1 text-[11px] text-bunker-700 italic">
       [message deleted]
     </div>
   <% else %>
-    <%# Avatar %>
-    <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
-      <% if message.user.avatar.attached? %>
-        <%= image_tag polymorphic_path(message.user.avatar), alt: "", class: "w-full h-full object-cover" %>
-      <% else %>
-        <span class="text-[11px] font-syne font-bold text-bunker-400 uppercase"><%= message.user.username[0] %></span>
-      <% end %>
-    </div>
-
-    <div class="flex-1 min-w-0">
-      <%# Header: username + timestamp %>
-      <div class="flex items-baseline gap-2">
-        <span class="font-syne text-[11px] font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
-        <span class="text-[9px] text-bunker-700"><%= message.created_at.strftime("%-m/%-d/%Y %-I:%M %p") %></span>
-        <% if message.edited? %>
-          <span class="text-[9px] text-bunker-700">(edited)</span>
+    <% if grouped %>
+      <%# Spacer matching avatar width for text alignment %>
+      <div class="flex-shrink-0 w-8"></div>
+    <% else %>
+      <%# Avatar %>
+      <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
+        <% if message.user.avatar.attached? %>
+          <%= image_tag polymorphic_path(message.user.avatar), alt: "", class: "w-full h-full object-cover" %>
+        <% else %>
+          <span class="text-[11px] font-syne font-bold text-bunker-400 uppercase"><%= message.user.username[0] %></span>
         <% end %>
       </div>
+    <% end %>
+
+    <div class="flex-1 min-w-0">
+      <% unless grouped %>
+        <%# Header: username + timestamp %>
+        <div class="flex items-baseline gap-2">
+          <span class="font-syne text-[11px] font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
+          <span class="text-[9px] text-bunker-700"><%= message.created_at.strftime("%-m/%-d/%Y %-I:%M %p") %></span>
+          <% if message.edited? %>
+            <span class="text-[9px] text-bunker-700">(edited)</span>
+          <% end %>
+        </div>
+      <% end %>
 
       <%# Body %>
       <% if message.body.present? %>

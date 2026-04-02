@@ -1,14 +1,17 @@
 <% previous_date = nil %>
+<% previous_message = nil %>
 <% @messages.each do |message| %>
   <% if message.created_at.to_date != previous_date %>
     <%= turbo_stream.prepend "messages" do %>
       <%= render "messages/date_separator", date: message.created_at.to_date %>
     <% end %>
     <% previous_date = message.created_at.to_date %>
+    <% previous_message = nil %>
   <% end %>
   <%= turbo_stream.prepend "messages" do %>
-    <%= render "messages/message", message: message %>
+    <%= render "messages/message", message: message, grouped: grouped_with_previous?(message, previous_message) %>
   <% end %>
+  <% previous_message = message %>
 <% end %>
 
 <%= turbo_stream.replace "load_older" do %>
