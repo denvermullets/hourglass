@@ -75,4 +75,23 @@ class User < ApplicationRecord
   def unread_notification_count
     notifications.unread.count
   end
+
+  def unread_channels?
+    channels = Channel.joins(:server)
+                      .where(servers: { id: servers.select(:id) })
+                      .where.not(last_message_at: nil)
+                      .pluck(:id, :last_message_at)
+
+    return false if channels.empty?
+
+    read_times = ChannelMembership
+                 .where(user: self, channel_id: channels.map(&:first))
+                 .pluck(:channel_id, :last_read_at)
+                 .to_h
+
+    channels.any? do |ch_id, last_msg_at|
+      last_read = read_times[ch_id]
+      last_read.nil? || last_msg_at > last_read
+    end
+  end
 end

@@ -126,7 +126,18 @@ class Messages::CreateService < Service
           </span>
         HTML
       )
+
+      Turbo::StreamsChannel.broadcast_replace_to(
+        "user_#{user_id}_unread_title",
+        target: 'unread_title_indicator',
+        html: unread_title_html(has_unread: true)
+      )
     end
+  end
+
+  def unread_title_html(has_unread:)
+    inner = has_unread ? '<span data-unread="true"></span>' : ''
+    "<span id=\"unread_title_indicator\" class=\"hidden\">#{inner}</span>"
   end
 
   def broadcast_date_separator(message)
