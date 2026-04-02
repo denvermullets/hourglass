@@ -9,7 +9,12 @@
     { id: "brutalist-newsprint", name: "Brutalist", colors: ["#e8d820", "#1e1c18", "#ddd8c8"] },
     { id: "muted-sage", name: "Muted Sage", colors: ["#60d890", "#2e3c34", "#6a8070"] },
     { id: "deep-navy", name: "Deep Navy", colors: ["#f08030", "#141e30", "#c8d8f0"] },
-    { id: "warm-dusk", name: "Warm Dusk", colors: ["#50e8c0", "#281820", "#ece0d8"] }
+    { id: "warm-dusk", name: "Warm Dusk", colors: ["#50e8c0", "#281820", "#ece0d8"] },
+    { id: "ink", name: "Ink", colors: ["#aaee44", "#141414", "#888888"] },
+    { id: "ocean-floor", name: "Ocean Floor", colors: ["#d4a84a", "#0e1820", "#6090a8"] },
+    { id: "ash", name: "Ash", colors: ["#ff5a3c", "#282828", "#909090"] },
+    { id: "chalk", name: "Chalk", colors: ["#0a6870", "#f5f4f0", "#5c5850"] },
+    { id: "dusk-redux", name: "Dusk Redux", colors: ["#f0a070", "#181424", "#8878b0"] }
   ]
   current_theme = user.theme
 %>
@@ -25,11 +30,10 @@
       <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <% themes.each do |theme| %>
           <label class="relative cursor-pointer group">
-            <input type="radio" name="theme" value="<%= theme[:id] %>"
-              checked
-              class="sr-only peer"
-              data-action="change->theme-preview#preview"
-              data-theme-preview-target="radio">
+            <%= tag.input type: "radio", name: "theme", value: theme[:id],
+              checked: theme[:id] == current_theme || nil,
+              class: "sr-only peer",
+              data: { action: "change->theme-preview#preview", theme_preview_target: "radio" } %>
             <div class="rounded-lg border-2 p-4 transition-all duration-150
               peer-checked:border-granny-smith-apple-600
               border-bunker-775 hover:border-bunker-600
@@ -49,6 +53,60 @@
               <svg class="w-3 h-3 text-bunker-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="h-px bg-bunker-825"></div>
+
+    <%# Text size %>
+    <%
+      text_sizes = [
+        ["xs", "XS", "compact"],
+        ["sm", "S", "default"],
+        ["md", "M", "comfortable"],
+        ["lg", "L", "large"]
+      ]
+      size_font = { 'xs' => '11px', 'sm' => '13px', 'md' => '14px', 'lg' => '16px' }
+    %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">text size — desktop</h3>
+      <div class="grid grid-cols-4 gap-2">
+        <% text_sizes.each do |value, label, desc| %>
+          <label class="relative cursor-pointer">
+            <%= tag.input type: "radio", name: "text_size", value: value,
+              checked: value == user.text_size || nil,
+              class: "sr-only peer",
+              data: { action: "change->theme-preview#previewTextSize" } %>
+            <div class="rounded-lg border-2 p-3 text-center transition-all duration-150
+              peer-checked:border-granny-smith-apple-600
+              border-bunker-775 hover:border-bunker-600
+              bg-bunker-875">
+              <span class="font-syne font-bold text-bunker-100" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <div class="text-[8px] text-bunker-600 mt-1"><%= desc %></div>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3 mt-4">text size — mobile</h3>
+      <div class="grid grid-cols-4 gap-2">
+        <% text_sizes.each do |value, label, desc| %>
+          <label class="relative cursor-pointer">
+            <%= tag.input type: "radio", name: "text_size_mobile", value: value,
+              checked: value == user.text_size_mobile || nil,
+              class: "sr-only peer",
+              data: { action: "change->theme-preview#previewTextSizeMobile" } %>
+            <div class="rounded-lg border-2 p-3 text-center transition-all duration-150
+              peer-checked:border-granny-smith-apple-600
+              border-bunker-775 hover:border-bunker-600
+              bg-bunker-875">
+              <span class="font-syne font-bold text-bunker-100" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <div class="text-[8px] text-bunker-600 mt-1"><%= desc %></div>
             </div>
           </label>
         <% end %>

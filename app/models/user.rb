@@ -10,7 +10,9 @@ class User < ApplicationRecord
     'appearance' => {
       'theme' => 'cold-wave',
       'timestamp_format' => 'relative',
-      'sidebar_position' => 'left'
+      'sidebar_position' => 'left',
+      'text_size' => 'xs',
+      'text_size_mobile' => 'xs'
     }
   }.freeze
 
@@ -56,6 +58,14 @@ class User < ApplicationRecord
 
   def sidebar_position
     resolved_settings.dig('appearance', 'sidebar_position') || 'left'
+  end
+
+  def text_size
+    resolved_settings.dig('appearance', 'text_size') || 'xs'
+  end
+
+  def text_size_mobile
+    resolved_settings.dig('appearance', 'text_size_mobile') || 'xs'
   end
 
   def notification_setting(key)

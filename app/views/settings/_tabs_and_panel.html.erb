@@ -1,4 +1,4 @@
-<%= turbo_frame_tag "user_settings_panel", class: "flex-1 flex flex-col lg:flex-row min-h-0" do %>
+<%= turbo_frame_tag "user_settings_panel", class: "flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden" do %>
   <%# Mobile tab nav %>
   <div class="lg:hidden flex border-b border-bunker-825">
     <% %w[profile account notifications appearance].each do |t| %>
@@ -25,7 +25,7 @@
   </div>
 
   <%# Panel content %>
-  <div class="flex-1 p-4 lg:p-6 overflow-y-auto">
+  <div class="flex-1 p-4 pb-24 lg:p-6 lg:pb-6 overflow-y-auto">
     <%= render panel_partial, **panel_locals %>
   </div>
 <% end %>
