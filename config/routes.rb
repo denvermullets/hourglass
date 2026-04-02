@@ -51,6 +51,7 @@ Rails.application.routes.draw do
         patch :reorder
         patch :archive
         patch :unarchive
+        patch :move
       end
       resources :messages, only: %i[index show create edit update destroy] do
         resource :thread, only: [:show], controller: 'threads'
