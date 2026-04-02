@@ -25,11 +25,10 @@
       <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <% themes.each do |theme| %>
           <label class="relative cursor-pointer group">
-            <input type="radio" name="theme" value="<%= theme[:id] %>"
-              checked
-              class="sr-only peer"
-              data-action="change->theme-preview#preview"
-              data-theme-preview-target="radio">
+            <%= tag.input type: "radio", name: "theme", value: theme[:id],
+              checked: theme[:id] == current_theme || nil,
+              class: "sr-only peer",
+              data: { action: "change->theme-preview#preview", theme_preview_target: "radio" } %>
             <div class="rounded-lg border-2 p-4 transition-all duration-150
               peer-checked:border-granny-smith-apple-600
               border-bunker-775 hover:border-bunker-600
