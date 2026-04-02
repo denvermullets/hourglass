@@ -5,5 +5,6 @@ class Channels::ArchiveService < Service
 
   def call
     @channel.archive!
+    Sidebar::BroadcastService.call(server: @channel.server, action: :replace_category, category: @channel.category)
   end
 end

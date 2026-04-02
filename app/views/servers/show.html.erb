@@ -1,4 +1,5 @@
 <%= turbo_stream_from "user_#{Current.user.id}_unread" %>
+<%= turbo_stream_from "server_#{@server.id}_sidebar" %>
 <div class="flex-1 flex flex-col lg:flex-row sidebar-container">
   <%# Desktop sidebar — hidden on mobile %>
   <div class="hidden lg:flex">
@@ -29,7 +30,7 @@
     </div>
 
     <%# Mobile channel list — matches cold_wave_mobile.html reference %>
-    <div class="flex-1 overflow-y-auto">
+    <div id="mobile_categories_server_<%= @server.id %>" class="flex-1 overflow-y-auto">
       <% @categories.each do |category| %>
         <%= render "servers/channel_sidebar_category", category: category, server: @server, current_channel: nil, mobile: true, unread_channel_ids: @unread_channel_ids %>
       <% end %>

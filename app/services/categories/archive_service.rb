@@ -8,5 +8,6 @@ class Categories::ArchiveService < Service
       @category.archive!
       @category.channels.each(&:archive!)
     end
+    Sidebar::BroadcastService.call(server: @category.server, action: :replace_all_categories)
   end
 end
