@@ -70,6 +70,21 @@
           </div>
 
           <div class="flex items-center gap-1">
+            <%# Move to another category %>
+            <% other_categories = sorted_categories.reject { |c| c.id == category.id } %>
+            <% if other_categories.any? %>
+              <%= form_with url: move_server_channel_path(server, channel), method: :patch, class: "flex items-center" do %>
+                <select name="category_id"
+                  onchange="this.form.requestSubmit()"
+                  class="text-[9px] bg-bunker-875 border border-bunker-775 text-bunker-500 rounded px-1 py-0.5 cursor-pointer outline-none hover:border-bunker-600 transition-colors duration-100">
+                  <option value="" disabled selected>move...</option>
+                  <% other_categories.each do |cat| %>
+                    <option value="<%= cat.id %>"><%= cat.name %></option>
+                  <% end %>
+                </select>
+              <% end %>
+            <% end %>
+
             <%# Reorder arrows %>
             <% unless ch_index == 0 %>
               <%= button_to reorder_server_channel_path(server, channel),
