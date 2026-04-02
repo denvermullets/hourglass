@@ -14,6 +14,7 @@
                   method: :patch,
                   data: {
                     controller: "message-composer attachment-upload",
+                    action: "submit->message-composer#handleSubmit",
                     message_composer_content_value: message.body,
                     message_composer_server_id_value: server.id
                   } do |f| %>

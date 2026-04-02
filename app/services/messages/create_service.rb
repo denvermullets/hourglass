@@ -36,22 +36,42 @@ class Messages::CreateService < Service
 
   def broadcast_append(message)
     fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)
+    previous = @channel.messages.root_messages.not_deleted
+                       .where.not(id: message.id)
+                       .order(created_at: :desc)
+                       .first
+
     Turbo::StreamsChannel.broadcast_append_to(
       @channel,
       target: 'messages',
       partial: 'messages/message',
-      locals: { message: fresh_message }
+      locals: { message: fresh_message, grouped: grouped_with?(message, previous) }
     )
   end
 
   def broadcast_thread_reply(message)
     fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)
+    previous = message.parent_message.replies.not_deleted
+                      .where.not(id: message.id)
+                      .order(created_at: :desc)
+                      .first
+
     Turbo::StreamsChannel.broadcast_append_to(
       "thread_#{message.parent_message_id}",
       target: 'thread_replies',
       partial: 'threads/reply',
-      locals: { reply: fresh_message, server: @channel.server, channel: @channel }
+      locals: {
+        reply: fresh_message, server: @channel.server,
+        channel: @channel, grouped: grouped_with?(message, previous)
+      }
     )
+  end
+
+  def grouped_with?(message, previous)
+    previous.present? &&
+      !previous.deleted? &&
+      previous.user_id == message.user_id &&
+      (message.created_at - previous.created_at) <= 60.seconds
   end
 
   def broadcast_reply_indicator_update(parent_message)

@@ -1,27 +1,35 @@
-<%= tag.div id: dom_id(reply), class: "group flex gap-3 py-2.5 border-b border-bunker-825 last:border-b-0", data: { message_author_id: reply.user_id, controller: "long-press" } do %>
+<% grouped = local_assigns.fetch(:grouped, false) %>
+<%= tag.div id: dom_id(reply), class: "group flex gap-3 #{ grouped ? '' : 'py-2.5' } border-b border-bunker-825 last:border-b-0", data: { message_author_id: reply.user_id, message_user_id: reply.user_id, message_created_at: reply.created_at.iso8601, controller: "long-press" } do %>
   <% if reply.deleted? %>
     <div class="flex-1 text-[11px] text-bunker-700 italic">
       [message deleted]
     </div>
   <% else %>
-    <%# Avatar %>
-    <div class="flex-shrink-0 w-[30px] h-[30px] rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center mt-0.5 overflow-hidden">
-      <% if reply.user.avatar.attached? %>
-        <%= image_tag polymorphic_path(reply.user.avatar), alt: "", class: "w-full h-full object-cover" %>
-      <% else %>
-        <span class="text-[9px] font-syne font-bold text-bunker-400 uppercase"><%= reply.user.username[0..1] %></span>
-      <% end %>
-    </div>
-
-    <div class="flex-1 min-w-0">
-      <%# Header %>
-      <div class="flex items-baseline gap-2.5 mb-1">
-        <span class="text-[12px] font-medium message-username" data-author-name><%= reply.user.username %></span>
-        <span class="text-[9px] text-bunker-600 tracking-[0.06em]"><%= reply.created_at.strftime("%H:%M:%S") %></span>
-        <% if reply.edited? %>
-          <span class="text-[9px] text-bunker-700">(edited)</span>
+    <% if grouped %>
+      <%# Spacer matching avatar width %>
+      <div class="flex-shrink-0 w-[30px]"></div>
+    <% else %>
+      <%# Avatar %>
+      <div class="flex-shrink-0 w-[30px] h-[30px] rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center mt-0.5 overflow-hidden">
+        <% if reply.user.avatar.attached? %>
+          <%= image_tag polymorphic_path(reply.user.avatar), alt: "", class: "w-full h-full object-cover" %>
+        <% else %>
+          <span class="text-[9px] font-syne font-bold text-bunker-400 uppercase"><%= reply.user.username[0..1] %></span>
         <% end %>
       </div>
+    <% end %>
+
+    <div class="flex-1 min-w-0">
+      <% unless grouped %>
+        <%# Header %>
+        <div class="flex items-baseline gap-2.5 mb-1">
+          <span class="text-[12px] font-medium message-username" data-author-name><%= reply.user.username %></span>
+          <span class="text-[9px] text-bunker-600 tracking-[0.06em]"><%= reply.created_at.strftime("%H:%M:%S") %></span>
+          <% if reply.edited? %>
+            <span class="text-[9px] text-bunker-700">(edited)</span>
+          <% end %>
+        </div>
+      <% end %>
 
       <%# Body %>
       <% if reply.body.present? %>
