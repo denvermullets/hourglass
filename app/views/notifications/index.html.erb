@@ -4,12 +4,10 @@
     <span class="text-[8px] text-bunker-700 tracking-[0.1em] uppercase block">activity</span>
     <span class="text-[11px] text-bunker-300 font-bold">notifications</span>
   </div>
-  <% if @notifications.any? { |n| !n.read? } %>
-    <button data-mark-all-read
-            class="text-[9px] text-granny-smith-apple-400 hover:text-granny-smith-apple-300 bg-transparent border-0 cursor-pointer p-0 font-dm-mono">
-      mark all read
-    </button>
-  <% end %>
+  <button data-mark-all-read
+          class="text-[9px] text-granny-smith-apple-400 hover:text-granny-smith-apple-300 bg-transparent border-0 cursor-pointer p-0 font-dm-mono">
+    mark all read
+  </button>
 </div>
 
 <%# Notification list %>
