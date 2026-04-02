@@ -37,28 +37,28 @@
       <% if message.parent_message_id.nil? %>
         <%= render "messages/reply_indicator", message: message %>
       <% end %>
-    </div>
 
-    <%# Actions (hover on desktop, long-press on mobile) %>
-    <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-1 pt-1"
-         data-long-press-target="actions">
-      <%# Reply — visible to all users %>
-      <% if message.parent_message_id.nil? %>
-        <%= link_to "reply",
-              server_channel_message_thread_path(message.channel.server, message.channel, message),
-              class: "text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 no-underline" %>
-      <% end %>
+      <%# Actions (hover on desktop, tap on mobile) — below message content %>
+      <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
+           data-long-press-target="actions">
+        <%# Reply — visible to all users %>
+        <% if message.parent_message_id.nil? %>
+          <%= link_to "reply",
+                server_channel_message_thread_path(message.channel.server, message.channel, message),
+                class: "text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 no-underline" %>
+        <% end %>
 
-      <%# Edit/Delete — author only %>
-      <div class="hidden items-center gap-1" data-author-only>
-        <%= link_to "edit",
-              edit_server_channel_message_path(message.channel.server, message.channel, message),
-              class: "text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 no-underline",
-              data: { turbo_method: :get, turbo_prefetch: false } %>
-        <%= link_to "delete",
-              server_channel_message_path(message.channel.server, message.channel, message),
-              class: "text-[9px] leading-none text-bunker-700 hover:text-danger-400 transition-colors duration-100 no-underline",
-              data: { turbo_method: :delete, turbo_confirm: "Delete this message?" } %>
+        <%# Edit/Delete — author only %>
+        <div class="hidden items-center gap-2" data-author-only>
+          <%= link_to "edit",
+                edit_server_channel_message_path(message.channel.server, message.channel, message),
+                class: "text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 no-underline",
+                data: { turbo_method: :get, turbo_prefetch: false } %>
+          <%= link_to "delete",
+                server_channel_message_path(message.channel.server, message.channel, message),
+                class: "text-[9px] leading-none text-bunker-700 hover:text-danger-400 transition-colors duration-100 no-underline",
+                data: { turbo_method: :delete, turbo_confirm: "Delete this message?" } %>
+        </div>
       </div>
     </div>
   <% end %>
