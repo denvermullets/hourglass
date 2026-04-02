@@ -308,3 +308,175 @@
   --color-granny-smith-apple-100: #b0f8e0;
   --color-granny-smith-apple-50: #e0fcf4;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   INK — Near-black unified, electric lime accent
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="ink"] {
+  --color-bunker-950: #141414;
+  --color-bunker-925: #181818;
+  --color-bunker-900: #181818;
+  --color-bunker-875: #1e1e1e;
+  --color-bunker-825: #242424;
+  --color-bunker-800: #2a2a2a;
+  --color-bunker-775: #2a2a2a;
+  --color-bunker-700: #444444;
+  --color-bunker-600: #555555;
+  --color-bunker-500: #666666;
+  --color-bunker-400: #888888;
+  --color-bunker-300: #aaaaaa;
+  --color-bunker-200: #cccccc;
+  --color-bunker-100: #f0f0f0;
+  --color-bunker-50: #ffffff;
+
+  --color-granny-smith-apple-950: #0a1208;
+  --color-granny-smith-apple-925: #1a2408;
+  --color-granny-smith-apple-900: #2a3810;
+  --color-granny-smith-apple-800: #4a6818;
+  --color-granny-smith-apple-700: #5a8010;
+  --color-granny-smith-apple-600: #6a9a20;
+  --color-granny-smith-apple-500: #8ab830;
+  --color-granny-smith-apple-400: #aaee44;
+  --color-granny-smith-apple-300: #aaee44;
+  --color-granny-smith-apple-200: #c0f060;
+  --color-granny-smith-apple-100: #d8f890;
+  --color-granny-smith-apple-50: #f0fcc8;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OCEAN FLOOR — Deep blue-green unified, sandy gold accent
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="ocean-floor"] {
+  --color-bunker-950: #0e1820;
+  --color-bunker-925: #121e28;
+  --color-bunker-900: #121e28;
+  --color-bunker-875: #162030;
+  --color-bunker-825: #1a2c3c;
+  --color-bunker-800: #1e3040;
+  --color-bunker-775: #1e3040;
+  --color-bunker-700: #2a4258;
+  --color-bunker-600: #3a5870;
+  --color-bunker-500: #4a7090;
+  --color-bunker-400: #6090a8;
+  --color-bunker-300: #80a8c0;
+  --color-bunker-200: #a0c0d8;
+  --color-bunker-100: #d0e8f0;
+  --color-bunker-50: #e8f4fa;
+
+  --color-granny-smith-apple-950: #100c04;
+  --color-granny-smith-apple-925: #162010;
+  --color-granny-smith-apple-900: #2a3008;
+  --color-granny-smith-apple-800: #584810;
+  --color-granny-smith-apple-700: #806020;
+  --color-granny-smith-apple-600: #a07828;
+  --color-granny-smith-apple-500: #b89038;
+  --color-granny-smith-apple-400: #d4a84a;
+  --color-granny-smith-apple-300: #d4a84a;
+  --color-granny-smith-apple-200: #e0c070;
+  --color-granny-smith-apple-100: #ecd898;
+  --color-granny-smith-apple-50: #f8f0c8;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ASH — True neutral grey unified, hot coral accent
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="ash"] {
+  --color-bunker-950: #282828;
+  --color-bunker-925: #2c2c2c;
+  --color-bunker-900: #2c2c2c;
+  --color-bunker-875: #303030;
+  --color-bunker-825: #333333;
+  --color-bunker-800: #383838;
+  --color-bunker-775: #383838;
+  --color-bunker-700: #484848;
+  --color-bunker-600: #585858;
+  --color-bunker-500: #686868;
+  --color-bunker-400: #909090;
+  --color-bunker-300: #b0b0b0;
+  --color-bunker-200: #d0d0d0;
+  --color-bunker-100: #efefef;
+  --color-bunker-50: #ffffff;
+
+  --color-granny-smith-apple-950: #200808;
+  --color-granny-smith-apple-925: #301a18;
+  --color-granny-smith-apple-900: #401010;
+  --color-granny-smith-apple-800: #702018;
+  --color-granny-smith-apple-700: #993322;
+  --color-granny-smith-apple-600: #cc3a22;
+  --color-granny-smith-apple-500: #e04830;
+  --color-granny-smith-apple-400: #ff5a3c;
+  --color-granny-smith-apple-300: #ff5a3c;
+  --color-granny-smith-apple-200: #ff8870;
+  --color-granny-smith-apple-100: #ffb8a8;
+  --color-granny-smith-apple-50: #ffe8e0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHALK — Warm near-white unified, deep teal accent
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="chalk"] {
+  /* backgrounds (inverted: 950=lightest, 50=darkest) */
+  --color-bunker-950: #f5f4f0;
+  --color-bunker-925: #efeee8;
+  --color-bunker-900: #efeee8;
+  --color-bunker-875: #eae8e4;
+  --color-bunker-825: #d0cec8;
+  --color-bunker-800: #c0beb8;
+  --color-bunker-775: #d0cec8;
+  --color-bunker-700: #9a9890;
+  --color-bunker-600: #9a9890;
+  --color-bunker-500: #7a7870;
+  --color-bunker-400: #5c5850;
+  --color-bunker-300: #3a3830;
+  --color-bunker-200: #2a2820;
+  --color-bunker-100: #141210;
+  --color-bunker-50: #0a0808;
+
+  /* accent: deep teal */
+  --color-granny-smith-apple-950: #e8f4f4;
+  --color-granny-smith-apple-925: #c0e0e4;
+  --color-granny-smith-apple-900: #90c8d0;
+  --color-granny-smith-apple-800: #60a8b0;
+  --color-granny-smith-apple-700: #208088;
+  --color-granny-smith-apple-600: #0a6870;
+  --color-granny-smith-apple-500: #085058;
+  --color-granny-smith-apple-400: #0a6870;
+  --color-granny-smith-apple-300: #0a6870;
+  --color-granny-smith-apple-200: #208088;
+  --color-granny-smith-apple-100: #044040;
+  --color-granny-smith-apple-50: #022828;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DUSK REDUX — Deep purple-blue unified, warm peach accent
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="dusk-redux"] {
+  --color-bunker-950: #181424;
+  --color-bunker-925: #1c1830;
+  --color-bunker-900: #1c1830;
+  --color-bunker-875: #221c38;
+  --color-bunker-825: #221c3a;
+  --color-bunker-800: #2a2248;
+  --color-bunker-775: #2a2448;
+  --color-bunker-700: #3a3060;
+  --color-bunker-600: #4a4070;
+  --color-bunker-500: #5a5080;
+  --color-bunker-400: #8878b0;
+  --color-bunker-300: #a098c8;
+  --color-bunker-200: #c0b8e0;
+  --color-bunker-100: #e8e0f8;
+  --color-bunker-50: #f8f4ff;
+
+  --color-granny-smith-apple-950: #181010;
+  --color-granny-smith-apple-925: #201428;
+  --color-granny-smith-apple-900: #302018;
+  --color-granny-smith-apple-800: #604028;
+  --color-granny-smith-apple-700: #906040;
+  --color-granny-smith-apple-600: #b06838;
+  --color-granny-smith-apple-500: #c88050;
+  --color-granny-smith-apple-400: #f0a070;
+  --color-granny-smith-apple-300: #f0a070;
+  --color-granny-smith-apple-200: #f0c0a0;
+  --color-granny-smith-apple-100: #f8d8c0;
+  --color-granny-smith-apple-50: #fcf0e8;
+}
