@@ -9,7 +9,7 @@ class Message < ApplicationRecord
 
   enum :message_type, { regular: 0, system: 1, user_join: 2, user_leave: 3 }
 
-  validates :body, length: { maximum: 10_000 }
+  validates :body, length: { maximum: 20_000 }
   validate :body_or_files_present
   validate :body_text_length
   validate :validate_file_limits
@@ -26,6 +26,7 @@ class Message < ApplicationRecord
     audio/mpeg audio/wav audio/ogg
     application/msword
     application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    text/plain text/markdown
   ].freeze
 
   def deleted?
@@ -68,9 +69,9 @@ class Message < ApplicationRecord
     return if body.blank?
 
     stripped = ActionController::Base.helpers.strip_tags(body).to_s.strip
-    return unless stripped.length > 4000
+    return unless stripped.length > 8000
 
-    errors.add(:body, 'is too long (maximum is 4000 characters)')
+    errors.add(:body, 'is too long (maximum is 8000 characters)')
   end
 
   def validate_file_limits
