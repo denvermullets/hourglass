@@ -45,6 +45,7 @@ class Channels::MarkReadService < Service
   def any_unread_channels?
     server = @channel.server
     channels = server.channels
+                     .visible_to(@user)
                      .where.not(last_message_at: nil)
                      .pluck(:id, :last_message_at)
 

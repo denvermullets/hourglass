@@ -112,27 +112,34 @@ class Messages::CreateService < Service
   def broadcast_unread_indicators(message)
     @channel.update_column(:last_message_at, message.created_at)
 
-    member_ids = @channel.server.memberships
-                         .where.not(user_id: @user.id)
-                         .pluck(:user_id)
-
-    member_ids.each do |user_id|
-      Turbo::StreamsChannel.broadcast_replace_to(
-        "user_#{user_id}_unread",
-        target: "unread_indicator_channel_#{@channel.id}",
-        html: <<~HTML
-          <span id="unread_indicator_channel_#{@channel.id}" class="flex-shrink-0 ml-auto flex items-center">
-            <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-400 block"></span>
-          </span>
-        HTML
-      )
-
-      Turbo::StreamsChannel.broadcast_replace_to(
-        "user_#{user_id}_unread_title",
-        target: 'unread_title_indicator',
-        html: unread_title_html(has_unread: true)
-      )
+    notifiable_member_ids.each do |user_id|
+      broadcast_unread_to_user(user_id)
     end
+  end
+
+  def notifiable_member_ids
+    scope = @channel.is_private? ? @channel.channel_memberships : @channel.server.memberships
+    scope.where.not(user_id: @user.id).pluck(:user_id)
+  end
+
+  def broadcast_unread_to_user(user_id)
+    target_id = "unread_indicator_channel_#{@channel.id}"
+
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "user_#{user_id}_unread",
+      target: target_id,
+      html: <<~HTML
+        <span id="#{target_id}" class="flex-shrink-0 ml-auto flex items-center">
+          <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-400 block"></span>
+        </span>
+      HTML
+    )
+
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "user_#{user_id}_unread_title",
+      target: 'unread_title_indicator',
+      html: unread_title_html(has_unread: true)
+    )
   end
 
   def unread_title_html(has_unread:)
