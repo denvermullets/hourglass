@@ -12,7 +12,7 @@
       </span>
     </div>
 
-    <% if current_membership&.can_manage_channels? %>
+    <% if current_membership&.can_create_channels? %>
       <span class="opacity-0 group-hover/cat:opacity-100 w-4 h-4 flex items-center justify-center text-bunker-700 hover:text-bunker-400 transition-all duration-100">
         <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14"/>
@@ -23,12 +23,12 @@
 
   <%# Channels list %>
   <div class="pb-1">
-    <% category.channels.sort_by(&:position).each do |channel| %>
+    <% category.channels.select { |c| !c.archived? }.sort_by(&:position).each do |channel| %>
       <%= render "servers/channel_sidebar_item", channel: channel, server: server, current_channel: current_channel, mobile: mobile, unread: local_assigns[:unread_channel_ids]&.include?(channel.id) %>
     <% end %>
 
     <%# Inline channel creation form — moderator+ %>
-    <% if current_membership&.can_manage_channels? %>
+    <% if current_membership&.can_create_channels? %>
       <div class="px-3.5 py-1">
         <%= render "channels/form", server: server, category: category %>
       </div>

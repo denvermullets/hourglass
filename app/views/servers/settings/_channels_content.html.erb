@@ -1,0 +1,122 @@
+<div class="max-w-[560px]">
+  <% sorted_categories = categories.sort_by(&:position) %>
+  <% sorted_categories.each_with_index do |category, cat_index| %>
+    <% archived = category.archived? %>
+    <% cat_classes = archived ? 'opacity-50' : '' %>
+    <div class="rounded border border-bunker-825 bg-bunker-925 p-3 mb-3 <%= cat_classes %>">
+      <%# Category header %>
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
+          <span class="text-[9px] tracking-[0.16em] uppercase text-bunker-500">
+            <span class="text-bunker-700">//</span> <%= category.name %>
+          </span>
+          <% if archived %>
+            <span class="text-[7px] tracking-[0.1em] text-bunker-700 border border-bunker-775 rounded px-1 py-0.5">archived</span>
+          <% end %>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <%# Reorder arrows %>
+          <% unless cat_index == 0 %>
+            <%= button_to reorder_server_category_path(server, category),
+              method: :patch,
+              params: { direction: 'up' },
+              class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-bunker-400 hover:bg-bunker-875 transition-colors duration-100 cursor-pointer bg-transparent border-0" do %>
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            <% end %>
+          <% end %>
+
+          <% unless cat_index == sorted_categories.length - 1 %>
+            <%= button_to reorder_server_category_path(server, category),
+              method: :patch,
+              params: { direction: 'down' },
+              class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-bunker-400 hover:bg-bunker-875 transition-colors duration-100 cursor-pointer bg-transparent border-0" do %>
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            <% end %>
+          <% end %>
+
+          <%# Archive/unarchive %>
+          <% if archived %>
+            <%= button_to unarchive_server_category_path(server, category),
+              method: :patch,
+              class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-granny-smith-apple-400 hover:bg-bunker-875 transition-colors duration-100 cursor-pointer bg-transparent border-0",
+              title: "Unarchive category" do %>
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            <% end %>
+          <% else %>
+            <%= button_to archive_server_category_path(server, category),
+              method: :patch,
+              class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-amber-400 hover:bg-bunker-875 transition-colors duration-100 cursor-pointer bg-transparent border-0",
+              title: "Archive category",
+              data: { turbo_confirm: "Archive '#{category.name}' and all its channels?" } do %>
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Channels list %>
+      <% sorted_channels = category.channels.sort_by(&:position) %>
+      <% sorted_channels.each_with_index do |channel, ch_index| %>
+        <% ch_archived = channel.archived? %>
+        <% ch_classes = ch_archived ? 'opacity-50' : '' %>
+        <div class="flex items-center justify-between py-1.5 px-2 rounded hover:bg-bunker-875 transition-colors duration-100 <%= ch_classes %>">
+          <div class="flex items-center gap-2 flex-1 min-w-0">
+            <span class="text-[10px] text-bunker-700">#</span>
+            <span class="text-[11px] text-bunker-400 truncate"><%= channel.name %></span>
+            <% if ch_archived %>
+              <span class="text-[7px] tracking-[0.1em] text-bunker-700 border border-bunker-775 rounded px-1 py-0.5">archived</span>
+            <% end %>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <%# Reorder arrows %>
+            <% unless ch_index == 0 %>
+              <%= button_to reorder_server_channel_path(server, channel),
+                method: :patch,
+                params: { direction: 'up' },
+                class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-bunker-400 hover:bg-bunker-825 transition-colors duration-100 cursor-pointer bg-transparent border-0" do %>
+                <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+              <% end %>
+            <% end %>
+
+            <% unless ch_index == sorted_channels.length - 1 %>
+              <%= button_to reorder_server_channel_path(server, channel),
+                method: :patch,
+                params: { direction: 'down' },
+                class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-bunker-400 hover:bg-bunker-825 transition-colors duration-100 cursor-pointer bg-transparent border-0" do %>
+                <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              <% end %>
+            <% end %>
+
+            <%# Archive/unarchive %>
+            <% if ch_archived %>
+              <%= button_to unarchive_server_channel_path(server, channel),
+                method: :patch,
+                class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-granny-smith-apple-400 hover:bg-bunker-825 transition-colors duration-100 cursor-pointer bg-transparent border-0",
+                title: "Unarchive channel" do %>
+                <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              <% end %>
+            <% else %>
+              <%= button_to archive_server_channel_path(server, channel),
+                method: :patch,
+                class: "w-5 h-5 flex items-center justify-center rounded text-bunker-600 hover:text-amber-400 hover:bg-bunker-825 transition-colors duration-100 cursor-pointer bg-transparent border-0",
+                title: "Archive channel",
+                data: { turbo_confirm: "Archive '##{channel.name}'?" } do %>
+                <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if sorted_channels.empty? %>
+        <div class="text-[9px] text-bunker-700 px-2 py-1">no channels</div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if sorted_categories.empty? %>
+    <div class="text-[9px] text-bunker-600">no categories yet.</div>
+  <% end %>
+</div>

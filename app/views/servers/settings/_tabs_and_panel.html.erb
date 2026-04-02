@@ -14,6 +14,16 @@
       class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'invite' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-600'}" do %>
       invite
     <% end %>
+    <%= link_to settings_channels_server_path(server),
+      data: { turbo_frame: "settings_panel" },
+      class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'channels' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-600'}" do %>
+      channels
+    <% end %>
+    <%= link_to settings_permissions_server_path(server),
+      data: { turbo_frame: "settings_panel" },
+      class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-600'}" do %>
+      permissions
+    <% end %>
     <%= link_to settings_danger_server_path(server),
       data: { turbo_frame: "settings_panel" },
       class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'danger' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-600'}" do %>
@@ -35,6 +45,16 @@
       data: { turbo_frame: "settings_panel" },
       class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'invite' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-600 hover:text-bunker-400 hover:bg-bunker-925'}" do %>
       invite
+    <% end %>
+    <%= link_to settings_channels_server_path(server),
+      data: { turbo_frame: "settings_panel" },
+      class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'channels' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-600 hover:text-bunker-400 hover:bg-bunker-925'}" do %>
+      channels
+    <% end %>
+    <%= link_to settings_permissions_server_path(server),
+      data: { turbo_frame: "settings_panel" },
+      class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-600 hover:text-bunker-400 hover:bg-bunker-925'}" do %>
+      permissions
     <% end %>
     <%= link_to settings_danger_server_path(server),
       data: { turbo_frame: "settings_panel" },
