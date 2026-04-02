@@ -18,7 +18,7 @@ export default class extends Controller {
   }
 
   observeNewMessages() {
-    const messages = this.containerTarget.querySelector("#messages")
+    const messages = this.containerTarget.querySelector("#messages") || this.containerTarget.querySelector("#thread_replies")
     if (!messages) return
 
     this.mutationObserver = new MutationObserver((mutations) => {

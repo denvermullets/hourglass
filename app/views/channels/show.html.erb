@@ -87,12 +87,15 @@
             </div>
           <% else %>
             <% previous_date = nil %>
+            <% previous_message = nil %>
             <% @messages.each do |message| %>
               <% if message.created_at.to_date != previous_date %>
                 <%= render "messages/date_separator", date: message.created_at.to_date %>
                 <% previous_date = message.created_at.to_date %>
+                <% previous_message = nil %>
               <% end %>
-              <%= render "messages/message", message: message %>
+              <%= render "messages/message", message: message, grouped: grouped_with_previous?(message, previous_message) %>
+              <% previous_message = message %>
             <% end %>
           <% end %>
         </div>

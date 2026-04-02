@@ -15,7 +15,8 @@ export default class extends Controller {
     "application/pdf", "application/zip",
     "audio/mpeg", "audio/wav", "audio/ogg",
     "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain", "text/markdown"
   ]
 
   connect() {

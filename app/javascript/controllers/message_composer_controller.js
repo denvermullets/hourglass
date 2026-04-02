@@ -291,7 +291,7 @@ export default class extends Controller {
     const { $isTextNode, $createTextNode, TextNode } = lexical
 
     this._autoLinkCleanup = this.editor.registerNodeTransform(TextNode, (textNode) => {
-      if (!$isTextNode(textNode) || !textNode.isSimpleText()) return
+      if (!$isTextNode(textNode)) return
 
       const parent = textNode.getParent()
       if (this._$isAutoLinkNode(parent) || this._$isLinkNode(parent)) return
@@ -315,7 +315,6 @@ export default class extends Controller {
 
       const linkNode = this._$createAutoLinkNode(url, { rel: "noopener noreferrer", target: "_blank" })
       const linkText = $createTextNode(url)
-      linkText.setFormat(targetNode.getFormat())
       linkNode.append(linkText)
       targetNode.replace(linkNode)
     })
@@ -348,12 +347,18 @@ export default class extends Controller {
     // Clean up Lexical's verbose code block output — it wraps every token
     // in <span style="white-space: pre-wrap;"> which bloats storage.
     // Extract plain text and keep just the <pre> with a language attr.
-    return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_match, attrs, inner) => {
+    html = html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_match, attrs, inner) => {
       const plain = inner
         .replace(/<br\s*\/?>/g, "\n")
         .replace(/<[^>]*>/g, "")
       return `<pre${attrs}>${plain}</pre>`
     })
+
+    // Strip leading/trailing empty paragraphs (whitespace-only lines)
+    html = html.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
+    html = html.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
+
+    return html
   }
 
   _isEmpty(html) {

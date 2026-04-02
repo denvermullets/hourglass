@@ -1,5 +1,5 @@
 <%# Category section with collapsible channel list — native <details> element %>
-<details open class="<%= mobile ? 'border-b border-bunker-825' : '' %> group/cat">
+<details open id="<%= mobile ? 'mobile' : 'desktop' %>_category_<%= category.id %>" class="<%= mobile ? 'border-b border-bunker-825' : '' %> group/cat">
   <%# Category header %>
   <summary class="flex items-center justify-between px-3.5 pt-2.5 pb-1 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
     <div class="flex items-center gap-1.5 flex-1 min-w-0">
@@ -12,7 +12,7 @@
       </span>
     </div>
 
-    <% if current_membership&.can_create_channels? %>
+    <% if defined?(current_membership) && current_membership&.can_create_channels? %>
       <span class="opacity-0 group-hover/cat:opacity-100 w-4 h-4 flex items-center justify-center text-bunker-700 hover:text-bunker-400 transition-all duration-100">
         <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14"/>
@@ -28,7 +28,7 @@
     <% end %>
 
     <%# Inline channel creation form — moderator+ %>
-    <% if current_membership&.can_create_channels? %>
+    <% if defined?(current_membership) && current_membership&.can_create_channels? %>
       <div class="px-3.5 py-1">
         <%= render "channels/form", server: server, category: category %>
       </div>

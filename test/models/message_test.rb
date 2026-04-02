@@ -9,7 +9,7 @@ class MessageTest < ActiveSupport::TestCase
 
   test 'validates body max length' do
     message = messages(:one)
-    message.body = 'a' * 4001
+    message.body = 'a' * 8001
     assert_not message.valid?
     assert message.errors[:body].any?
   end

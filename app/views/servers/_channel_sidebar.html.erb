@@ -1,4 +1,5 @@
 <%# Desktop channel sidebar — 240px, matches .references/cold_wave_dm_view.html sidebar pattern %>
+<%= turbo_stream_from "server_#{server.id}_sidebar" %>
 <div class="w-60 flex-shrink-0 border-r border-bunker-825 flex flex-col h-full">
   <%# Server header %>
   <div class="px-3.5 py-3 border-b border-bunker-825 flex items-center justify-between">
@@ -20,7 +21,7 @@
   </div>
 
   <%# Channel list %>
-  <div class="flex-1 overflow-y-auto py-2">
+  <div id="desktop_categories_server_<%= server.id %>" class="flex-1 overflow-y-auto py-2" data-controller="sidebar-active">
     <% categories.each do |category| %>
       <%= render "servers/channel_sidebar_category", category: category, server: server, current_channel: current_channel, mobile: false, unread_channel_ids: local_assigns[:unread_channel_ids] %>
     <% end %>
