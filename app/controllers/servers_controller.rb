@@ -37,6 +37,7 @@ class ServersController < ApplicationController
 
   def show
     @categories = @server.categories.ordered.includes(:channels)
+    @unread_channel_ids = unread_channel_ids_for_server(@server)
   end
 
   def settings

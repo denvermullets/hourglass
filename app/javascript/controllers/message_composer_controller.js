@@ -321,6 +321,16 @@ export default class extends Controller {
     })
   }
 
+  handleSubmit(event) {
+    const html = this._serializeToHtml()
+    const hasFiles = this.element.querySelectorAll('input[name="message[files][]"]').length > 0
+    if (this._isEmpty(html) && !hasFiles) {
+      event.preventDefault()
+      return
+    }
+    this.hiddenInputTarget.value = html
+  }
+
   _submitMessage() {
     const html = this._serializeToHtml()
     const hasFiles = this.element.querySelectorAll('input[name="message[files][]"]').length > 0

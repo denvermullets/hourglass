@@ -4,16 +4,22 @@ class ChannelsController < ApplicationController
   layout 'app'
 
   before_action :set_server
-  before_action :set_channel, only: %i[show update destroy]
+  before_action :set_channel, only: %i[show update destroy mark_read]
   before_action :require_membership!
   before_action :require_moderator!, only: %i[create update destroy]
 
   def show
     @categories = @server.categories.ordered.includes(:channels)
+    @unread_channel_ids = unread_channel_ids_for_server(@server)
     messages = @channel.messages.root_messages.not_deleted.includes(:user).order(created_at: :desc).limit(51)
     @has_older = messages.size > 50
     @messages = messages.first(50).reverse
     @message_count = @channel.messages.not_deleted.count
+  end
+
+  def mark_read
+    Channels::MarkReadService.call(channel: @channel, user: Current.user)
+    render inline: "<%= turbo_frame_tag 'mark_read' %>", layout: false
   end
 
   def create
