@@ -4,10 +4,12 @@ class ServersController < ApplicationController
   layout 'app'
 
   before_action :set_server,
-                only: %i[show edit update destroy settings settings_general settings_invite settings_danger members]
+                only: %i[show edit update destroy settings settings_general settings_invite settings_danger
+                         settings_channels settings_permissions update_permissions members]
   before_action :require_membership!, only: %i[show members]
   before_action :require_admin!,
-                only: %i[settings settings_general settings_invite settings_danger edit update]
+                only: %i[settings settings_general settings_invite settings_danger settings_channels
+                         settings_permissions update_permissions edit update]
   before_action :require_owner!, only: [:destroy]
 
   def index
@@ -66,6 +68,32 @@ class ServersController < ApplicationController
       panel_partial: 'servers/settings/danger_content',
       panel_locals: { server: @server, membership: current_membership }
     }
+  end
+
+  def settings_channels
+    categories = @server.all_categories.order(position: :asc).includes(:channels)
+    render partial: 'servers/settings/tabs_and_panel', locals: {
+      server: @server, tab: 'channels',
+      panel_partial: 'servers/settings/channels_content',
+      panel_locals: { server: @server, categories: categories }
+    }
+  end
+
+  def settings_permissions
+    render partial: 'servers/settings/tabs_and_panel', locals: {
+      server: @server, tab: 'permissions',
+      panel_partial: 'servers/settings/permissions_content',
+      panel_locals: { server: @server }
+    }
+  end
+
+  def update_permissions
+    perms = {
+      'members_can_create_channels' => params[:members_can_create_channels] == '1',
+      'members_can_create_categories' => params[:members_can_create_categories] == '1'
+    }
+    Servers::UpdatePermissionsService.call(server: @server, permissions: perms)
+    redirect_to settings_permissions_server_path(@server), notice: 'Permissions updated.'
   end
 
   def edit; end

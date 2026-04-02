@@ -33,11 +33,25 @@ Rails.application.routes.draw do
       get 'settings/general', to: 'servers#settings_general', as: :settings_general
       get 'settings/invite', to: 'servers#settings_invite', as: :settings_invite
       get 'settings/danger', to: 'servers#settings_danger', as: :settings_danger
+      get 'settings/channels', to: 'servers#settings_channels', as: :settings_channels
+      get 'settings/permissions', to: 'servers#settings_permissions', as: :settings_permissions
+      patch 'settings/permissions', to: 'servers#update_permissions', as: :update_permissions
     end
     resource :membership, only: [:destroy]
-    resources :categories, only: %i[create update destroy]
+    resources :categories, only: %i[create update destroy] do
+      member do
+        patch :reorder
+        patch :archive
+        patch :unarchive
+      end
+    end
     resources :channels, only: %i[show create update destroy] do
-      get :mark_read, on: :member
+      member do
+        get :mark_read
+        patch :reorder
+        patch :archive
+        patch :unarchive
+      end
       resources :messages, only: %i[index show create edit update destroy] do
         resource :thread, only: [:show], controller: 'threads'
       end

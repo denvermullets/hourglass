@@ -4,11 +4,15 @@ class ChannelsController < ApplicationController
   layout 'app'
 
   before_action :set_server
-  before_action :set_channel, only: %i[show update destroy mark_read]
+  before_action :set_channel, only: %i[show update destroy mark_read reorder archive unarchive]
   before_action :require_membership!
-  before_action :require_moderator!, only: %i[create update destroy]
+  before_action :require_moderator!, only: %i[create update destroy reorder archive unarchive]
 
   def show
+    if @channel.archived?
+      redirect_to server_path(@server), alert: 'That channel is archived.'
+      return
+    end
     @categories = @server.categories.ordered.includes(:channels)
     @unread_channel_ids = unread_channel_ids_for_server(@server)
     messages = @channel.messages.root_messages.not_deleted.includes(:user).order(created_at: :desc).limit(51)
@@ -45,6 +49,21 @@ class ChannelsController < ApplicationController
   def destroy
     @channel.destroy!
     redirect_to server_path(@server)
+  end
+
+  def reorder
+    Channels::ReorderService.call(channel: @channel, direction: params[:direction].to_sym)
+    redirect_to settings_channels_server_path(@server)
+  end
+
+  def archive
+    Channels::ArchiveService.call(channel: @channel)
+    redirect_to settings_channels_server_path(@server)
+  end
+
+  def unarchive
+    Channels::UnarchiveService.call(channel: @channel)
+    redirect_to settings_channels_server_path(@server)
   end
 
   private

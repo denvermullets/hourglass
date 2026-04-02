@@ -27,7 +27,7 @@
   </div>
 
   <%# Add category — moderator+ %>
-  <% if current_membership&.can_manage_channels? %>
+  <% if current_membership&.can_create_categories? %>
     <div class="px-3 py-2 border-t border-bunker-825">
       <%= render "categories/form", server: server %>
     </div>

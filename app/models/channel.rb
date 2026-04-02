@@ -16,10 +16,24 @@ class Channel < ApplicationRecord
   before_validation :format_name
 
   scope :ordered, -> { order(position: :asc) }
+  scope :active, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
   scope :visible_to, lambda { |user|
     where(is_private: false)
       .or(where(id: ChannelMembership.where(user: user).select(:channel_id)))
   }
+
+  def archived?
+    archived_at.present?
+  end
+
+  def archive!
+    update!(archived_at: Time.current)
+  end
+
+  def unarchive!
+    update!(archived_at: nil)
+  end
 
   private
 
