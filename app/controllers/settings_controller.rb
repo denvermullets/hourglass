@@ -81,7 +81,7 @@ class SettingsController < ApplicationController
   end
 
   def profile_params
-    params.permit(:display_name, :bio, :avatar, :remove_avatar)
+    params.permit(:username, :display_name, :bio, :avatar, :remove_avatar)
   end
 
   def account_params

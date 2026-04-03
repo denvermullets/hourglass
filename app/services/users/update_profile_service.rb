@@ -11,10 +11,10 @@ class Users::UpdateProfileService < Service
       @user.avatar.attach(@params[:avatar])
     end
 
-    @user.update!(
-      display_name: @params[:display_name],
-      bio: @params[:bio]
-    )
+    attrs = { display_name: @params[:display_name], bio: @params[:bio] }
+    attrs[:username] = @params[:username] if @params[:username].present?
+
+    @user.update!(attrs)
     @user
   end
 end
