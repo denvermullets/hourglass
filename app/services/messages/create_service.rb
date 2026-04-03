@@ -179,7 +179,7 @@ class Messages::CreateService < Service
       @channel,
       target: 'messages',
       partial: 'messages/date_separator',
-      locals: { date: message.created_at.to_date }
+      locals: { date: message.created_at }
     )
   end
 end

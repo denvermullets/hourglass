@@ -46,7 +46,7 @@
       <% end %>
 
       <time class="text-[8px] text-bunker-700 mt-0.5 block">
-        <%= time_ago_in_words(notification.created_at) %> ago
+        <%= format_timestamp(notification.created_at, style: :notification) %>
       </time>
     </div>
   </a>

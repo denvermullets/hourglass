@@ -24,7 +24,7 @@
         <%# Header %>
         <div class="flex items-baseline gap-2.5 mb-1">
           <span class="text-[12px] font-medium message-username" data-author-name><%= reply.user.username %></span>
-          <span class="text-[9px] text-bunker-600 tracking-[0.06em]"><%= reply.created_at.strftime("%H:%M:%S") %></span>
+          <span class="text-[9px] text-bunker-600 tracking-[0.06em]"><%= format_timestamp(reply.created_at, style: :reply) %></span>
           <% if reply.edited? %>
             <span class="text-[9px] text-bunker-700">(edited)</span>
           <% end %>
