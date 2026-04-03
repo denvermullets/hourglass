@@ -5,7 +5,13 @@ export default class extends Controller {
 
   connect() {
     this._wasNearBottom = true
-    this.scrollToBottom()
+
+    if (this._scrollToAnchor()) {
+      // Scrolled to a specific message from URL hash
+    } else {
+      this.scrollToBottom()
+    }
+
     this.observeNewMessages()
     this._onScroll = () => { this._wasNearBottom = this.isNearBottom() }
     this.containerTarget.addEventListener("scroll", this._onScroll, { passive: true })
@@ -44,6 +50,19 @@ export default class extends Controller {
     requestAnimationFrame(() => {
       container.scrollTop = container.scrollHeight - previousHeight
     })
+  }
+
+  _scrollToAnchor() {
+    const hash = window.location.hash
+    if (!hash?.startsWith("#message_")) return false
+
+    const target = this.containerTarget.querySelector(hash)
+    if (!target) return false
+
+    target.scrollIntoView({ block: "center" })
+    target.classList.add("bg-granny-smith-apple-600/10")
+    setTimeout(() => target.classList.remove("bg-granny-smith-apple-600/10"), 2000)
+    return true
   }
 
   disconnect() {

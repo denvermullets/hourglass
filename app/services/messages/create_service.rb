@@ -124,6 +124,7 @@ class Messages::CreateService < Service
         'server_id' => @channel.server_id,
         'channel_id' => @channel.id,
         'message_id' => message.id,
+        'parent_message_id' => message.parent_message_id,
         'preview' => preview
       }
     )

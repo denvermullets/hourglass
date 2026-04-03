@@ -1,5 +1,8 @@
 <% data = notification.data || {} %>
-<% url = if data["server_id"] && data["channel_id"]
+<% url = if data["server_id"] && data["channel_id"] && data["parent_message_id"]
+           thread_path = server_channel_message_thread_path(data["server_id"], data["channel_id"], data["parent_message_id"])
+           "#{thread_path}#message_#{data['message_id']}"
+         elsif data["server_id"] && data["channel_id"]
            path = server_channel_path(data["server_id"], data["channel_id"])
            data["message_id"] ? "#{path}#message_#{data['message_id']}" : path
          else
