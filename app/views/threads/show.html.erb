@@ -24,7 +24,7 @@
         <div class="text-[8px] text-bunker-600 tracking-[0.12em] flex items-center gap-1.5">
           <span># <%= @channel.name %></span>
           <span class="text-bunker-775">/</span>
-          <span class="text-granny-smith-apple-600">thread · <%= @parent_message.created_at.strftime("%b %d · %H:%M").downcase %></span>
+          <span class="text-granny-smith-apple-600">thread · <%= format_timestamp(@parent_message.created_at, style: :thread_breadcrumb) %></span>
         </div>
         <div class="font-syne text-[16px] font-bold text-bunker-100 mt-0.5 tracking-tight">thread</div>
         <%= render "threads/header_meta", parent_message: @parent_message, participant_count: @participant_count %>

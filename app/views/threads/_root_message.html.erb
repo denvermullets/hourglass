@@ -11,7 +11,7 @@
         <% end %>
       </div>
       <span class="text-[12px] font-medium text-granny-smith-apple-300"><%= message.user.username %></span>
-      <span class="text-[9px] text-bunker-600 ml-auto"><%= message.created_at.strftime("%b %d · %H:%M:%S").downcase %></span>
+      <span class="text-[9px] text-bunker-600 ml-auto"><%= format_timestamp(message.created_at, style: :thread_root) %></span>
     </div>
 
     <%# Body %>

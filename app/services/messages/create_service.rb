@@ -108,25 +108,7 @@ class Messages::CreateService < Service
   end
 
   def notify_thread_reply(message)
-    parent_author = message.parent_message.user
-    return if parent_author == @user
-
-    preview = ActionController::Base.helpers.strip_tags(message.body).to_s.truncate(100)
-
-    Notifications::CreateService.call(
-      user: parent_author,
-      actor: @user,
-      notification_type: :reply,
-      notifiable: message,
-      data: {
-        'channel_name' => @channel.name,
-        'server_name' => @channel.server.name,
-        'server_id' => @channel.server_id,
-        'channel_id' => @channel.id,
-        'message_id' => message.id,
-        'preview' => preview
-      }
-    )
+    Messages::NotifyThreadReplyService.call(message: message, channel: @channel, user: @user)
   end
 
   def broadcast_unread_indicators(message)
@@ -179,7 +161,7 @@ class Messages::CreateService < Service
       @channel,
       target: 'messages',
       partial: 'messages/date_separator',
-      locals: { date: message.created_at.to_date }
+      locals: { date: message.created_at }
     )
   end
 end

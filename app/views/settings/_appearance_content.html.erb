@@ -132,6 +132,19 @@
 
     <div class="h-px bg-bunker-825"></div>
 
+    <%# Timezone %>
+    <div>
+      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">timezone</h3>
+      <select name="timezone"
+        class="w-full rounded-lg border-2 border-bunker-775 bg-bunker-875 text-[11px] text-bunker-400 px-3 py-2.5 cursor-pointer focus:border-granny-smith-apple-600 focus:outline-none transition-colors duration-150 appearance-none">
+        <% ActiveSupport::TimeZone.all.each do |tz| %>
+          <%= tag.option "(UTC#{tz.formatted_offset}) #{tz.name}", value: tz.name, selected: tz.name == user.timezone %>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="h-px bg-bunker-825"></div>
+
     <%# Sidebar position %>
     <div>
       <h3 class="text-[11px] text-bunker-400 font-medium mb-3">sidebar position</h3>
