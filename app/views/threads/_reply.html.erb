@@ -1,5 +1,5 @@
 <% grouped = local_assigns.fetch(:grouped, false) %>
-<%= tag.div id: dom_id(reply), class: "group flex gap-3 #{ grouped ? '' : 'py-2.5' } border-b border-bunker-825 last:border-b-0", data: { message_author_id: reply.user_id, message_user_id: reply.user_id, message_created_at: reply.created_at.iso8601, controller: "long-press" } do %>
+<%= tag.div id: dom_id(reply), class: "group flex gap-3 #{ grouped ? '-mt-0.5' : 'py-2.5 border-b border-bunker-825' } last:border-b-0", data: { message_author_id: reply.user_id, message_user_id: reply.user_id, message_created_at: reply.created_at.iso8601, controller: "long-press" } do %>
   <% if reply.deleted? %>
     <div class="flex-1 text-[11px] text-bunker-700 italic">
       [message deleted]
