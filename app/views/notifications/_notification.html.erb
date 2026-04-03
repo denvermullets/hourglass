@@ -1,5 +1,8 @@
 <% data = notification.data || {} %>
-<% url = if data["server_id"] && data["channel_id"]
+<% url = if data["server_id"] && data["channel_id"] && data["parent_message_id"]
+           thread_path = server_channel_message_thread_path(data["server_id"], data["channel_id"], data["parent_message_id"])
+           "#{thread_path}#message_#{data['message_id']}"
+         elsif data["server_id"] && data["channel_id"]
            path = server_channel_path(data["server_id"], data["channel_id"])
            data["message_id"] ? "#{path}#message_#{data['message_id']}" : path
          else
@@ -46,7 +49,7 @@
       <% end %>
 
       <time class="text-[8px] text-bunker-700 mt-0.5 block">
-        <%= time_ago_in_words(notification.created_at) %> ago
+        <%= format_timestamp(notification.created_at, style: :notification) %>
       </time>
     </div>
   </a>

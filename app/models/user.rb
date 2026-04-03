@@ -10,6 +10,7 @@ class User < ApplicationRecord
     'appearance' => {
       'theme' => 'cold-wave',
       'timestamp_format' => 'relative',
+      'timezone' => 'UTC',
       'sidebar_position' => 'left',
       'text_size' => 'xs',
       'text_size_mobile' => 'xs'
@@ -54,6 +55,10 @@ class User < ApplicationRecord
 
   def timestamp_format
     resolved_settings.dig('appearance', 'timestamp_format') || 'relative'
+  end
+
+  def timezone
+    resolved_settings.dig('appearance', 'timezone') || 'UTC'
   end
 
   def sidebar_position

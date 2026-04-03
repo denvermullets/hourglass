@@ -24,7 +24,7 @@
         <%# Header: username + timestamp %>
         <div class="flex items-baseline gap-2">
           <span class="font-syne text-[11px] font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
-          <span class="text-[9px] text-bunker-700"><%= message.created_at.strftime("%-m/%-d/%Y %-I:%M %p") %></span>
+          <span class="text-[9px] text-bunker-700"><%= format_timestamp(message.created_at, style: :message) %></span>
           <% if message.edited? %>
             <span class="text-[9px] text-bunker-700">(edited)</span>
           <% end %>

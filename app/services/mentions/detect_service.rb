@@ -48,7 +48,7 @@ class Mentions::DetectService < Service
   def notification_data
     preview = ActionController::Base.helpers.strip_tags(@message.body).to_s.truncate(100)
 
-    {
+    data = {
       'channel_name' => @message.channel.name,
       'server_name' => @message.channel.server.name,
       'server_id' => @message.channel.server_id,
@@ -56,5 +56,7 @@ class Mentions::DetectService < Service
       'message_id' => @message.id,
       'preview' => preview
     }
+    data['parent_message_id'] = @message.parent_message_id if @message.parent_message_id
+    data
   end
 end

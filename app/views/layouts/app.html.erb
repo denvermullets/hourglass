@@ -23,7 +23,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-dvh overflow-hidden" data-controller="notifications-channel notification-panel">
+  <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-dvh overflow-hidden" data-controller="notifications-channel notification-panel connection-monitor">
     <%# Notification panel overlay %>
     <div data-notification-panel-target="overlay"
          data-action="click->notification-panel#close"
@@ -45,6 +45,14 @@
       <% if Current.user&.unread_channels? %><span data-unread="true"></span><% end %>
     </span>
     <%= turbo_stream_from "user_#{Current.user.id}_unread_title" %>
+
+    <div class="hidden fixed top-0 inset-x-0 z-50 flex items-center justify-center gap-2 py-1.5 bg-danger-400/90 text-bunker-950 text-[10px] font-medium tracking-wide"
+         data-connection-monitor-target="banner">
+      <svg class="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+      </svg>
+      reconnecting...
+    </div>
 
     <div class="flex h-full sidebar-container">
       <%# Desktop icon rail — hidden on mobile %>
