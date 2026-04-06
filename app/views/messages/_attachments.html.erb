@@ -43,12 +43,16 @@
 
 <%# Video thumbnails %>
 <% videos.each do |video| %>
-  <div class="relative rounded-md overflow-hidden mt-2 max-w-[380px] bg-bunker-875 border border-bunker-825 cursor-pointer group/vid">
-    <video preload="metadata" class="w-full" style="max-height: 240px">
-      <source src="<%= rails_blob_path(video, disposition: :inline) %>" type="<%= video.content_type %>">
+  <% video_src = rails_blob_path(video, disposition: :inline) %>
+  <div class="relative rounded-md overflow-hidden mt-2 max-w-[380px] bg-bunker-875 border border-bunker-825 cursor-pointer group/vid"
+       data-controller="lightbox"
+       data-lightbox-src-value="<%= video_src %>"
+       data-lightbox-type-value="video"
+       data-action="click->lightbox#open">
+    <video preload="metadata" class="w-full pointer-events-none" style="max-height: 240px">
+      <source src="<%= video_src %>" type="<%= video.content_type %>">
     </video>
-    <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-80 group-hover/vid:opacity-100 transition-opacity duration-150"
-         onclick="this.parentElement.querySelector('video').play(); this.style.display='none'">
+    <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-80 group-hover/vid:opacity-100 transition-opacity duration-150">
       <div class="w-12 h-12 rounded-full bg-bunker-950/80 border border-bunker-825 flex items-center justify-center">
         <div class="w-0 h-0 border-solid ml-1" style="border-width: 9px 0 9px 16px; border-color: transparent transparent transparent var(--color-bunker-400)"></div>
       </div>
