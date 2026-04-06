@@ -189,6 +189,7 @@ export default class extends Controller {
 
     this._ready = true
     this._updatePlaceholder()
+    this.editorTarget.focus()
   }
 
   disconnect() {
