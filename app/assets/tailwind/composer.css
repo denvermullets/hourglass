@@ -153,6 +153,37 @@
   color: var(--color-jordy-blue-300);
 }
 
+/* Blockquote / quote reply — editor */
+[data-message-composer-target="editor"] blockquote {
+  border-left: 3px solid var(--color-bunker-700);
+  padding: 4px 0 4px 12px;
+  margin: 4px 0;
+  color: var(--color-bunker-400);
+  font-style: italic;
+}
+
+/* Blockquote / quote reply — rendered message */
+.message-content blockquote {
+  position: relative;
+  border: 1px solid var(--color-bunker-825);
+  border-radius: 8px;
+  padding: 10px 14px 10px 32px;
+  margin: 6px 0;
+  background: var(--color-bunker-925);
+  color: var(--color-bunker-300);
+  font-style: normal;
+}
+.message-content blockquote::before {
+  content: "\201C";
+  position: absolute;
+  left: 10px;
+  top: 4px;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color-bunker-600);
+  font-family: Georgia, serif;
+}
+
 /* Rouge syntax highlighting tokens */
 .highlight .c,
 .highlight .cm,
