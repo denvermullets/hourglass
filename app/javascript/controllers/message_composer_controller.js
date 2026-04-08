@@ -187,7 +187,12 @@ export default class extends Controller {
       )
     )
 
+    // Listen for quote events
+    this._handleQuote = (e) => this._insertQuote(e.detail)
+    document.addEventListener("message:quote", this._handleQuote)
+
     this._ready = true
+    this._submitting = false
     this._updatePlaceholder()
     this.editorTarget.focus()
   }
@@ -197,6 +202,10 @@ export default class extends Controller {
     this._removeLanguagePicker()
     this._hideMentionDropdown()
 
+    if (this._handleQuote) {
+      document.removeEventListener("message:quote", this._handleQuote)
+      this._handleQuote = null
+    }
     if (this._autoLinkCleanup) {
       this._autoLinkCleanup()
       this._autoLinkCleanup = null
@@ -274,6 +283,12 @@ export default class extends Controller {
 
   // Reset after successful form submission
   reset() {
+    this._setSubmitDisabled(false)
+    if (this._submitTimeout) {
+      clearTimeout(this._submitTimeout)
+      this._submitTimeout = null
+    }
+
     if (!this._ready) return
 
     this.editor.update(() => {
@@ -329,6 +344,12 @@ export default class extends Controller {
       return
     }
     this.hiddenInputTarget.value = html
+    this._setSubmitDisabled(true)
+
+    // Safety: re-enable after 3s in case turbo:submit-end doesn't fire
+    this._submitTimeout = setTimeout(() => {
+      this._setSubmitDisabled(false)
+    }, 3000)
   }
 
   _submitMessage() {
@@ -476,6 +497,46 @@ export default class extends Controller {
       const selected = value === (current || "") ? " selected" : ""
       return `<option value="${value}"${selected}>${label}</option>`
     }).join("")
+  }
+
+  _setSubmitDisabled(disabled) {
+    const btn = this.element.querySelector('input[type="submit"]')
+    if (btn) {
+      btn.disabled = disabled
+      btn.style.opacity = disabled ? "0.4" : ""
+    }
+  }
+
+  _insertQuote({ body }) {
+    if (!this._ready || !body) return
+
+    // Build a blockquote HTML string and parse it into Lexical nodes
+    // using the same DOM-to-Lexical approach used for editing pre-population
+    const escaped = body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    const quoteHtml = `<blockquote><p>${escaped}</p></blockquote><p></p>`
+
+    this.editor.update(() => {
+      const parser = new DOMParser()
+      const dom = parser.parseFromString(quoteHtml, "text/html")
+      const nodes = this.htmlModule.$generateNodesFromDOM(this.editor, dom)
+
+      const root = this.lexical.$getRoot()
+      const firstChild = root.getFirstChild()
+      const isEmpty = root.getChildrenSize() === 1 &&
+        firstChild?.getTextContent().trim() === ""
+
+      if (isEmpty) {
+        root.clear()
+      }
+
+      nodes.forEach(node => root.append(node))
+
+      // Place cursor in the trailing paragraph
+      const lastChild = root.getLastChild()
+      if (lastChild) lastChild.select()
+    })
+
+    this.editorTarget.focus()
   }
 
   _updatePlaceholder() {

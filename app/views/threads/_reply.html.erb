@@ -42,18 +42,26 @@
       <% end %>
 
       <%# Actions — below reply content %>
-      <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1 message-actions hidden"
-           data-author-only
+      <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
            data-long-press-target="actions">
+        <% quote_body = strip_tags(reply.body).truncate(500) %>
+        <button type="button"
+                onclick="document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))"
+                data-quote-body="<%= quote_body %>"
+                class="text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
+          quote
+        </button>
+
         <%= button_to "edit",
               edit_server_channel_message_path(server, channel, reply),
               method: :get,
-              class: "text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
+              class: "text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
+              data: { author_only: true } %>
         <%= button_to "delete",
               server_channel_message_path(server, channel, reply),
               method: :delete,
-              class: "text-[9px] text-bunker-700 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer",
-              data: { turbo_confirm: "Delete this reply?" } %>
+              class: "text-[9px] text-bunker-700 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
+              data: { turbo_confirm: "Delete this reply?", author_only: true } %>
       </div>
     </div>
   <% end %>
