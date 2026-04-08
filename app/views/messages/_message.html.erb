@@ -56,6 +56,15 @@
                 class: "text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 no-underline" %>
         <% end %>
 
+        <%# Quote — visible to all users %>
+        <% quote_body = strip_tags(message.body).truncate(500) %>
+        <button type="button"
+                onclick="document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))"
+                data-quote-body="<%= quote_body %>"
+                class="text-[9px] leading-none text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
+          quote
+        </button>
+
         <%# Edit/Delete — author only %>
         <div class="hidden items-center gap-2" data-author-only>
           <%= link_to "edit",
