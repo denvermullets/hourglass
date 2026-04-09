@@ -2,7 +2,7 @@
 <% reply_context = local_assigns.fetch(:context, :channel) %>
 <%= tag.div id: dom_id(reply), class: "group flex gap-3 #{ grouped ? '-mt-0.5' : 'py-2.5 border-b border-bunker-825' } last:border-b-0", data: { message_author_id: reply.user_id, message_user_id: reply.user_id, message_created_at: reply.created_at.iso8601, controller: "long-press" } do %>
   <% if reply.deleted? %>
-    <div class="flex-1 text-[11px] text-bunker-700 italic">
+    <div class="flex-1 text-[11px] text-bunker-600 italic">
       [message deleted]
     </div>
   <% else %>
@@ -15,7 +15,7 @@
         <% if reply.user.avatar.attached? %>
           <%= image_tag polymorphic_path(reply.user.avatar), alt: "", class: "w-full h-full object-cover" %>
         <% else %>
-          <span class="text-[9px] font-syne font-bold text-bunker-400 uppercase"><%= reply.user.username[0..1] %></span>
+          <span class="text-[9px] font-syne font-bold text-bunker-300 uppercase"><%= reply.user.username[0..1] %></span>
         <% end %>
       </div>
     <% end %>
@@ -25,16 +25,16 @@
         <%# Header %>
         <div class="flex items-baseline gap-2.5 mb-1">
           <span class="text-[12px] font-medium message-username" data-author-name><%= reply.user.username %></span>
-          <span class="text-[9px] text-bunker-600 tracking-[0.06em]"><%= format_timestamp(reply.created_at, style: :reply) %></span>
+          <span class="text-[9px] text-bunker-500 tracking-[0.06em]"><%= format_timestamp(reply.created_at, style: :reply) %></span>
           <% if reply.edited? %>
-            <span class="text-[9px] text-bunker-700">(edited)</span>
+            <span class="text-[9px] text-bunker-600">(edited)</span>
           <% end %>
         </div>
       <% end %>
 
       <%# Body %>
       <% if reply.body.present? %>
-        <div class="text-[12px] text-bunker-400 leading-[1.8] font-light message-content"><%= sanitize_message(reply.body) %></div>
+        <div class="text-[12px] text-bunker-300 leading-[1.8] font-light message-content"><%= sanitize_message(reply.body) %></div>
       <% end %>
 
       <%# Attachments %>
@@ -49,7 +49,7 @@
         <button type="button"
                 onclick="document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))"
                 data-quote-body="<%= quote_body %>"
-                class="text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
+                class="text-[9px] text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
           quote
         </button>
 
@@ -62,11 +62,11 @@
         <% end %>
         <%= button_to "edit", edit_url,
               method: :get,
-              class: "text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
+              class: "text-[9px] text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
               data: { author_only: true } %>
         <%= button_to "delete", delete_url,
               method: :delete,
-              class: "text-[9px] text-bunker-700 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
+              class: "text-[9px] text-bunker-600 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
               data: { turbo_confirm: "Delete this reply?", author_only: true } %>
       </div>
     </div>

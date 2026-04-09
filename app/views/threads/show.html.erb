@@ -21,12 +21,12 @@
 
       <div class="flex-1 min-w-0">
         <%# Breadcrumb %>
-        <div class="text-[8px] text-bunker-600 tracking-[0.12em] flex items-center gap-1.5">
+        <div class="text-[8px] text-bunker-500 tracking-[0.12em] flex items-center gap-1.5">
           <span># <%= @channel.name %></span>
           <span class="text-bunker-775">/</span>
           <span class="text-granny-smith-apple-600">thread · <%= format_timestamp(@parent_message.created_at, style: :thread_breadcrumb) %></span>
         </div>
-        <div class="font-syne text-[16px] font-bold text-bunker-100 mt-0.5 tracking-tight">thread</div>
+        <div class="font-syne text-[16px] font-bold text-bunker-050 mt-0.5 tracking-tight">thread</div>
         <%= render "threads/header_meta", parent_message: @parent_message, participant_count: @participant_count %>
       </div>
     </div>
@@ -70,7 +70,7 @@
         <div class="text-sm text-granny-smith-apple-300 tracking-[0.06em]">// drop to attach</div>
         <div class="text-[10px] text-granny-smith-apple-600 leading-relaxed text-center">
           files will be attached to your next message in<br>
-          <span class="text-bunker-400">thread</span>
+          <span class="text-bunker-300">thread</span>
         </div>
         <div class="flex gap-1.5 flex-wrap justify-center mt-1">
           <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">jpg &middot; png &middot; gif &middot; webp</span>

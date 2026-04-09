@@ -20,13 +20,13 @@
 %>
 
 <div class="max-w-2xl" data-controller="theme-preview">
-  <h2 class="font-syne text-[15px] font-bold text-bunker-100 tracking-tight mb-1">Appearance</h2>
-  <p class="text-[10px] text-bunker-600 mb-6">Customize the look and feel</p>
+  <h2 class="font-syne text-[15px] font-bold text-bunker-050 tracking-tight mb-1">Appearance</h2>
+  <p class="text-[10px] text-bunker-500 mb-6">Customize the look and feel</p>
 
   <%= form_with url: update_appearance_settings_path, method: :patch, class: "space-y-8", data: { turbo_frame: "_top" } do |f| %>
     <%# Theme switcher %>
     <div>
-      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">theme</h3>
+      <h3 class="text-[11px] text-bunker-300 font-medium mb-3">theme</h3>
       <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <% themes.each do |theme| %>
           <label class="relative cursor-pointer group">
@@ -39,7 +39,7 @@
               border-bunker-775 hover:border-bunker-600
               bg-bunker-875">
               <div class="flex items-center justify-between mb-3">
-                <span class="text-[11px] text-bunker-400 font-medium"><%= theme[:name] %></span>
+                <span class="text-[11px] text-bunker-300 font-medium"><%= theme[:name] %></span>
                 <div class="w-5 h-5 rounded-full border-2 border-bunker-600"></div>
               </div>
               <div class="flex gap-2">
@@ -72,7 +72,7 @@
       size_font = { 'xs' => '11px', 'sm' => '13px', 'md' => '14px', 'lg' => '16px' }
     %>
     <div>
-      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">text size — desktop</h3>
+      <h3 class="text-[11px] text-bunker-300 font-medium mb-3">text size — desktop</h3>
       <div class="grid grid-cols-4 gap-2">
         <% text_sizes.each do |value, label, desc| %>
           <label class="relative cursor-pointer">
@@ -84,8 +84,8 @@
               peer-checked:border-granny-smith-apple-600
               border-bunker-775 hover:border-bunker-600
               bg-bunker-875">
-              <span class="font-syne font-bold text-bunker-100" style="font-size: <%= size_font[value] %>"><%= label %></span>
-              <div class="text-[8px] text-bunker-600 mt-1"><%= desc %></div>
+              <span class="font-syne font-bold text-bunker-050" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <div class="text-[8px] text-bunker-500 mt-1"><%= desc %></div>
             </div>
           </label>
         <% end %>
@@ -93,7 +93,7 @@
     </div>
 
     <div>
-      <h3 class="text-[11px] text-bunker-400 font-medium mb-3 mt-4">text size — mobile</h3>
+      <h3 class="text-[11px] text-bunker-300 font-medium mb-3 mt-4">text size — mobile</h3>
       <div class="grid grid-cols-4 gap-2">
         <% text_sizes.each do |value, label, desc| %>
           <label class="relative cursor-pointer">
@@ -105,8 +105,8 @@
               peer-checked:border-granny-smith-apple-600
               border-bunker-775 hover:border-bunker-600
               bg-bunker-875">
-              <span class="font-syne font-bold text-bunker-100" style="font-size: <%= size_font[value] %>"><%= label %></span>
-              <div class="text-[8px] text-bunker-600 mt-1"><%= desc %></div>
+              <span class="font-syne font-bold text-bunker-050" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <div class="text-[8px] text-bunker-500 mt-1"><%= desc %></div>
             </div>
           </label>
         <% end %>
@@ -117,14 +117,14 @@
 
     <%# Timestamp format %>
     <div>
-      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">timestamp format</h3>
+      <h3 class="text-[11px] text-bunker-300 font-medium mb-3">timestamp format</h3>
       <div class="space-y-2">
         <% [["relative", "Relative (2 hours ago)"], ["absolute", "Absolute (Apr 1, 2026 12:30 PM)"]].each do |value, label| %>
           <label class="flex items-center gap-3 py-1.5 cursor-pointer">
             <%= f.radio_button :timestamp_format, value,
               checked: user.timestamp_format == value,
               class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
-            <span class="text-[11px] text-bunker-400"><%= label %></span>
+            <span class="text-[11px] text-bunker-300"><%= label %></span>
           </label>
         <% end %>
       </div>
@@ -134,9 +134,9 @@
 
     <%# Timezone %>
     <div>
-      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">timezone</h3>
+      <h3 class="text-[11px] text-bunker-300 font-medium mb-3">timezone</h3>
       <select name="timezone"
-        class="w-full rounded-lg border-2 border-bunker-775 bg-bunker-875 text-[11px] text-bunker-400 px-3 py-2.5 cursor-pointer focus:border-granny-smith-apple-600 focus:outline-none transition-colors duration-150 appearance-none">
+        class="w-full rounded-lg border-2 border-bunker-775 bg-bunker-875 text-[11px] text-bunker-300 px-3 py-2.5 cursor-pointer focus:border-granny-smith-apple-600 focus:outline-none transition-colors duration-150 appearance-none">
         <% ActiveSupport::TimeZone.all.each do |tz| %>
           <%= tag.option "(UTC#{tz.formatted_offset}) #{tz.name}", value: tz.name, selected: tz.name == user.timezone %>
         <% end %>
@@ -147,14 +147,14 @@
 
     <%# Sidebar position %>
     <div>
-      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">sidebar position</h3>
+      <h3 class="text-[11px] text-bunker-300 font-medium mb-3">sidebar position</h3>
       <div class="space-y-2">
         <% [["left", "Left (default)"], ["right", "Right"]].each do |value, label| %>
           <label class="flex items-center gap-3 py-1.5 cursor-pointer">
             <%= f.radio_button :sidebar_position, value,
               checked: user.sidebar_position == value,
               class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
-            <span class="text-[11px] text-bunker-400"><%= label %></span>
+            <span class="text-[11px] text-bunker-300"><%= label %></span>
           </label>
         <% end %>
       </div>

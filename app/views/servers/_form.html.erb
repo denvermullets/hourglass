@@ -1,14 +1,14 @@
 <%# Shared form for server create/edit %>
 <%= form_with model: server, class: "flex flex-col gap-3.5" do |form| %>
   <div class="flex flex-col gap-1">
-    <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+    <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
       <span class="text-granny-smith-apple-600">$</span> name <span class="text-danger-400 opacity-80">*</span>
     </label>
     <%= form.text_field :name,
       required: true,
       autofocus: true,
       placeholder: "my server",
-      class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border text-bunker-400 #{server.errors[:name].any? ? 'border-danger-800' : 'border-bunker-775'}",
+      class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border text-bunker-300 #{server.errors[:name].any? ? 'border-danger-800' : 'border-bunker-775'}",
       onfocus: "this.classList.remove('border-bunker-775','border-danger-800');this.classList.add('border-granny-smith-apple-600')",
       onblur: "this.classList.remove('border-granny-smith-apple-600');this.classList.add('border-bunker-775')" %>
     <% if server.errors[:name].any? %>
@@ -17,25 +17,25 @@
   </div>
 
   <div class="flex flex-col gap-1">
-    <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+    <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
       <span class="text-granny-smith-apple-600">$</span> description
     </label>
     <%= form.text_area :description,
       rows: 3,
       placeholder: "what's this server about?",
       maxlength: 1000,
-      class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7 bg-bunker-875 border border-bunker-775 text-bunker-400",
+      class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7 bg-bunker-875 border border-bunker-775 text-bunker-300",
       onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
       onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
   </div>
 
   <div class="flex flex-col gap-1">
-    <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+    <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
       <span class="text-granny-smith-apple-600">$</span> icon
     </label>
     <%= form.file_field :icon,
       accept: "image/*",
-      class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] bg-bunker-875 border border-bunker-775 text-bunker-600 file:bg-bunker-825 file:border-0 file:rounded file:px-2 file:py-1 file:text-[10px] file:text-bunker-400 file:mr-3 file:cursor-pointer" %>
+      class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] bg-bunker-875 border border-bunker-775 text-bunker-500 file:bg-bunker-825 file:border-0 file:rounded file:px-2 file:py-1 file:text-[10px] file:text-bunker-300 file:mr-3 file:cursor-pointer" %>
   </div>
 
   <%= form.submit server.persisted? ? "// save changes \u2192" : "// create server \u2192",

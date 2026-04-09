@@ -1,7 +1,7 @@
 <%= form_with model: Category.new, url: server_categories_path(server), class: "flex items-center gap-2" do |f| %>
   <%= f.text_field :name,
     placeholder: "// new category",
-    class: "flex-1 min-w-0 bg-bunker-950 border border-bunker-900 rounded px-2 py-1 text-[10px] text-bunker-300 placeholder:text-bunker-700 focus:outline-none focus:border-bunker-600 font-dm-mono" %>
+    class: "flex-1 min-w-0 bg-bunker-950 border border-bunker-900 rounded px-2 py-1 text-[10px] text-bunker-200 placeholder:text-bunker-600 focus:outline-none focus:border-bunker-600 font-dm-mono" %>
   <%= f.submit "+",
-    class: "w-6 h-6 rounded flex items-center justify-center border border-bunker-775 text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 transition-colors duration-100 cursor-pointer bg-transparent text-[12px]" %>
+    class: "w-6 h-6 rounded flex items-center justify-center border border-bunker-775 text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 transition-colors duration-100 cursor-pointer bg-transparent text-[12px]" %>
 <% end %>

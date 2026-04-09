@@ -20,10 +20,10 @@
       <div data-message-composer-target="editor"
            contenteditable="true"
            data-action="paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
-           class="min-h-[36px] max-h-[200px] overflow-y-auto px-3 py-2.5 text-base sm:text-[11px] text-bunker-100 font-dm-mono focus:outline-none">
+           class="min-h-[36px] max-h-[200px] overflow-y-auto px-3 py-2.5 text-base sm:text-[11px] text-bunker-050 font-dm-mono focus:outline-none">
       </div>
       <div data-message-composer-target="placeholder"
-           class="absolute top-0 left-0 px-3 py-2.5 text-base sm:text-[11px] text-bunker-700 font-dm-mono pointer-events-none">
+           class="absolute top-0 left-0 px-3 py-2.5 text-base sm:text-[11px] text-bunker-600 font-dm-mono pointer-events-none">
         // message #<%= channel.name %>
       </div>
     </div>
@@ -50,12 +50,12 @@
         </svg>
       </button>
 
-      <span class="ml-auto text-[9px] text-bunker-700 font-dm-mono hidden sm:inline">
+      <span class="ml-auto text-[9px] text-bunker-600 font-dm-mono hidden sm:inline">
         <span class="text-granny-smith-apple-600">md</span> supported
       </span>
 
       <%= f.submit "send",
-            class: "sm:ml-2 ml-auto bg-transparent text-[9px] text-bunker-600 hover:text-granny-smith-apple-300 transition-colors duration-150 cursor-pointer font-dm-mono uppercase tracking-[0.1em] border-0 p-0" %>
+            class: "sm:ml-2 ml-auto bg-transparent text-[9px] text-bunker-500 hover:text-granny-smith-apple-300 transition-colors duration-150 cursor-pointer font-dm-mono uppercase tracking-[0.1em] border-0 p-0" %>
     </div>
   </div>
 <% end %>
