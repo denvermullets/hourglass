@@ -1,18 +1,18 @@
 <div class="max-w-[480px]">
   <div class="rounded border border-bunker-825 bg-bunker-925 p-4" data-controller="clipboard">
-    <div class="text-[8px] tracking-[0.16em] text-bunker-600 mb-2">
+    <div class="text-[8px] tracking-[0.16em] text-bunker-500 mb-2">
       <span class="text-granny-smith-apple-600">$</span> invite_code
     </div>
     <div class="flex items-center gap-2">
-      <div class="flex-1 rounded px-3 py-2.5 bg-bunker-875 border border-bunker-775 text-[11px] text-bunker-400 font-dm-mono select-all"
+      <div class="flex-1 rounded px-3 py-2.5 bg-bunker-875 border border-bunker-775 text-[11px] text-bunker-300 font-dm-mono select-all"
            data-clipboard-target="source">
         <%= server.invite_code %>
       </div>
-      <button class="px-3 py-2.5 rounded text-[10px] border border-bunker-775 text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 cursor-pointer transition-colors duration-150 bg-transparent"
+      <button class="px-3 py-2.5 rounded text-[10px] border border-bunker-775 text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 cursor-pointer transition-colors duration-150 bg-transparent"
               data-action="click->clipboard#copy">
         copy
       </button>
     </div>
-    <div class="text-[9px] text-bunker-600 mt-2">share this code so others can join your server.</div>
+    <div class="text-[9px] text-bunker-500 mt-2">share this code so others can join your server.</div>
   </div>
 </div>

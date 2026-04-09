@@ -2,41 +2,41 @@
   <%= render "shared/auth_flash" %>
   <%= form_with model: server, url: server_path(server), method: :patch, class: "flex flex-col gap-3.5" do |form| %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
         <span class="text-granny-smith-apple-600">$</span> name <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.text_field :name,
         required: true,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
         onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
         onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
     </div>
 
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
         <span class="text-granny-smith-apple-600">$</span> description
       </label>
       <%= form.text_area :description,
         rows: 3,
         maxlength: 1000,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7 bg-bunker-875 border border-bunker-775 text-bunker-400",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7 bg-bunker-875 border border-bunker-775 text-bunker-300",
         onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
         onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
     </div>
 
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
         <span class="text-granny-smith-apple-600">$</span> icon
       </label>
       <% if server.icon.attached? %>
         <div class="flex items-center gap-3 mb-2">
           <%= image_tag server.icon, alt: "#{server.name} icon", class: "w-12 h-12 rounded-lg object-cover border border-bunker-775" %>
-          <span class="text-[9px] text-bunker-600">current icon</span>
+          <span class="text-[9px] text-bunker-500">current icon</span>
         </div>
       <% end %>
       <%= form.file_field :icon,
         accept: "image/*",
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] bg-bunker-875 border border-bunker-775 text-bunker-600 file:bg-bunker-825 file:border-0 file:rounded file:px-2 file:py-1 file:text-[10px] file:text-bunker-400 file:mr-3 file:cursor-pointer" %>
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] bg-bunker-875 border border-bunker-775 text-bunker-500 file:bg-bunker-825 file:border-0 file:rounded file:px-2 file:py-1 file:text-[10px] file:text-bunker-300 file:mr-3 file:cursor-pointer" %>
     </div>
 
     <%= form.submit "// save changes \u2192",

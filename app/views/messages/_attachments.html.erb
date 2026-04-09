@@ -26,13 +26,13 @@
         </div>
         <% if is_last_visible %>
           <div class="absolute inset-0 bg-bunker-950/75 flex items-center justify-center">
-            <span class="font-syne text-xl font-bold text-bunker-100">+<%= images.size - 4 %></span>
+            <span class="font-syne text-xl font-bold text-bunker-050">+<%= images.size - 4 %></span>
           </div>
         <% end %>
       </div>
     <% end %>
   </div>
-  <div class="text-[9px] text-bunker-700 mt-1">
+  <div class="text-[9px] text-bunker-600 mt-1">
     <% if images.size == 1 %>
       <%= images.first.filename %> &middot; <%= human_file_size(images.first.byte_size) %>
     <% else %>
@@ -58,8 +58,8 @@
       </div>
     </div>
     <div class="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-bunker-950/90 to-transparent flex items-center justify-between">
-      <span class="text-[9px] text-bunker-400"><%= video.filename %></span>
-      <span class="text-[9px] text-bunker-700"><%= human_file_size(video.byte_size) %></span>
+      <span class="text-[9px] text-bunker-300"><%= video.filename %></span>
+      <span class="text-[9px] text-bunker-600"><%= human_file_size(video.byte_size) %></span>
     </div>
   </div>
 <% end %>
@@ -72,8 +72,8 @@
       <%= file_extension_label(file) %>
     </div>
     <div class="flex-1 min-w-0">
-      <div class="text-[11px] text-bunker-100 truncate"><%= file.filename %></div>
-      <div class="text-[9px] text-bunker-700 mt-0.5"><%= file_extension_label(file) %> &middot; <%= human_file_size(file.byte_size) %></div>
+      <div class="text-[11px] text-bunker-050 truncate"><%= file.filename %></div>
+      <div class="text-[9px] text-bunker-600 mt-0.5"><%= file_extension_label(file) %> &middot; <%= human_file_size(file.byte_size) %></div>
     </div>
     <div class="text-[9px] text-granny-smith-apple-600 flex-shrink-0">&darr;</div>
   <% end %>

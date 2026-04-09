@@ -1,7 +1,7 @@
 <div class="max-w-md space-y-8">
   <div>
-    <h2 class="font-syne text-[15px] font-bold text-bunker-100 tracking-tight mb-1">Notifications</h2>
-    <p class="text-[10px] text-bunker-600 mb-6">Choose what you get notified about</p>
+    <h2 class="font-syne text-[15px] font-bold text-bunker-050 tracking-tight mb-1">Notifications</h2>
+    <p class="text-[10px] text-bunker-500 mb-6">Choose what you get notified about</p>
   </div>
 
   <%= form_with url: update_notifications_settings_path, method: :patch, class: "space-y-6", data: { turbo_frame: "_top" } do |f| %>
@@ -14,7 +14,7 @@
         ["reactions", "Reactions to your messages"]
       ].each do |key, label| %>
         <label class="flex items-center justify-between py-2 cursor-pointer group">
-          <span class="text-[11px] text-bunker-400"><%= label %></span>
+          <span class="text-[11px] text-bunker-300"><%= label %></span>
           <div class="relative">
             <%= f.check_box key,
               { checked: user.notification_setting(key), class: "sr-only peer" },
@@ -30,7 +30,7 @@
 
     <%# Email digest %>
     <div>
-      <h3 class="text-[11px] text-bunker-400 font-medium mb-3">email digest frequency</h3>
+      <h3 class="text-[11px] text-bunker-300 font-medium mb-3">email digest frequency</h3>
       <div class="space-y-2">
         <% [
           ["never", "Never"],
@@ -42,7 +42,7 @@
             <%= f.radio_button :email_digest, value,
               checked: user.notification_setting("email_digest") == value,
               class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
-            <span class="text-[11px] text-bunker-400"><%= label %></span>
+            <span class="text-[11px] text-bunker-300"><%= label %></span>
           </label>
         <% end %>
       </div>
@@ -53,13 +53,13 @@
     <%# Per-channel mute %>
     <% if channel_memberships.any? %>
       <div>
-        <h3 class="text-[11px] text-bunker-400 font-medium mb-3">channel notifications</h3>
+        <h3 class="text-[11px] text-bunker-300 font-medium mb-3">channel notifications</h3>
         <div class="space-y-2 max-h-60 overflow-y-auto">
           <% channel_memberships.each do |cm| %>
             <label class="flex items-center justify-between py-1.5 cursor-pointer">
-              <span class="text-[11px] text-bunker-400">
-                <span class="text-bunker-600">#</span> <%= cm.channel.name %>
-                <span class="text-[9px] text-bunker-700">(<%= cm.channel.server.name %>)</span>
+              <span class="text-[11px] text-bunker-300">
+                <span class="text-bunker-500">#</span> <%= cm.channel.name %>
+                <span class="text-[9px] text-bunker-600">(<%= cm.channel.server.name %>)</span>
               </span>
               <div class="relative">
                 <input type="checkbox" name="muted_channel_ids[]" value="<%= cm.channel_id %>"

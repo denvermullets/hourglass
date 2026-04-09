@@ -4,18 +4,18 @@
 
 <div>
   <div class="mb-6">
-    <div class="text-[8px] tracking-[0.2em] flex items-center gap-1 text-bunker-600">
-      <span class="text-bunker-700">//</span> account
+    <div class="text-[8px] tracking-[0.2em] flex items-center gap-1 text-bunker-500">
+      <span class="text-bunker-600">//</span> account
     </div>
-    <h1 class="font-syne text-[22px] font-bold tracking-tight mt-1 text-bunker-100">reset password</h1>
-    <p class="text-[10px] mt-1 leading-relaxed text-bunker-600">enter your new password below.</p>
+    <h1 class="font-syne text-[22px] font-bold tracking-tight mt-1 text-bunker-050">reset password</h1>
+    <p class="text-[10px] mt-1 leading-relaxed text-bunker-500">enter your new password below.</p>
   </div>
 
   <%= render "shared/auth_flash" %>
 
   <%= form_with url: password_path(params[:token]), method: :put, class: "flex flex-col gap-3.5" do |form| %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
         <span class="text-granny-smith-apple-600">$</span> new_password <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.password_field :password,
@@ -23,13 +23,13 @@
         autocomplete: "new-password",
         placeholder: "min 8 characters",
         maxlength: 72,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
         onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
         onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
     </div>
 
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-600">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
         <span class="text-granny-smith-apple-600">$</span> confirm_password <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.password_field :password_confirmation,
@@ -37,7 +37,7 @@
         autocomplete: "new-password",
         placeholder: "repeat new password",
         maxlength: 72,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-400",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
         onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
         onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
     </div>

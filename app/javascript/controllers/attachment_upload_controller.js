@@ -219,7 +219,7 @@ export default class extends Controller {
     this.previewStripTarget.insertAdjacentHTML("beforeend", `
       <button type="button" data-action="click->attachment-upload#openFilePicker" data-add-more
               class="flex items-center justify-center w-[52px] h-[52px] border border-dashed border-bunker-825 rounded cursor-pointer flex-shrink-0 hover:border-bunker-700 transition-colors duration-150">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-bunker-700" stroke-width="1.5" stroke-linecap="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-bunker-600" stroke-width="1.5" stroke-linecap="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
@@ -236,7 +236,7 @@ export default class extends Controller {
       <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative overflow-hidden border border-bunker-825 bg-bunker-875" data-pending-file>
         <img src="${entry.previewUrl}" class="w-full h-full object-cover" />
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"
-                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-400 cursor-pointer leading-none hover:text-bunker-100">&times;</button>
+                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-050">&times;</button>
         ${progressBar}
       </div>
     `
@@ -252,9 +252,9 @@ export default class extends Controller {
     return `
       <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative border border-bunker-825 bg-bunker-875 flex flex-col items-center justify-center gap-0.5" data-pending-file>
         <span class="text-[8px] font-medium ${extColor}">${ext}</span>
-        <span class="text-[6px] text-bunker-700 text-center px-0.5 truncate max-w-full">${entry.file.name}</span>
+        <span class="text-[6px] text-bunker-600 text-center px-0.5 truncate max-w-full">${entry.file.name}</span>
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"
-                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-400 cursor-pointer leading-none hover:text-bunker-100">&times;</button>
+                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-050">&times;</button>
         ${progressBar}
       </div>
     `
@@ -265,7 +265,7 @@ export default class extends Controller {
     if (type.startsWith("audio/")) return "text-purple-400"
     if (type === "application/zip") return "text-yellow-400"
     if (type.includes("word") || type.includes("document")) return "text-jordy-blue-400"
-    return "text-bunker-400"
+    return "text-bunker-300"
   }
 
   _updateProgress(entry) {

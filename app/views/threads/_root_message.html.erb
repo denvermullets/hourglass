@@ -11,12 +11,12 @@
         <% end %>
       </div>
       <span class="text-[12px] font-medium text-granny-smith-apple-300"><%= message.user.username %></span>
-      <span class="text-[9px] text-bunker-600 ml-auto"><%= format_timestamp(message.created_at, style: :thread_root) %></span>
+      <span class="text-[9px] text-bunker-500 ml-auto"><%= format_timestamp(message.created_at, style: :thread_root) %></span>
     </div>
 
     <%# Body %>
     <% if message.body.present? %>
-      <div class="text-[12px] text-bunker-400 leading-[1.8] font-light message-content">
+      <div class="text-[12px] text-bunker-300 leading-[1.8] font-light message-content">
         <%= sanitize_message(message.body) %>
       </div>
     <% end %>

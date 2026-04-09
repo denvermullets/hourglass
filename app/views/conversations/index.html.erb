@@ -11,13 +11,13 @@
     <%# Mobile header %>
     <div class="px-4 py-3 border-b border-bunker-825 flex items-center justify-between">
       <div>
-        <h1 class="font-syne text-[17px] font-bold text-bunker-100 tracking-tight">direct messages</h1>
-        <div class="text-[8px] tracking-[0.16em] mt-0.5 text-bunker-600">
+        <h1 class="font-syne text-[17px] font-bold text-bunker-050 tracking-tight">direct messages</h1>
+        <div class="text-[8px] tracking-[0.16em] mt-0.5 text-bunker-500">
           <span class="text-granny-smith-apple-600">//</span> <%= @conversations.size %> conversation<%= @conversations.size == 1 ? "" : "s" %>
         </div>
       </div>
       <%= link_to new_conversation_path,
-        class: "w-7 h-7 rounded flex items-center justify-center border border-bunker-775 text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 transition-colors duration-100 no-underline" do %>
+        class: "w-7 h-7 rounded flex items-center justify-center border border-bunker-775 text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 transition-colors duration-100 no-underline" do %>
         <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -32,8 +32,8 @@
         <% end %>
       <% else %>
         <div class="text-center py-8">
-          <div class="text-[11px] text-bunker-600 mb-1">no conversations yet</div>
-          <div class="text-[9px] text-bunker-700">start a new message to get going.</div>
+          <div class="text-[11px] text-bunker-500 mb-1">no conversations yet</div>
+          <div class="text-[9px] text-bunker-600">start a new message to get going.</div>
         </div>
       <% end %>
     </div>
@@ -42,8 +42,8 @@
   <%# Desktop welcome %>
   <div class="hidden lg:flex flex-1 items-center justify-center">
     <div class="text-center">
-      <div class="font-syne text-[15px] font-bold text-bunker-300 mb-1">direct messages</div>
-      <div class="text-[10px] text-bunker-600">select a conversation or start a new one.</div>
+      <div class="font-syne text-[15px] font-bold text-bunker-200 mb-1">direct messages</div>
+      <div class="text-[10px] text-bunker-500">select a conversation or start a new one.</div>
     </div>
   </div>
 </div>
