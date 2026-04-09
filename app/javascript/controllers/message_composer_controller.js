@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { MentionNode, $createMentionNode } from "lexical/mention_node"
+import { ChannelNode, $createChannelNode } from "lexical/channel_node"
 
 export default class extends Controller {
   static targets = ["editor", "hiddenInput", "placeholder"]
@@ -82,7 +83,8 @@ export default class extends Controller {
         AutoLinkNode,
         ListNode,
         ListItemNode,
-        MentionNode
+        MentionNode,
+        ChannelNode
       ],
       onError: (error) => console.error("Lexical error:", error)
     })
@@ -112,10 +114,15 @@ export default class extends Controller {
       this.editor.registerCommand(
         KEY_ENTER_COMMAND,
         (event) => {
-          // If mention dropdown is open, select the active mention
+          // If mention or channel dropdown is open, select the active item
           if (this._mentionDropdown) {
             event?.preventDefault()
             this._selectActiveMention()
+            return true
+          }
+          if (this._channelDropdown) {
+            event?.preventDefault()
+            this._selectActiveChannel()
             return true
           }
           if (event && !event.shiftKey) {
@@ -138,6 +145,7 @@ export default class extends Controller {
             this._updateToolbarState(selection)
             this._updateLanguagePicker(selection)
             this._checkMentionTrigger(selection)
+            this._checkChannelTrigger(selection)
           }
           this._updatePlaceholder()
         })
@@ -148,14 +156,14 @@ export default class extends Controller {
     this._cleanups.push(
       this.editor.registerCommand(
         lexical.KEY_ARROW_DOWN_COMMAND,
-        (event) => this._handleMentionNav(event, "down"),
+        (event) => this._handleMentionNav(event, "down") || this._handleChannelNav(event, "down"),
         lexical.COMMAND_PRIORITY_HIGH
       )
     )
     this._cleanups.push(
       this.editor.registerCommand(
         lexical.KEY_ARROW_UP_COMMAND,
-        (event) => this._handleMentionNav(event, "up"),
+        (event) => this._handleMentionNav(event, "up") || this._handleChannelNav(event, "up"),
         lexical.COMMAND_PRIORITY_HIGH
       )
     )
@@ -166,6 +174,11 @@ export default class extends Controller {
           if (this._mentionDropdown) {
             event.preventDefault()
             this._selectActiveMention()
+            return true
+          }
+          if (this._channelDropdown) {
+            event.preventDefault()
+            this._selectActiveChannel()
             return true
           }
           return false
@@ -179,6 +192,10 @@ export default class extends Controller {
         () => {
           if (this._mentionDropdown) {
             this._hideMentionDropdown()
+            return true
+          }
+          if (this._channelDropdown) {
+            this._hideChannelDropdown()
             return true
           }
           return false
@@ -201,6 +218,7 @@ export default class extends Controller {
     this.isDisconnecting = true
     this._removeLanguagePicker()
     this._hideMentionDropdown()
+    this._hideChannelDropdown()
 
     if (this._handleQuote) {
       document.removeEventListener("message:quote", this._handleQuote)
@@ -746,6 +764,195 @@ export default class extends Controller {
 
     try {
       const url = `/servers/${this.serverIdValue}/members?q=${encodeURIComponent(query)}`
+      const response = await fetch(url, {
+        headers: { "Accept": "application/json" }
+      })
+
+      if (!response.ok) return []
+      return await response.json()
+    } catch {
+      return []
+    }
+  }
+
+  // --- #Channel autocomplete ---
+
+  _checkChannelTrigger(selection) {
+    if (!selection.isCollapsed()) {
+      this._hideChannelDropdown()
+      return
+    }
+
+    const anchor = selection.anchor
+    const node = anchor.getNode()
+    const textContent = node.getTextContent()
+    const offset = anchor.offset
+
+    const textBeforeCursor = textContent.substring(0, offset)
+    const match = textBeforeCursor.match(/#([a-z0-9-]{0,30})$/)
+
+    if (!match) {
+      this._hideChannelDropdown()
+      return
+    }
+
+    const query = match[1]
+    this._channelQuery = query
+    this._channelNodeKey = node.getKey()
+    this._channelOffset = offset
+
+    const nativeSelection = window.getSelection()
+    if (!nativeSelection || nativeSelection.rangeCount === 0) return
+
+    const range = nativeSelection.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
+
+    this._fetchChannels(query).then(channels => {
+      if (channels.length > 0) {
+        this._showChannelDropdown(channels, rect)
+      } else {
+        this._hideChannelDropdown()
+      }
+    })
+  }
+
+  _showChannelDropdown(channels, anchorRect) {
+    this._hideChannelDropdown()
+
+    const dropdown = document.createElement("div")
+    dropdown.className = "mention-autocomplete"
+    this._channelActiveIndex = 0
+
+    channels.forEach((channel, index) => {
+      const item = document.createElement("div")
+      item.className = `mention-autocomplete-item${index === 0 ? " active" : ""}`
+      item.dataset.channelId = channel.id
+      item.dataset.channelName = channel.name
+
+      const nameSpan = document.createElement("span")
+      nameSpan.textContent = `#${channel.name}`
+      item.appendChild(nameSpan)
+
+      if (channel.description) {
+        const descSpan = document.createElement("span")
+        descSpan.className = "display-name"
+        descSpan.textContent = channel.description
+        item.appendChild(descSpan)
+      }
+
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        this._insertChannel(channel.id, channel.name, channel.server_id)
+      })
+
+      item.addEventListener("mouseenter", () => {
+        this._setChannelActiveIndex(index)
+      })
+
+      dropdown.appendChild(item)
+    })
+
+    this._channelItems = channels
+
+    dropdown.style.position = "fixed"
+    dropdown.style.left = `${anchorRect.left}px`
+    dropdown.style.bottom = `${window.innerHeight - anchorRect.top + 4}px`
+
+    document.body.appendChild(dropdown)
+    this._channelDropdown = dropdown
+  }
+
+  _hideChannelDropdown() {
+    if (this._channelDropdown) {
+      this._channelDropdown.remove()
+      this._channelDropdown = null
+      this._channelItems = null
+      this._channelActiveIndex = 0
+    }
+  }
+
+  _handleChannelNav(event, direction) {
+    if (!this._channelDropdown || !this._channelItems) return false
+
+    event.preventDefault()
+    const items = this._channelDropdown.querySelectorAll(".mention-autocomplete-item")
+    const max = items.length - 1
+
+    if (direction === "down") {
+      this._setChannelActiveIndex(Math.min(this._channelActiveIndex + 1, max))
+    } else {
+      this._setChannelActiveIndex(Math.max(this._channelActiveIndex - 1, 0))
+    }
+
+    return true
+  }
+
+  _setChannelActiveIndex(index) {
+    const items = this._channelDropdown?.querySelectorAll(".mention-autocomplete-item")
+    if (!items) return
+
+    items.forEach((item, i) => {
+      item.classList.toggle("active", i === index)
+    })
+    this._channelActiveIndex = index
+    items[index]?.scrollIntoView({ block: "nearest" })
+  }
+
+  _selectActiveChannel() {
+    if (!this._channelItems || this._channelActiveIndex == null) return
+    const channel = this._channelItems[this._channelActiveIndex]
+    if (channel) {
+      this._insertChannel(channel.id, channel.name, channel.server_id)
+    }
+  }
+
+  _insertChannel(channelId, channelName, serverId) {
+    this._hideChannelDropdown()
+
+    const nodeKey = this._channelNodeKey
+    const offset = this._channelOffset
+    const query = this._channelQuery
+
+    this.editor.update(() => {
+      const node = this.lexical.$getNodeByKey(nodeKey)
+      if (!node) return
+
+      const textContent = node.getTextContent()
+      const triggerStart = offset - query.length - 1 // -1 for the #
+
+      const channelNode = $createChannelNode(channelId, channelName, serverId)
+      const spaceNode = this.lexical.$createTextNode(" ")
+
+      if (triggerStart === 0 && offset === textContent.length) {
+        node.replace(channelNode)
+        channelNode.insertAfter(spaceNode)
+      } else if (triggerStart === 0) {
+        const remaining = node.getTextContent().substring(offset)
+        node.setTextContent(remaining)
+        node.insertBefore(channelNode)
+        channelNode.insertAfter(spaceNode)
+      } else {
+        const before = textContent.substring(0, triggerStart)
+        const after = textContent.substring(offset)
+        node.setTextContent(before)
+        node.insertAfter(spaceNode)
+        node.insertAfter(channelNode)
+        if (after) {
+          const afterNode = this.lexical.$createTextNode(after)
+          spaceNode.insertAfter(afterNode)
+        }
+      }
+
+      spaceNode.select()
+    })
+  }
+
+  async _fetchChannels(query) {
+    if (!this.hasServerIdValue || !this.serverIdValue) return []
+
+    try {
+      const url = `/servers/${this.serverIdValue}/channels/search?q=${encodeURIComponent(query)}`
       const response = await fetch(url, {
         headers: { "Accept": "application/json" }
       })
