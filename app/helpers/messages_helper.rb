@@ -11,7 +11,8 @@ module MessagesHelper
     )
 
     highlighted = Messages::HighlightService.call(html: sanitized)
-    Mentions::HighlightService.call(html: highlighted, current_user: Current.user)
+    with_mentions = Mentions::HighlightService.call(html: highlighted, current_user: Current.user)
+    Channels::HighlightService.call(html: with_mentions)
   end
 
   def grouped_with_previous?(message, previous_message)

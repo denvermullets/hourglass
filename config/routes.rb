@@ -57,6 +57,9 @@ Rails.application.routes.draw do
       end
     end
     resources :channels, only: %i[show create update destroy] do
+      collection do
+        get :search
+      end
       member do
         get :mark_read
         patch :reorder

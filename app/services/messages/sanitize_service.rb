@@ -1,6 +1,7 @@
 class Messages::SanitizeService < Service
   ALLOWED_TAGS = %w[p br strong em s code pre a span ul ol li blockquote].freeze
-  ALLOWED_ATTRIBUTES = %w[href rel target class data-language data-highlight-language data-mention-username].freeze
+  ALLOWED_ATTRIBUTES = %w[href rel target class data-language data-highlight-language data-mention-username
+                          data-channel-id data-channel-name data-server-id].freeze
 
   def initialize(html:)
     @html = html
