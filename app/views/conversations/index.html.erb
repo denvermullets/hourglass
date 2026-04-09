@@ -25,7 +25,7 @@
     </div>
 
     <%# Mobile conversation list %>
-    <div class="flex-1 overflow-y-auto py-2">
+    <div id="conversation_list_mobile" class="flex-1 overflow-y-auto py-2">
       <% if @conversations.any? %>
         <% @conversations.each do |conversation| %>
           <%= render "conversations/sidebar_item", conversation: conversation, current_conversation: nil %>

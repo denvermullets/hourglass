@@ -167,13 +167,6 @@ class Conversations::CreateMessageService < Service
   end
 
   def broadcast_sidebar_update
-    @conversation.conversation_memberships.pluck(:user_id).each do |user_id|
-      Turbo::StreamsChannel.broadcast_replace_to(
-        "user_#{user_id}_conversations",
-        target: "conversation_sidebar_item_#{@conversation.id}",
-        partial: 'conversations/sidebar_item',
-        locals: { conversation: @conversation, current_user: User.find(user_id) }
-      )
-    end
+    Conversations::BroadcastSidebarService.call(conversation: @conversation)
   end
 end
