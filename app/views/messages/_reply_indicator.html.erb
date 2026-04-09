@@ -1,6 +1,8 @@
+<% reply_context = local_assigns.fetch(:context, :channel) %>
 <div id="reply_indicator_<%= message.id %>">
   <% if message.replies_count > 0 %>
-    <%= link_to server_channel_message_thread_path(message.channel.server, message.channel, message),
+    <% thread_path = reply_context == :conversation ? conversation_message_thread_path(message.conversation, message) : server_channel_message_thread_path(message.channel.server, message.channel, message) %>
+    <%= link_to thread_path,
       class: "inline-flex items-center gap-1.5 mt-1 text-[9px] text-jordy-blue-400 hover:text-jordy-blue-300 no-underline transition-colors duration-100" do %>
       <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>

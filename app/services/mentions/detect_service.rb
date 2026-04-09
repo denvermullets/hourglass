@@ -5,15 +5,12 @@ class Mentions::DetectService < Service
 
   def call
     return if @message.body.blank?
-    return if @message.channel.blank?
+    return if @message.channel.blank? && @message.conversation.blank?
 
     usernames = extract_usernames
     return if usernames.empty?
 
-    server = @message.channel.server
-    mentioned_users = server.users
-                            .where('LOWER(username) IN (?)', usernames.map(&:downcase))
-                            .where.not(id: @message.user_id)
+    mentioned_users = resolve_mentioned_users(usernames)
 
     mentioned_users.each do |user|
       Notifications::CreateService.call(
@@ -45,18 +42,34 @@ class Mentions::DetectService < Service
     usernames
   end
 
-  def notification_data
-    preview = ActionController::Base.helpers.strip_tags(@message.body).to_s.truncate(100)
+  def resolve_mentioned_users(usernames)
+    scope = if @message.conversation.present?
+              @message.conversation.members
+            else
+              @message.channel.server.users
+            end
 
-    data = {
-      'channel_name' => @message.channel.name,
-      'server_name' => @message.channel.server.name,
-      'server_id' => @message.channel.server_id,
-      'channel_id' => @message.channel_id,
-      'message_id' => @message.id,
-      'preview' => preview
-    }
+    scope.where('LOWER(username) IN (?)', usernames.map(&:downcase))
+         .where.not(id: @message.user_id)
+  end
+
+  def notification_data
+    data = @message.in_conversation? ? conversation_notification_data : channel_notification_data
     data['parent_message_id'] = @message.parent_message_id if @message.parent_message_id
     data
+  end
+
+  def conversation_notification_data
+    preview = ActionController::Base.helpers.strip_tags(@message.body).to_s.truncate(100)
+    { 'conversation_id' => @message.conversation_id,
+      'conversation_name' => @message.conversation.display_name(@message.user),
+      'message_id' => @message.id, 'preview' => preview }
+  end
+
+  def channel_notification_data
+    preview = ActionController::Base.helpers.strip_tags(@message.body).to_s.truncate(100)
+    { 'channel_name' => @message.channel.name, 'server_name' => @message.channel.server.name,
+      'server_id' => @message.channel.server_id, 'channel_id' => @message.channel_id,
+      'message_id' => @message.id, 'preview' => preview }
   end
 end

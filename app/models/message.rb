@@ -1,6 +1,7 @@
 class Message < ApplicationRecord
   belongs_to :user
   belongs_to :channel, optional: true
+  belongs_to :conversation, optional: true
   belongs_to :parent_message, class_name: 'Message', optional: true, counter_cache: :replies_count
   has_many :replies, class_name: 'Message', foreign_key: :parent_message_id, dependent: :nullify
   has_many :notifications, as: :notifiable, dependent: :destroy
@@ -13,6 +14,7 @@ class Message < ApplicationRecord
   validate :body_or_files_present
   validate :body_text_length
   validate :validate_file_limits
+  validate :channel_or_conversation_present
 
   scope :ordered, -> { order(created_at: :asc) }
   scope :not_deleted, -> { where(deleted_at: nil) }
@@ -39,6 +41,14 @@ class Message < ApplicationRecord
 
   def owned_by?(user)
     user_id == user.id
+  end
+
+  def messageable
+    channel || conversation
+  end
+
+  def in_conversation?
+    conversation_id.present?
   end
 
   def thread_participant_count
@@ -72,6 +82,13 @@ class Message < ApplicationRecord
     return unless stripped.length > 8000
 
     errors.add(:body, 'is too long (maximum is 8000 characters)')
+  end
+
+  def channel_or_conversation_present
+    return if channel_id.present? || conversation_id.present?
+    return if parent_message_id.present?
+
+    errors.add(:base, 'must belong to a channel or conversation')
   end
 
   def validate_file_limits

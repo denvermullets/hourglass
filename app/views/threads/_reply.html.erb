@@ -1,4 +1,5 @@
 <% grouped = local_assigns.fetch(:grouped, false) %>
+<% reply_context = local_assigns.fetch(:context, :channel) %>
 <%= tag.div id: dom_id(reply), class: "group flex gap-3 #{ grouped ? '-mt-0.5' : 'py-2.5 border-b border-bunker-825' } last:border-b-0", data: { message_author_id: reply.user_id, message_user_id: reply.user_id, message_created_at: reply.created_at.iso8601, controller: "long-press" } do %>
   <% if reply.deleted? %>
     <div class="flex-1 text-[11px] text-bunker-700 italic">
@@ -52,13 +53,18 @@
           quote
         </button>
 
-        <%= button_to "edit",
-              edit_server_channel_message_path(server, channel, reply),
+        <% if reply_context == :conversation %>
+          <% edit_url = edit_conversation_message_path(conversation, reply) %>
+          <% delete_url = conversation_message_path(conversation, reply) %>
+        <% else %>
+          <% edit_url = edit_server_channel_message_path(server, channel, reply) %>
+          <% delete_url = server_channel_message_path(server, channel, reply) %>
+        <% end %>
+        <%= button_to "edit", edit_url,
               method: :get,
               class: "text-[9px] text-bunker-700 hover:text-bunker-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
               data: { author_only: true } %>
-        <%= button_to "delete",
-              server_channel_message_path(server, channel, reply),
+        <%= button_to "delete", delete_url,
               method: :delete,
               class: "text-[9px] text-bunker-700 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
               data: { turbo_confirm: "Delete this reply?", author_only: true } %>

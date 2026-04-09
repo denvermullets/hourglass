@@ -26,6 +26,17 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :conversations, only: %i[index show create new] do
+    member do
+      get :mark_read
+    end
+    resources :messages, only: %i[index show create edit update destroy],
+                         controller: 'conversation_messages' do
+      resource :thread, only: [:show], controller: 'conversation_threads'
+    end
+  end
+  get 'conversations/users/search', to: 'conversations#user_search', as: :conversation_user_search
+
   resources :servers do
     member do
       get :members

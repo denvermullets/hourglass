@@ -1,0 +1,84 @@
+<div class="flex-1 flex flex-col lg:flex-row min-h-0">
+  <%# Collapsed sidebar — desktop only %>
+  <div class="hidden lg:flex">
+    <%= render "conversation_threads/collapsed_sidebar", conversations: @conversations, current_conversation: @conversation %>
+  </div>
+
+  <%# Thread content %>
+  <div class="flex-1 flex flex-col min-w-0 min-h-0 relative"
+       data-controller="dropzone"
+       data-dropzone-channel-name-value="<%= @conversation.display_name(Current.user) %>">
+    <%# Thread header %>
+    <div class="px-4 lg:px-7 py-3.5 border-b border-bunker-825 flex-shrink-0 flex items-center gap-3">
+      <%# Back button %>
+      <%= link_to conversation_path(@conversation),
+        class: "text-[10px] text-granny-smith-apple-600 no-underline flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 border border-bunker-825 rounded hover:border-granny-smith-apple-600 transition-colors duration-100" do %>
+        &larr; back
+      <% end %>
+
+      <div class="w-px h-[18px] bg-bunker-825 flex-shrink-0"></div>
+
+      <div class="flex-1 min-w-0">
+        <%# Breadcrumb %>
+        <div class="text-[8px] text-bunker-600 tracking-[0.12em] flex items-center gap-1.5">
+          <span><%= @conversation.display_name(Current.user) %></span>
+          <span class="text-bunker-775">/</span>
+          <span class="text-granny-smith-apple-600">thread · <%= format_timestamp(@parent_message.created_at, style: :thread_breadcrumb) %></span>
+        </div>
+        <div class="font-syne text-[16px] font-bold text-bunker-100 mt-0.5 tracking-tight">thread</div>
+        <%= render "threads/header_meta", parent_message: @parent_message, participant_count: @participant_count %>
+      </div>
+    </div>
+
+    <%# Thread body — scrollable area %>
+    <div class="flex-1 flex flex-col min-h-0 overflow-hidden"
+         data-controller="messages-scroll message-actions"
+         data-message-actions-current-user-value="<%= Current.user.id %>">
+
+      <%# Turbo Stream subscription %>
+      <%= turbo_stream_from "thread_#{@parent_message.id}" %>
+
+      <div class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
+        <%# Root message %>
+        <%= render "threads/root_message", message: @parent_message, channel: nil %>
+
+        <%# Connector %>
+        <%= render "threads/connector", parent_message: @parent_message %>
+
+        <%# Replies %>
+        <div id="thread_replies" class="px-4 lg:px-7 pb-4">
+          <% previous_reply = nil %>
+          <% @replies.each do |reply| %>
+            <%= render "threads/reply", reply: reply, conversation: @conversation, context: :conversation, grouped: grouped_with_previous?(reply, previous_reply) %>
+            <% previous_reply = reply %>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Thread composer %>
+      <div class="px-4 lg:px-7 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:pb-3 border-t border-bunker-825 flex-shrink-0 relative z-10 bg-bunker-950">
+        <%= render "conversation_threads/form", conversation: @conversation, parent_message: @parent_message %>
+      </div>
+    </div>
+
+    <%# Drag-and-drop overlay %>
+    <div data-dropzone-target="overlay"
+         class="hidden absolute inset-0 bg-bunker-950/85 z-10 flex items-center justify-center">
+      <div class="border-2 border-dashed border-granny-smith-apple-600 rounded-lg p-12 flex flex-col items-center gap-3.5 bg-granny-smith-apple-925">
+        <div class="font-syne text-4xl font-extrabold text-granny-smith-apple-300 leading-none">&darr;</div>
+        <div class="text-sm text-granny-smith-apple-300 tracking-[0.06em]">// drop to attach</div>
+        <div class="text-[10px] text-granny-smith-apple-600 leading-relaxed text-center">
+          files will be attached to your next message in<br>
+          <span class="text-bunker-400">thread</span>
+        </div>
+        <div class="flex gap-1.5 flex-wrap justify-center mt-1">
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">jpg &middot; png &middot; gif &middot; webp</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">mp3 &middot; wav</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">mp4 &middot; mov</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">pdf &middot; zip &middot; any</span>
+        </div>
+        <div class="text-[9px] text-granny-smith-apple-600 mt-1">max 50mb per file</div>
+      </div>
+    </div>
+  </div>
+</div>

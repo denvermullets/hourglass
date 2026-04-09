@@ -1,0 +1,50 @@
+<div class="flex-1 flex flex-col lg:flex-row min-h-0 sidebar-container">
+  <%# Desktop sidebar %>
+  <div class="hidden lg:flex">
+    <%= render "conversations/conversation_sidebar", conversations: @conversations, current_conversation: nil %>
+  </div>
+
+  <%# New conversation form %>
+  <div class="flex-1 flex flex-col min-w-0 min-h-0">
+    <%# Header %>
+    <div class="px-4 lg:px-5 py-3 border-b border-bunker-825 flex-shrink-0">
+      <div class="flex items-center gap-2.5">
+        <%= link_to conversations_path, class: "lg:hidden text-[10px] text-granny-smith-apple-600 no-underline flex-shrink-0" do %>
+          &larr; back
+        <% end %>
+        <span class="font-syne text-[13px] lg:text-[15px] font-bold text-bunker-100">new message</span>
+      </div>
+    </div>
+
+    <%# Form %>
+    <div class="flex-1 overflow-y-auto px-4 lg:px-5 py-4">
+      <%= form_with url: conversations_path, method: :post, class: "max-w-md" do |f| %>
+        <%# User search %>
+        <div class="mb-4"
+             data-controller="user-search"
+             data-user-search-url-value="<%= conversation_user_search_path %>">
+          <label class="text-[10px] text-bunker-600 tracking-[0.1em] block mb-2">to:</label>
+          <div data-user-search-target="selectedUsers" class="flex flex-wrap gap-1.5 mb-2"></div>
+          <input type="text"
+                 placeholder="search users..."
+                 autocomplete="off"
+                 class="w-full bg-bunker-875 border border-bunker-825 rounded px-3 py-2 text-[11px] text-bunker-100 font-dm-mono focus:outline-none focus:border-bunker-600 transition-colors duration-150"
+                 data-action="input->user-search#search"
+                 data-user-search-target="input">
+          <div data-user-search-target="results" class="mt-1"></div>
+        </div>
+
+        <%# Group name (optional) %>
+        <div class="mb-4">
+          <label class="text-[10px] text-bunker-600 tracking-[0.1em] block mb-2">group name (optional):</label>
+          <%= f.text_field :name,
+            class: "w-full bg-bunker-875 border border-bunker-825 rounded px-3 py-2 text-[11px] text-bunker-100 font-dm-mono focus:outline-none focus:border-bunker-600 transition-colors duration-150",
+            placeholder: "leave blank for 1:1" %>
+        </div>
+
+        <%= f.submit "start conversation",
+          class: "bg-granny-smith-apple-600 text-bunker-950 text-[10px] font-dm-mono tracking-[0.1em] uppercase px-4 py-2 rounded cursor-pointer hover:bg-granny-smith-apple-500 transition-colors duration-150 border-0" %>
+      <% end %>
+    </div>
+  </div>
+</div>
