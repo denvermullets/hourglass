@@ -244,6 +244,22 @@
   font-weight: 500;
 }
 
+/* #channel in editor */
+.editor-channel {
+  color: var(--color-jordy-blue-400);
+  font-weight: 500;
+}
+
+/* #channel rendered in messages */
+.channel-mention {
+  color: var(--color-jordy-blue-400);
+  background: color-mix(in srgb, var(--color-jordy-blue-400) 12%, transparent);
+  padding: 0 3px;
+  border-radius: 3px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 /* Mention autocomplete dropdown */
 .mention-autocomplete {
   position: fixed;

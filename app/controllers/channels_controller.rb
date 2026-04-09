@@ -8,6 +8,18 @@ class ChannelsController < ApplicationController
   before_action :require_membership!
   before_action :require_moderator!, only: %i[create update destroy reorder archive unarchive move]
 
+  def search
+    channels = @server.channels
+                      .active
+                      .visible_to(Current.user)
+                      .where('channels.name ILIKE ?', "#{params[:q]}%")
+                      .limit(10)
+
+    render json: channels.map { |c|
+      { id: c.id, name: c.name, description: c.description.presence, server_id: c.server_id }
+    }
+  end
+
   def show
     if @channel.archived?
       redirect_to server_path(@server), alert: 'That channel is archived.'
