@@ -1,6 +1,6 @@
-class Messages::CreateService < Service
-  def initialize(channel:, user:, params:)
-    @channel = channel
+class Conversations::CreateMessageService < Service
+  def initialize(conversation:, user:, params:)
+    @conversation = conversation
     @user = user
     @params = params
   end
@@ -10,11 +10,10 @@ class Messages::CreateService < Service
       body: Messages::SanitizeService.call(html: @params[:body])
     )
 
-    message = @channel.messages.create!(
+    message = @conversation.messages.create!(
       sanitized_params.merge(user: @user, message_type: :regular)
     )
 
-    # Eager load attachments before broadcasting to avoid N+1
     message.files.load if message.files.attached?
 
     if message.parent_message_id.present?
@@ -36,16 +35,16 @@ class Messages::CreateService < Service
 
   def broadcast_append(message)
     fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)
-    previous = @channel.messages.root_messages.not_deleted
-                       .where.not(id: message.id)
-                       .order(created_at: :desc)
-                       .first
+    previous = @conversation.messages.root_messages.not_deleted
+                            .where.not(id: message.id)
+                            .order(created_at: :desc)
+                            .first
 
     Turbo::StreamsChannel.broadcast_append_to(
-      @channel,
+      @conversation,
       target: 'messages',
       partial: 'messages/message',
-      locals: { message: fresh_message, grouped: grouped_with?(message, previous), context: :channel }
+      locals: { message: fresh_message, grouped: grouped_with?(message, previous), context: :conversation }
     )
   end
 
@@ -61,8 +60,10 @@ class Messages::CreateService < Service
       target: 'thread_replies',
       partial: 'threads/reply',
       locals: {
-        reply: fresh_message, server: @channel.server,
-        channel: @channel, grouped: grouped_with?(message, previous)
+        reply: fresh_message,
+        conversation: @conversation,
+        context: :conversation,
+        grouped: grouped_with?(message, previous)
       }
     )
   end
@@ -78,15 +79,13 @@ class Messages::CreateService < Service
     parent_message.reload
     participant_count = parent_message.thread_participant_count
 
-    # Update reply indicator in main channel view
     Turbo::StreamsChannel.broadcast_replace_to(
-      @channel,
+      @conversation,
       target: "reply_indicator_#{parent_message.id}",
       partial: 'messages/reply_indicator',
-      locals: { message: parent_message }
+      locals: { message: parent_message, context: :conversation }
     )
 
-    # Update connector count in thread view
     Turbo::StreamsChannel.broadcast_replace_to(
       "thread_#{parent_message.id}",
       target: "thread_connector_#{parent_message.id}",
@@ -94,7 +93,6 @@ class Messages::CreateService < Service
       locals: { parent_message: parent_message }
     )
 
-    # Update header meta in thread view
     Turbo::StreamsChannel.broadcast_replace_to(
       "thread_#{parent_message.id}",
       target: "thread_header_meta_#{parent_message.id}",
@@ -108,24 +106,27 @@ class Messages::CreateService < Service
   end
 
   def notify_thread_reply(message)
-    Messages::NotifyThreadReplyService.call(message: message, channel: @channel, user: @user)
+    Messages::NotifyThreadReplyService.call(
+      message: message, channel: nil, user: @user, conversation: @conversation
+    )
   end
 
   def broadcast_unread_indicators(message)
-    @channel.update_column(:last_message_at, message.created_at)
+    @conversation.update_column(:last_message_at, message.created_at)
 
     notifiable_member_ids.each do |user_id|
       broadcast_unread_to_user(user_id)
     end
+
+    broadcast_sidebar_update
   end
 
   def notifiable_member_ids
-    scope = @channel.is_private? ? @channel.channel_memberships : @channel.server.memberships
-    scope.where.not(user_id: @user.id).pluck(:user_id)
+    @conversation.conversation_memberships.where.not(user_id: @user.id).pluck(:user_id)
   end
 
   def broadcast_unread_to_user(user_id)
-    target_id = "unread_indicator_channel_#{@channel.id}"
+    target_id = "unread_indicator_conversation_#{@conversation.id}"
 
     Turbo::StreamsChannel.broadcast_replace_to(
       "user_#{user_id}_unread",
@@ -150,18 +151,29 @@ class Messages::CreateService < Service
   end
 
   def broadcast_date_separator(message)
-    previous = @channel.messages.not_deleted
-                       .where('created_at < ?', message.created_at)
-                       .order(created_at: :desc)
-                       .pick(:created_at)
+    previous = @conversation.messages.not_deleted
+                            .where('created_at < ?', message.created_at)
+                            .order(created_at: :desc)
+                            .pick(:created_at)
 
     return if previous&.to_date == message.created_at.to_date
 
     Turbo::StreamsChannel.broadcast_append_to(
-      @channel,
+      @conversation,
       target: 'messages',
       partial: 'messages/date_separator',
       locals: { date: message.created_at }
     )
+  end
+
+  def broadcast_sidebar_update
+    @conversation.conversation_memberships.pluck(:user_id).each do |user_id|
+      Turbo::StreamsChannel.broadcast_replace_to(
+        "user_#{user_id}_conversations",
+        target: "conversation_sidebar_item_#{@conversation.id}",
+        partial: 'conversations/sidebar_item',
+        locals: { conversation: @conversation, current_user: User.find(user_id) }
+      )
+    end
   end
 end

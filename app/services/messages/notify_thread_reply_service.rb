@@ -1,7 +1,8 @@
 class Messages::NotifyThreadReplyService < Service
-  def initialize(message:, channel:, user:)
+  def initialize(message:, user:, channel: nil, conversation: nil)
     @message = message
     @channel = channel
+    @conversation = conversation
     @user = user
   end
 
@@ -31,11 +32,21 @@ class Messages::NotifyThreadReplyService < Service
   def notification_data
     preview = ActionController::Base.helpers.strip_tags(@message.body).to_s.truncate(100)
 
-    {
-      'channel_name' => @channel.name, 'server_name' => @channel.server.name,
-      'server_id' => @channel.server_id, 'channel_id' => @channel.id,
-      'message_id' => @message.id, 'parent_message_id' => @message.parent_message_id,
-      'preview' => preview
-    }
+    if @conversation
+      {
+        'conversation_id' => @conversation.id,
+        'conversation_name' => @conversation.display_name(@user),
+        'message_id' => @message.id,
+        'parent_message_id' => @message.parent_message_id,
+        'preview' => preview
+      }
+    else
+      {
+        'channel_name' => @channel.name, 'server_name' => @channel.server.name,
+        'server_id' => @channel.server_id, 'channel_id' => @channel.id,
+        'message_id' => @message.id, 'parent_message_id' => @message.parent_message_id,
+        'preview' => preview
+      }
+    end
   end
 end

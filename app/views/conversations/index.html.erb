@@ -1,0 +1,49 @@
+<%= turbo_stream_from "user_#{Current.user.id}_unread" %>
+<%= turbo_stream_from "user_#{Current.user.id}_conversations" %>
+<div class="flex-1 flex flex-col lg:flex-row sidebar-container">
+  <%# Desktop sidebar %>
+  <div class="hidden lg:flex">
+    <%= render "conversations/conversation_sidebar", conversations: @conversations, current_conversation: nil, unread_conversation_ids: @unread_conversation_ids %>
+  </div>
+
+  <%# Mobile conversation list %>
+  <div class="lg:hidden flex-1 flex flex-col">
+    <%# Mobile header %>
+    <div class="px-4 py-3 border-b border-bunker-825 flex items-center justify-between">
+      <div>
+        <h1 class="font-syne text-[17px] font-bold text-bunker-100 tracking-tight">direct messages</h1>
+        <div class="text-[8px] tracking-[0.16em] mt-0.5 text-bunker-600">
+          <span class="text-granny-smith-apple-600">//</span> <%= @conversations.size %> conversation<%= @conversations.size == 1 ? "" : "s" %>
+        </div>
+      </div>
+      <%= link_to new_conversation_path,
+        class: "w-7 h-7 rounded flex items-center justify-center border border-bunker-775 text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 transition-colors duration-100 no-underline" do %>
+        <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      <% end %>
+    </div>
+
+    <%# Mobile conversation list %>
+    <div class="flex-1 overflow-y-auto py-2">
+      <% if @conversations.any? %>
+        <% @conversations.each do |conversation| %>
+          <%= render "conversations/sidebar_item", conversation: conversation, current_conversation: nil %>
+        <% end %>
+      <% else %>
+        <div class="text-center py-8">
+          <div class="text-[11px] text-bunker-600 mb-1">no conversations yet</div>
+          <div class="text-[9px] text-bunker-700">start a new message to get going.</div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Desktop welcome %>
+  <div class="hidden lg:flex flex-1 items-center justify-center">
+    <div class="text-center">
+      <div class="font-syne text-[15px] font-bold text-bunker-300 mb-1">direct messages</div>
+      <div class="text-[10px] text-bunker-600">select a conversation or start a new one.</div>
+    </div>
+  </div>
+</div>

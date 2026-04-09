@@ -43,6 +43,8 @@ class Channels::MarkReadService < Service
   end
 
   def any_unread_channels?
+    return true if @user.unread_conversations?
+
     server = @channel.server
     channels = server.channels
                      .visible_to(@user)
