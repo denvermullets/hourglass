@@ -23,7 +23,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="font-dm-mono bg-bunker-950 text-bunker-400 h-dvh overflow-hidden" data-controller="notifications-channel notification-panel connection-monitor">
+  <body class="font-dm-mono bg-bunker-950 text-bunker-300 h-dvh overflow-hidden" data-controller="notifications-channel notification-panel connection-monitor">
     <%# Notification panel overlay %>
     <div data-notification-panel-target="overlay"
          data-action="click->notification-panel#close"
@@ -42,7 +42,7 @@
           data-controller="unread-title"
           data-unread-title-base-value="<%= content_for(:title) || 'Hourglass' %>"
           class="hidden">
-      <% if Current.user&.unread_channels? %><span data-unread="true"></span><% end %>
+      <% if Current.user&.unread_channels? || Current.user&.unread_conversations? %><span data-unread="true"></span><% end %>
     </span>
     <%= turbo_stream_from "user_#{Current.user.id}_unread_title" %>
 

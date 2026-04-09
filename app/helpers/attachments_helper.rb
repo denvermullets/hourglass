@@ -11,7 +11,7 @@ module AttachmentsHelper
     when 'doc', 'docx'
       'bg-jordy-blue-950 border-jordy-blue-900 text-jordy-blue-400'
     else
-      'bg-bunker-875 border-bunker-825 text-bunker-400'
+      'bg-bunker-875 border-bunker-825 text-bunker-300'
     end
   end
 

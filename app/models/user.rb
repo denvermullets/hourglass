@@ -25,6 +25,8 @@ class User < ApplicationRecord
   has_many :owned_servers, class_name: 'Server', foreign_key: :owner_id, dependent: :restrict_with_error
   has_many :channel_memberships, dependent: :destroy
   has_many :joined_channels, through: :channel_memberships, source: :channel
+  has_many :conversation_memberships, dependent: :destroy
+  has_many :conversations, through: :conversation_memberships
   has_many :messages, dependent: :nullify
   has_many :notifications, dependent: :destroy
   has_many :triggered_notifications, class_name: 'Notification', foreign_key: :actor_id, dependent: :nullify
@@ -79,6 +81,24 @@ class User < ApplicationRecord
 
   def unread_notification_count
     notifications.unread.count
+  end
+
+  def unread_conversations?
+    convos = Conversation.for_user(self)
+                         .where.not(last_message_at: nil)
+                         .pluck(:id, :last_message_at)
+
+    return false if convos.empty?
+
+    read_times = ConversationMembership
+                 .where(user: self, conversation_id: convos.map(&:first))
+                 .pluck(:conversation_id, :last_read_at)
+                 .to_h
+
+    convos.any? do |convo_id, last_msg_at|
+      last_read = read_times[convo_id]
+      last_read.nil? || last_msg_at > last_read
+    end
   end
 
   def unread_channels?

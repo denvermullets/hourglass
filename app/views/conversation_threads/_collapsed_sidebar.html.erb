@@ -1,0 +1,20 @@
+<%# Collapsed sidebar — icon strip only, 56px wide, dimmed %>
+<div class="w-14 flex-shrink-0 border-r border-bunker-825 flex flex-col bg-bunker-875 opacity-60">
+  <%# Header %>
+  <div class="py-3 border-b border-bunker-825 flex flex-col items-center gap-1.5">
+    <span class="font-syne text-[13px] font-extrabold text-bunker-050 tracking-tight">
+      dm<span class="text-granny-smith-apple-300">.</span>
+    </span>
+  </div>
+
+  <%# Conversation icons %>
+  <div class="flex-1 overflow-y-auto flex flex-col items-center py-2 gap-0.5">
+    <% conversations.each do |conversation| %>
+      <%= link_to conversation_path(conversation),
+        class: "w-9 h-7 rounded-md flex items-center justify-center text-[9px] no-underline #{conversation == current_conversation ? 'bg-bunker-825 border border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-775 hover:text-bunker-300'}",
+        data: { turbo_frame: "_top" } do %>
+        <%= conversation.display_name(Current.user).first(2).upcase %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -1,14 +1,14 @@
 <%# Desktop icon rail — 52px wide, matches .references/cold_wave_dm_view.html %>
 <nav class="w-[52px] flex-shrink-0 border-r border-bunker-825 flex flex-col items-center py-3 gap-1">
   <%# Logo %>
-  <%= link_to servers_path, class: "font-syne text-[15px] font-extrabold tracking-tight text-bunker-100 mb-2.5 no-underline" do %>
+  <%= link_to servers_path, class: "font-syne text-[15px] font-extrabold tracking-tight text-bunker-050 mb-2.5 no-underline" do %>
     h<span class="text-granny-smith-apple-300">.</span>
   <% end %>
 
   <%# Server icons %>
   <% Current.user.servers.each do |server| %>
     <%= link_to server_path(server),
-      class: "w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[9px] cursor-pointer transition-all duration-100 border #{current_server&.id == server.id ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'bg-transparent border-transparent text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400'}",
+      class: "w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[9px] cursor-pointer transition-all duration-100 border #{current_server&.id == server.id ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'bg-transparent border-transparent text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300'}",
       title: server.name do %>
       <% if server.icon.attached? %>
         <%= image_tag server.icon, alt: server.name, class: "w-full h-full rounded-lg object-cover" %>
@@ -20,7 +20,7 @@
 
   <%# Create server %>
   <%= link_to new_server_path,
-    class: "w-[34px] h-[34px] rounded-lg flex items-center justify-center text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 transition-all duration-100 border border-transparent",
+    class: "w-[34px] h-[34px] rounded-lg flex items-center justify-center text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 transition-all duration-100 border border-transparent",
     title: "Create server" do %>
     <svg class="w-[15px] h-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 5v14M5 12h14"/>
@@ -30,9 +30,18 @@
   <%# Separator %>
   <div class="w-6 h-px bg-bunker-825 my-1"></div>
 
+  <%# DMs %>
+  <%= link_to conversations_path,
+    class: "w-[34px] h-[34px] rounded-lg flex items-center justify-center transition-all duration-100 border #{controller_name == 'conversations' || controller_name == 'conversation_messages' || controller_name == 'conversation_threads' ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 border-transparent'}",
+    title: "Direct messages" do %>
+    <svg class="w-[15px] h-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  <% end %>
+
   <%# Notifications %>
   <button
-    class="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 transition-all duration-100 border border-transparent relative cursor-pointer"
+    class="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 transition-all duration-100 border border-transparent relative cursor-pointer"
     title="Notifications"
     data-action="click->notification-panel#toggle">
     <svg class="w-[15px] h-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -46,7 +55,7 @@
 
   <%# Settings %>
   <%= link_to settings_path,
-    class: "w-[34px] h-[34px] rounded-lg flex items-center justify-center transition-all duration-100 border #{controller_name == 'settings' ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-600 hover:bg-bunker-875 hover:text-bunker-400 border-transparent'}",
+    class: "w-[34px] h-[34px] rounded-lg flex items-center justify-center transition-all duration-100 border #{controller_name == 'settings' ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 border-transparent'}",
     title: "Settings" do %>
     <svg class="w-[15px] h-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="3"/>
@@ -56,7 +65,7 @@
 
   <%# User avatar — pushed to bottom %>
   <div class="mt-auto relative">
-    <div class="w-7 h-7 rounded-md bg-bunker-875 border border-bunker-775 flex items-center justify-center text-[8px] text-bunker-600 cursor-pointer">
+    <div class="w-7 h-7 rounded-md bg-bunker-875 border border-bunker-775 flex items-center justify-center text-[8px] text-bunker-500 cursor-pointer">
       <%= Current.user.username[0, 2].upcase %>
     </div>
     <div class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-granny-smith-apple-600 border-2 border-bunker-950"></div>

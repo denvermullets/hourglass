@@ -26,8 +26,8 @@
 
     <%# Content %>
     <div class="flex-1 min-w-0">
-      <p class="text-[10px] text-bunker-300 leading-relaxed m-0">
-        <span class="font-bold text-bunker-200"><%= notification.actor.username %></span>
+      <p class="text-[10px] text-bunker-200 leading-relaxed m-0">
+        <span class="font-bold text-bunker-100"><%= notification.actor.username %></span>
         <% case notification.notification_type %>
         <% when "mention" %>
           mentioned you in <span class="text-jordy-blue-400">#<%= data["channel_name"] %></span>
@@ -45,10 +45,10 @@
       </p>
 
       <% if data["preview"].present? %>
-        <p class="text-[9px] text-bunker-600 mt-0.5 truncate m-0"><%= data["preview"] %></p>
+        <p class="text-[9px] text-bunker-500 mt-0.5 truncate m-0"><%= data["preview"] %></p>
       <% end %>
 
-      <time class="text-[8px] text-bunker-700 mt-0.5 block">
+      <time class="text-[8px] text-bunker-600 mt-0.5 block">
         <%= format_timestamp(notification.created_at, style: :notification) %>
       </time>
     </div>

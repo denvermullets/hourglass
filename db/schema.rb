@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_02_131952) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_08_233509) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,6 +82,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_131952) do
     t.index ["server_id", "category_id", "position"], name: "index_channels_on_server_id_and_category_id_and_position"
     t.index ["server_id", "name"], name: "index_channels_on_server_id_and_name", unique: true
     t.index ["server_id"], name: "index_channels_on_server_id"
+  end
+
+  create_table "conversation_memberships", force: :cascade do |t|
+    t.bigint "conversation_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_read_at"
+    t.boolean "muted", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["conversation_id"], name: "index_conversation_memberships_on_conversation_id"
+    t.index ["user_id", "conversation_id"], name: "index_conversation_memberships_on_user_id_and_conversation_id", unique: true
+    t.index ["user_id"], name: "index_conversation_memberships_on_user_id"
+  end
+
+  create_table "conversations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "is_group", default: false, null: false
+    t.datetime "last_message_at"
+    t.string "name"
+    t.datetime "updated_at", null: false
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -176,9 +196,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_131952) do
   add_foreign_key "channel_memberships", "users"
   add_foreign_key "channels", "categories"
   add_foreign_key "channels", "servers"
+  add_foreign_key "conversation_memberships", "conversations"
+  add_foreign_key "conversation_memberships", "users"
   add_foreign_key "memberships", "servers"
   add_foreign_key "memberships", "users"
   add_foreign_key "messages", "channels"
+  add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "messages", column: "parent_message_id"
   add_foreign_key "messages", "users"
   add_foreign_key "notifications", "users"

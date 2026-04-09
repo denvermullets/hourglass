@@ -29,20 +29,37 @@ class Messages::UpdateService < Service
   end
 
   def broadcast_update
-    if @message.parent_message_id.present?
-      Turbo::StreamsChannel.broadcast_replace_to(
-        "thread_#{@message.parent_message_id}",
-        target: @message,
-        partial: 'threads/reply',
-        locals: { reply: @message, server: @message.channel.server, channel: @message.channel }
-      )
+    @message.parent_message_id.present? ? broadcast_thread_update : broadcast_main_update
+  end
+
+  def broadcast_thread_update
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "thread_#{@message.parent_message_id}",
+      target: @message,
+      partial: 'threads/reply',
+      locals: thread_locals
+    )
+  end
+
+  def broadcast_main_update
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @message.messageable,
+      target: @message,
+      partial: 'messages/message',
+      locals: { message: @message, context: broadcast_context }
+    )
+  end
+
+  def thread_locals
+    base = { reply: @message, context: broadcast_context }
+    if @message.in_conversation?
+      base.merge(conversation: @message.conversation)
     else
-      Turbo::StreamsChannel.broadcast_replace_to(
-        @message.channel,
-        target: @message,
-        partial: 'messages/message',
-        locals: { message: @message }
-      )
+      base.merge(server: @message.channel.server, channel: @message.channel)
     end
+  end
+
+  def broadcast_context
+    @message.in_conversation? ? :conversation : :channel
   end
 end

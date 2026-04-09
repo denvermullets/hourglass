@@ -1,22 +1,26 @@
+<% edit_context = local_assigns.fetch(:context, :channel) %>
 <%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5" do %>
   <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bunker-825 flex items-center justify-center">
-    <span class="text-[11px] font-syne font-bold text-bunker-400 uppercase"><%= message.user.username[0] %></span>
+    <span class="text-[11px] font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
   </div>
 
   <div class="flex-1 min-w-0">
     <div class="flex items-baseline gap-2 mb-1">
-      <span class="font-syne text-[11px] font-bold text-bunker-100"><%= message.user.username %></span>
-      <span class="text-[9px] text-bunker-700">editing</span>
+      <span class="font-syne text-[11px] font-bold text-bunker-050"><%= message.user.username %></span>
+      <span class="text-[9px] text-bunker-600">editing</span>
     </div>
 
+    <% edit_url = edit_context == :conversation ? conversation_message_path(conversation, message) : server_channel_message_path(server, channel, message) %>
+    <% show_url = edit_context == :conversation ? conversation_message_path(conversation, message) : server_channel_message_path(server, channel, message) %>
+    <% server_id_val = edit_context == :conversation ? "" : server.id %>
     <%= form_with model: message,
-                  url: server_channel_message_path(server, channel, message),
+                  url: edit_url,
                   method: :patch,
                   data: {
                     controller: "message-composer attachment-upload",
                     action: "submit->message-composer#handleSubmit",
                     message_composer_content_value: message.body,
-                    message_composer_server_id_value: server.id
+                    message_composer_server_id_value: server_id_val
                   } do |f| %>
       <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
       <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
@@ -35,14 +39,14 @@
                                class: "w-full h-full object-cover" %>
                 <% else %>
                   <div class="w-full h-full flex flex-col items-center justify-center gap-0.5">
-                    <span class="text-[8px] font-medium text-bunker-400"><%= File.extname(file.filename.to_s).delete('.').upcase %></span>
-                    <span class="text-[6px] text-bunker-700 text-center px-0.5 truncate max-w-full"><%= file.filename %></span>
+                    <span class="text-[8px] font-medium text-bunker-300"><%= File.extname(file.filename.to_s).delete('.').upcase %></span>
+                    <span class="text-[6px] text-bunker-600 text-center px-0.5 truncate max-w-full"><%= file.filename %></span>
                   </div>
                 <% end %>
                 <button type="button"
                         data-action="click->attachment-upload#removeExistingFile"
                         data-file-id="<%= file.id %>"
-                        class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-400 cursor-pointer leading-none hover:text-bunker-100">&times;</button>
+                        class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-050">&times;</button>
               </div>
             <% end %>
           <% end %>
@@ -53,7 +57,7 @@
           <div data-message-composer-target="editor"
                contenteditable="true"
                data-action="paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
-               class="min-h-[60px] max-h-[400px] overflow-y-auto px-3 py-2.5 text-[11px] text-bunker-100 font-dm-mono focus:outline-none">
+               class="min-h-[60px] max-h-[400px] overflow-y-auto px-3 py-2.5 text-[11px] text-bunker-050 font-dm-mono focus:outline-none">
           </div>
         </div>
 
@@ -82,9 +86,8 @@
           <div class="ml-auto flex gap-2 items-center">
             <%= f.submit "save",
                   class: "text-[9px] text-granny-smith-apple-300 hover:text-granny-smith-apple-600 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer font-dm-mono" %>
-            <%= link_to "cancel",
-                  server_channel_message_path(server, channel, message),
-                  class: "text-[9px] text-bunker-600 hover:text-bunker-400 transition-colors duration-100 no-underline font-dm-mono",
+            <%= link_to "cancel", show_url,
+                  class: "text-[9px] text-bunker-500 hover:text-bunker-300 transition-colors duration-100 no-underline font-dm-mono",
                   data: { turbo_method: :get, turbo_prefetch: false } %>
           </div>
         </div>

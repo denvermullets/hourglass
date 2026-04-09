@@ -1,23 +1,23 @@
 <%# Mobile bottom navigation — matches .references/cold_wave_mobile.html %>
 <nav class="fixed bottom-0 left-0 right-0 border-t border-bunker-825 bg-bunker-950 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-50">
   <%# Servers %>
-  <%= link_to servers_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'servers' && action_name == 'index' ? 'text-granny-smith-apple-300' : 'text-bunker-600'}" do %>
+  <%= link_to servers_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'servers' && action_name == 'index' ? 'text-granny-smith-apple-300' : 'text-bunker-500'}" do %>
     <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 5h18M3 12h18M3 19h18"/>
     </svg>
     <span class="text-[7px] tracking-[0.08em]">servers</span>
   <% end %>
 
-  <%# DMs (placeholder) %>
-  <div class="flex flex-col items-center gap-0.5 px-2.5 text-bunker-600 cursor-pointer relative">
+  <%# DMs %>
+  <%= link_to conversations_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name.start_with?('conversation') ? 'text-granny-smith-apple-300' : 'text-bunker-500'}" do %>
     <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
     <span class="text-[7px] tracking-[0.08em]">dms</span>
-  </div>
+  <% end %>
 
   <%# Notifications %>
-  <button class="flex flex-col items-center gap-0.5 px-2.5 text-bunker-600 cursor-pointer relative bg-transparent border-0"
+  <button class="flex flex-col items-center gap-0.5 px-2.5 text-bunker-500 cursor-pointer relative bg-transparent border-0"
     data-action="click->notification-panel#toggle">
     <div class="relative">
       <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -34,7 +34,7 @@
   </button>
 
   <%# Profile / Settings %>
-  <%= link_to settings_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'settings' ? 'text-granny-smith-apple-300' : 'text-bunker-600'}" do %>
+  <%= link_to settings_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'settings' ? 'text-granny-smith-apple-300' : 'text-bunker-500'}" do %>
     <div class="w-[18px] h-[18px] rounded flex items-center justify-center text-[6px] bg-bunker-875 border border-bunker-775">
       <%= Current.user.username[0, 2].upcase %>
     </div>

@@ -45,7 +45,7 @@ class Messages::CreateService < Service
       @channel,
       target: 'messages',
       partial: 'messages/message',
-      locals: { message: fresh_message, grouped: grouped_with?(message, previous) }
+      locals: { message: fresh_message, grouped: grouped_with?(message, previous), context: :channel }
     )
   end
 

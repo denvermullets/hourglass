@@ -1,0 +1,41 @@
+<%# Individual conversation link in sidebar %>
+<% current_user = Current.user %>
+<% active = local_assigns.key?(:current_conversation) && current_conversation&.id == conversation.id %>
+<% unread_ids = local_assigns.fetch(:unread_conversation_ids, nil) %>
+<% is_unread = unread_ids&.include?(conversation.id) && !active %>
+<%= tag.div id: "conversation_sidebar_item_#{conversation.id}" do %>
+  <%= link_to conversation_path(conversation),
+    class: "flex items-center gap-2.5 mx-1.5 px-2 py-1.5 rounded text-[11px] transition-colors duration-100 no-underline relative #{active ? 'bg-bunker-875 text-bunker-050' : is_unread ? 'text-bunker-100 font-bold hover:bg-bunker-900' : 'text-bunker-400 hover:bg-bunker-900 hover:text-bunker-200'}" do %>
+    <% if active %>
+      <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-r bg-granny-smith-apple-300"></span>
+    <% end %>
+
+    <%# Avatar(s) %>
+    <% if conversation.one_on_one? %>
+      <% other = conversation.other_user(current_user) %>
+      <div class="flex-shrink-0 w-6 h-6 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
+        <% if other&.avatar&.attached? %>
+          <%= image_tag polymorphic_path(other.avatar), alt: "", class: "w-full h-full object-cover" %>
+        <% else %>
+          <span class="text-[8px] font-syne font-bold text-bunker-300 uppercase"><%= other&.username&.first || "?" %></span>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex-shrink-0 w-6 h-6 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center">
+        <svg class="w-3 h-3 text-bunker-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+    <% end %>
+
+    <span class="truncate flex-1"><%= conversation.display_name(current_user) %></span>
+    <span id="unread_indicator_conversation_<%= conversation.id %>" class="flex-shrink-0 ml-auto flex items-center">
+      <% if is_unread %>
+        <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-400 block"></span>
+      <% end %>
+    </span>
+  <% end %>
+<% end %>

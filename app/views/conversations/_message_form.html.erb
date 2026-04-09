@@ -1,0 +1,61 @@
+<%= form_with scope: :message, url: conversation_messages_path(conversation),
+             id: "message_form",
+             data: {
+               controller: "message-composer attachment-upload",
+               action: "submit->message-composer#handleSubmit turbo:submit-end->message-composer#reset turbo:submit-end->attachment-upload#reset",
+               message_composer_placeholder_value: "// message #{conversation.display_name(Current.user)}",
+               message_composer_server_id_value: ""
+             } do |f| %>
+  <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
+  <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
+
+  <div class="bg-bunker-950 border border-bunker-900 rounded-lg overflow-clip focus-within:border-bunker-600 transition-colors duration-150">
+    <%# Attachment preview strip %>
+    <div data-attachment-upload-target="previewStrip"
+         class="hidden border-b border-bunker-900 px-3 py-2 flex gap-2 items-center overflow-x-auto scrollbar-none">
+    </div>
+
+    <%# Lexical editor area %>
+    <div class="relative">
+      <div data-message-composer-target="editor"
+           contenteditable="true"
+           data-action="paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
+           class="min-h-[36px] max-h-[200px] overflow-y-auto px-3 py-2.5 text-base sm:text-[11px] text-bunker-050 font-dm-mono focus:outline-none">
+      </div>
+      <div data-message-composer-target="placeholder"
+           class="absolute top-0 left-0 px-3 py-2.5 text-base sm:text-[11px] text-bunker-600 font-dm-mono pointer-events-none">
+        // message <%= conversation.display_name(Current.user) %>
+      </div>
+    </div>
+
+    <%# Toolbar footer %>
+    <div class="flex items-center gap-1 px-2 py-1.5 border-t border-bunker-900">
+      <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#bold" data-format="bold"
+              class="toolbar-btn" title="Bold (Ctrl+B)"><strong>B</strong></button>
+      <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#italic" data-format="italic"
+              class="toolbar-btn" title="Italic (Ctrl+I)"><em>I</em></button>
+      <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#strikethrough" data-format="strikethrough"
+              class="toolbar-btn" title="Strikethrough"><s>S</s></button>
+      <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#code" data-format="code"
+              class="toolbar-btn" title="Inline Code">&lt;/&gt;</button>
+      <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#codeBlock"
+              class="toolbar-btn" title="Code Block">{}</button>
+
+      <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->attachment-upload#openFilePicker"
+              class="toolbar-btn" title="Attach file">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+      </button>
+
+      <span class="ml-auto text-[9px] text-bunker-600 font-dm-mono hidden sm:inline">
+        <span class="text-granny-smith-apple-600">md</span> supported
+      </span>
+
+      <%= f.submit "send",
+            class: "sm:ml-2 ml-auto bg-transparent text-[9px] text-bunker-500 hover:text-granny-smith-apple-300 transition-colors duration-150 cursor-pointer font-dm-mono uppercase tracking-[0.1em] border-0 p-0" %>
+    </div>
+  </div>
+<% end %>
