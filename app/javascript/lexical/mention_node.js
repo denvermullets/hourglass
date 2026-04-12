@@ -42,6 +42,23 @@ export class MentionNode extends TextNode {
     return $createMentionNode(json.username)
   }
 
+  static importDOM() {
+    return {
+      span: (domNode) => {
+        if (domNode.classList.contains("editor-mention") && domNode.dataset.mentionUsername) {
+          return {
+            conversion: (element) => {
+              const username = element.dataset.mentionUsername
+              return { node: $createMentionNode(username) }
+            },
+            priority: 1
+          }
+        }
+        return null
+      }
+    }
+  }
+
   isTextEntity() {
     return true
   }

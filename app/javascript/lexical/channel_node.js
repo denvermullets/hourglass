@@ -52,6 +52,25 @@ export class ChannelNode extends TextNode {
     return $createChannelNode(json.channelId, json.channelName, json.serverId)
   }
 
+  static importDOM() {
+    return {
+      span: (domNode) => {
+        if (domNode.classList.contains("editor-channel") && domNode.dataset.channelId) {
+          return {
+            conversion: (element) => {
+              const channelId = element.dataset.channelId
+              const channelName = element.dataset.channelName
+              const serverId = element.dataset.serverId
+              return { node: $createChannelNode(channelId, channelName, serverId) }
+            },
+            priority: 1
+          }
+        }
+        return null
+      }
+    }
+  }
+
   isTextEntity() {
     return true
   }

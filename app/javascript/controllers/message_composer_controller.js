@@ -3,7 +3,7 @@ import { MentionNode, $createMentionNode } from "lexical/mention_node"
 import { ChannelNode, $createChannelNode } from "lexical/channel_node"
 
 export default class extends Controller {
-  static targets = ["editor", "hiddenInput", "placeholder"]
+  static targets = ["editor", "hiddenInput", "placeholder", "resizeBtn"]
   static values = { placeholder: String, content: String, serverId: String }
 
   async connect() {
@@ -43,7 +43,9 @@ export default class extends Controller {
     } = lexical
 
     const { registerRichText, HeadingNode, QuoteNode } = richText
-    const { registerMarkdownShortcuts, TRANSFORMERS } = markdown
+    const { TRANSFORMERS, $convertFromMarkdownString } = markdown
+    this._TRANSFORMERS = TRANSFORMERS
+    this._$convertFromMarkdownString = $convertFromMarkdownString
     const { CodeNode, CodeHighlightNode, $createCodeNode, $isCodeNode, registerCodeHighlighting } = code
     const { LinkNode, AutoLinkNode, $createAutoLinkNode, $isAutoLinkNode, $isLinkNode } = link
     const { ListNode, ListItemNode } = list
@@ -89,9 +91,14 @@ export default class extends Controller {
       onError: (error) => console.error("Lexical error:", error)
     })
 
+    this._editorNodes = [
+      HeadingNode, QuoteNode, CodeNode, CodeHighlightNode,
+      LinkNode, AutoLinkNode, ListNode, ListItemNode,
+      MentionNode, ChannelNode
+    ]
+
     this.editor.setRootElement(this.editorTarget)
     registerRichText(this.editor)
-    registerMarkdownShortcuts(this.editor, TRANSFORMERS)
     registerCodeHighlighting(this.editor)
     this._registerAutoLink(lexical)
 
@@ -299,6 +306,49 @@ export default class extends Controller {
     })
   }
 
+  // Editor resize actions
+  resizeDefault(event) {
+    event.preventDefault()
+    this._applyEditorSize("default")
+  }
+
+  resizeHalf(event) {
+    event.preventDefault()
+    this._applyEditorSize("half")
+  }
+
+  resizeFull(event) {
+    event.preventDefault()
+    this._applyEditorSize("full")
+  }
+
+  _applyEditorSize(size) {
+    const editor = this.editorTarget
+
+    if (size === "default") {
+      editor.style.maxHeight = "200px"
+      editor.style.minHeight = "36px"
+    } else if (size === "half") {
+      editor.style.maxHeight = "50vh"
+      editor.style.minHeight = "50vh"
+    } else if (size === "full") {
+      // Find the message input wrapper (the fixed-bottom bar containing the form)
+      // and the channel header above the message area, then fill the space between
+      const messageArea = this.element.closest(".flex-1.flex.flex-col.min-h-0.overflow-hidden")
+      const areaHeight = messageArea ? messageArea.clientHeight : window.innerHeight - 100
+      // Subtract the form's own chrome: toolbar (~34px), padding (~24px), border
+      const height = `${Math.max(200, areaHeight - 60)}px`
+      editor.style.maxHeight = height
+      editor.style.minHeight = height
+    }
+
+    this.resizeBtnTargets.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.size === size)
+    })
+
+    this.editorTarget.focus()
+  }
+
   // Reset after successful form submission
   reset() {
     this._setSubmitDisabled(false)
@@ -315,6 +365,7 @@ export default class extends Controller {
       root.append(this.lexical.$createParagraphNode())
     })
 
+    this._applyEditorSize("default")
     this.editorTarget.focus()
   }
 
@@ -380,24 +431,54 @@ export default class extends Controller {
   }
 
   _serializeToHtml() {
+    // Check for raw markdown and convert using a temp editor to get clean HTML,
+    // without mutating the main editor state.
+    let plainText = ""
+    this.editor.getEditorState().read(() => {
+      plainText = this.lexical.$getRoot().getTextContent()
+    })
+
+    if (plainText && this._looksLikeMarkdown(plainText)) {
+      const normalized = plainText
+        .replace(/\n\n/g, "\n")
+        // Flatten nested blockquotes (>> or > > >) to single >
+        .replace(/^(?:>\s*){2,}/gm, "> ")
+      const tempEditor = this.lexical.createEditor({
+        namespace: "MarkdownTemp",
+        nodes: this._editorNodes
+      })
+      const tempEl = document.createElement("div")
+      tempEditor.setRootElement(tempEl)
+      tempEditor.update(() => {
+        this._$convertFromMarkdownString(normalized, this._TRANSFORMERS)
+      }, { discrete: true })
+
+      let html = ""
+      tempEditor.getEditorState().read(() => {
+        html = this.htmlModule.$generateHtmlFromNodes(tempEditor)
+      })
+      tempEditor.setRootElement(null)
+      return this._cleanHtml(html)
+    }
+
     let html = ""
     this.editor.getEditorState().read(() => {
       html = this.htmlModule.$generateHtmlFromNodes(this.editor)
     })
-    // Clean up Lexical's verbose code block output — it wraps every token
-    // in <span style="white-space: pre-wrap;"> which bloats storage.
-    // Extract plain text and keep just the <pre> with a language attr.
+    return this._cleanHtml(html)
+  }
+
+  _cleanHtml(html) {
+    // Clean up Lexical's verbose code block output
     html = html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_match, attrs, inner) => {
       const plain = inner
         .replace(/<br\s*\/?>/g, "\n")
         .replace(/<[^>]*>/g, "")
       return `<pre${attrs}>${plain}</pre>`
     })
-
-    // Strip leading/trailing empty paragraphs (whitespace-only lines)
+    // Strip leading/trailing empty paragraphs
     html = html.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
     html = html.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
-
     return html
   }
 
@@ -946,6 +1027,24 @@ export default class extends Controller {
 
       spaceNode.select()
     })
+  }
+
+  _looksLikeMarkdown(text) {
+    const patterns = [
+      /^#{1,6}\s/m,           // headings
+      /\*\*.+?\*\*/,          // bold
+      /~~.+?~~/,              // strikethrough
+      /^```/m,                // fenced code block
+      /^>\s/m,                // blockquote
+      /^[-*+]\s/m,            // unordered list
+      /^\d+\.\s/m,            // ordered list
+      /\[.+?\]\(.+?\)/,       // link
+    ]
+
+    for (const pattern of patterns) {
+      if (pattern.test(text)) return true
+    }
+    return false
   }
 
   async _fetchChannels(query) {
