@@ -479,7 +479,119 @@ export default class extends Controller {
     // Strip leading/trailing empty paragraphs
     html = html.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
     html = html.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
+    // Convert markdown tables that survived as plain text in <p> tags
+    html = this._convertMarkdownTables(html)
     return html
+  }
+
+  _convertMarkdownTables(html) {
+    // First, split <p> tags that contain <br> followed by pipe content
+    // into separate chunks so table rows aren't merged with preceding text.
+    html = html.replace(/(<p[^>]*>)([\s\S]*?)<\/p>/g, (_match, openTag, inner) => {
+      // Split on <br> boundaries
+      const segments = inner.split(/<br\s*\/?>/)
+      if (segments.length <= 1) return _match
+
+      const parts = []
+      let current = []
+      for (const seg of segments) {
+        const text = seg.replace(/<[^>]*>/g, "").trim()
+        if (text.startsWith("|") && text.endsWith("|") && current.length > 0) {
+          // Previous non-table content becomes its own <p>
+          parts.push(`${openTag}${current.join("<br>")}</p>`)
+          current = []
+        }
+        current.push(seg)
+      }
+      if (current.length > 0) {
+        parts.push(`${openTag}${current.join("<br>")}</p>`)
+      }
+      return parts.join("")
+    })
+
+    // Now split into <p> chunks and non-<p> content
+    const chunks = []
+    const pRegex = /(<p[^>]*>[\s\S]*?<\/p>)/g
+    let lastIndex = 0
+    let m
+
+    while ((m = pRegex.exec(html)) !== null) {
+      if (m.index > lastIndex) {
+        chunks.push({ type: "other", raw: html.slice(lastIndex, m.index) })
+      }
+      const raw = m[1]
+      const text = raw.replace(/<[^>]*>/g, "").trim()
+      chunks.push({ type: "p", raw, text })
+      lastIndex = pRegex.lastIndex
+    }
+    if (lastIndex < html.length) {
+      chunks.push({ type: "other", raw: html.slice(lastIndex) })
+    }
+
+    // Walk chunks, collecting consecutive pipe-rows into table groups
+    let result = ""
+    let tableRows = []
+    let tableRawParts = []
+
+    const flushTable = () => {
+      if (tableRows.length >= 3 && /^[\s|:-]+$/.test(tableRows[1])) {
+        result += this._buildTableHtml(tableRows)
+      } else {
+        result += tableRawParts.join("")
+      }
+      tableRows = []
+      tableRawParts = []
+    }
+
+    for (const chunk of chunks) {
+      if (chunk.type === "p") {
+        const t = chunk.text
+        if (t.startsWith("|") && t.endsWith("|")) {
+          tableRows.push(t)
+          tableRawParts.push(chunk.raw)
+          continue
+        }
+      }
+      if (tableRows.length > 0) flushTable()
+      result += chunk.raw
+    }
+    if (tableRows.length > 0) flushTable()
+
+    return result
+  }
+
+  _buildTableHtml(lines) {
+    // lines[0] = header, lines[1] = separator, lines[2+] = data
+    const parseRow = (line) =>
+      line.split("|").slice(1, -1).map(cell => cell.trim())
+
+    const separator = parseRow(lines[1])
+    const alignments = separator.map(cell => {
+      if (cell.startsWith(":") && cell.endsWith(":")) return "center"
+      if (cell.endsWith(":")) return "right"
+      return "left"
+    })
+
+    const alignClass = (a) => a === "center" ? ' class="text-center"' : a === "right" ? ' class="text-right"' : ""
+
+    const headerCells = parseRow(lines[0])
+    let tableHtml = "<table><thead><tr>"
+    headerCells.forEach((cell, i) => {
+      tableHtml += `<th${alignClass(alignments[i])}>${cell}</th>`
+    })
+    tableHtml += "</tr></thead><tbody>"
+
+    for (let r = 2; r < lines.length; r++) {
+      const cells = parseRow(lines[r])
+      tableHtml += "<tr>"
+      cells.forEach((cell, i) => {
+        tableHtml += `<td${alignClass(alignments[i])}>${cell}</td>`
+      })
+      tableHtml += "</tr>"
+    }
+
+    tableHtml += "</tbody></table>"
+    return tableHtml
   }
 
   _isEmpty(html) {
