@@ -1,0 +1,39 @@
+<%# locals: (message:) %>
+<%= tag.div id: dom_id(message), class: "group flex px-2 py-1.5 rounded" do %>
+  <div class="flex-1">
+    <div class="border border-bunker-825 rounded-lg bg-bunker-925 p-4 relative overflow-hidden">
+      <%# Decorative accent bar %>
+      <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
+
+      <%# Header %>
+      <div class="text-[9px] tracking-[0.08em] text-granny-smith-apple-400 mb-3">
+        // <%= message.user.username %> has joined this server
+      </div>
+
+      <%# User card %>
+      <div class="flex items-center gap-3">
+        <%# Avatar %>
+        <div class="flex-shrink-0 w-10 h-10 rounded-md bg-bunker-875 border border-bunker-775 flex items-center justify-center overflow-hidden">
+          <% if message.user.avatar.attached? %>
+            <%= image_tag polymorphic_path(message.user.avatar), alt: "", class: "w-full h-full object-cover" %>
+          <% else %>
+            <span class="text-sm font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
+          <% end %>
+        </div>
+
+        <%# Info %>
+        <div class="min-w-0">
+          <div class="font-syne text-[12px] font-bold text-bunker-50"><%= message.user.display_name.presence || message.user.username %></div>
+          <div class="text-[10px] text-bunker-500">@<%= message.user.username %></div>
+        </div>
+      </div>
+
+      <%# Bio %>
+      <% if message.user.bio.present? %>
+        <div class="mt-2.5 text-[10px] text-bunker-400 leading-relaxed italic">
+          &ldquo;<%= message.user.bio %>&rdquo;
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

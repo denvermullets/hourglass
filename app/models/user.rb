@@ -47,6 +47,18 @@ class User < ApplicationRecord
 
   validates :bio, length: { maximum: 160 }, allow_blank: true
 
+  def onboarding_complete?
+    onboarding_step.zero?
+  end
+
+  def current_onboarding_path
+    case onboarding_step
+    when 2 then Rails.application.routes.url_helpers.onboarding_profile_path
+    when 3 then Rails.application.routes.url_helpers.onboarding_channels_path
+    else Rails.application.routes.url_helpers.root_path
+    end
+  end
+
   def resolved_settings
     SETTINGS_DEFAULTS.deep_merge(settings || {})
   end

@@ -12,6 +12,7 @@ class Servers::JoinService < Service
     raise AlreadyMemberError, 'You are already a member of this server.' if server.membership_for(@user)
 
     server.memberships.create!(user: @user, role: :member)
+    Servers::AnnounceJoinService.call(server: server, user: @user)
     server
   end
 end

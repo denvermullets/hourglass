@@ -1,0 +1,22 @@
+<%# locals: (current_step:) %>
+<% steps = %w[credentials profile server] %>
+<% fill_pct = (current_step.to_f / steps.size * 100).round %>
+
+<div class="flex flex-col gap-1.5 mb-1">
+  <div class="bg-bunker-775 rounded-sm h-0.5">
+    <div class="bg-granny-smith-apple-600 rounded-sm h-0.5 transition-all duration-300" style="width: <%= fill_pct %>%"></div>
+  </div>
+  <div class="flex justify-between">
+    <% steps.each_with_index do |step, i| %>
+      <% step_num = i + 1 %>
+      <% css = if step_num < current_step
+                 "text-granny-smith-apple-600"
+               elsif step_num == current_step
+                 "text-bunker-500"
+               else
+                 "text-bunker-600"
+               end %>
+      <span class="text-[8px] tracking-[0.08em] <%= css %>"><%= step %></span>
+    <% end %>
+  </div>
+</div>

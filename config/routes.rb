@@ -3,6 +3,12 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resource :registration, only: %i[new create]
 
+  namespace :onboarding do
+    resource :credentials, only: %i[new create]
+    resource :profile, only: %i[show update]
+    resource :channels, only: %i[show update]
+  end
+
   resource :settings, only: [:show] do
     member do
       get :profile

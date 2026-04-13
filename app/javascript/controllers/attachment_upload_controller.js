@@ -236,7 +236,7 @@ export default class extends Controller {
       <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative overflow-hidden border border-bunker-825 bg-bunker-875" data-pending-file>
         <img src="${entry.previewUrl}" class="w-full h-full object-cover" />
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"
-                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-050">&times;</button>
+                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-50">&times;</button>
         ${progressBar}
       </div>
     `
@@ -254,7 +254,7 @@ export default class extends Controller {
         <span class="text-[8px] font-medium ${extColor}">${ext}</span>
         <span class="text-[6px] text-bunker-600 text-center px-0.5 truncate max-w-full">${entry.file.name}</span>
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"
-                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-050">&times;</button>
+                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-50">&times;</button>
         ${progressBar}
       </div>
     `
