@@ -88,12 +88,67 @@
   color: var(--color-bunker-200);
 }
 
+/* Lexical editor headings — sized relative to the 11px editor base */
+.editor-heading-h1 {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--color-bunker-100);
+  margin: 4px 0 2px 0;
+  line-height: 1.3;
+}
+.editor-heading-h2 {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--color-bunker-100);
+  margin: 3px 0 2px 0;
+  line-height: 1.3;
+}
+.editor-heading-h3 {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--color-bunker-100);
+  margin: 2px 0 1px 0;
+  line-height: 1.4;
+}
+/* Lexical editor lists — 3 nesting levels */
+[data-message-composer-target="editor"] ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 2px 0;
+}
+[data-message-composer-target="editor"] ul ul {
+  list-style: circle;
+}
+[data-message-composer-target="editor"] ul ul ul {
+  list-style: square;
+}
+[data-message-composer-target="editor"] ol {
+  list-style: decimal;
+  padding-left: 20px;
+  margin: 2px 0;
+}
+[data-message-composer-target="editor"] ol ol {
+  list-style: lower-alpha;
+}
+[data-message-composer-target="editor"] ol ol ol {
+  list-style: lower-roman;
+}
+[data-message-composer-target="editor"] li {
+  margin: 1px 0;
+}
+[data-message-composer-target="editor"] li:has(> ul:only-child),
+[data-message-composer-target="editor"] li:has(> ol:only-child) {
+  list-style: none;
+}
+
 /* Lexical editor content area */
 [data-message-composer-target="editor"] {
   min-width: 0;
 }
 [data-message-composer-target="editor"] p {
   margin: 0;
+  font-size: inherit;
+  font-weight: normal;
 }
 [data-message-composer-target="editor"] p + p {
   margin-top: 4px;
@@ -102,6 +157,11 @@
 /* Message display content styles */
 .message-content p {
   margin: 0;
+  min-height: 1em;
+}
+.message-content p:empty,
+.message-content p:has(> br:only-child) {
+  min-height: 1em;
 }
 .message-content p + p {
   margin-top: 4px;
@@ -144,6 +204,93 @@
   border-radius: 0;
   color: inherit;
   font-size: inherit;
+}
+.message-content h1 {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--color-bunker-100);
+  margin: 4px 0 2px 0;
+  line-height: 1.3;
+}
+.message-content h2 {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--color-bunker-100);
+  margin: 3px 0 2px 0;
+  line-height: 1.3;
+}
+.message-content h3 {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--color-bunker-100);
+  margin: 2px 0 1px 0;
+  line-height: 1.4;
+}
+.message-content ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 2px 0;
+}
+.message-content ul ul {
+  list-style: circle;
+}
+.message-content ul ul ul {
+  list-style: square;
+}
+.message-content ol {
+  list-style: decimal;
+  padding-left: 20px;
+  margin: 2px 0;
+}
+.message-content ol ol {
+  list-style: lower-alpha;
+}
+.message-content ol ol ol {
+  list-style: lower-roman;
+}
+.message-content li {
+  margin: 1px 0;
+}
+/* Hide bullet on li that wraps a nested list without its own text */
+.message-content li:has(> ul:only-child),
+.message-content li:has(> ol:only-child) {
+  list-style: none;
+}
+
+/* Tables */
+.message-content table {
+  border-collapse: collapse;
+  margin: 4px 0;
+  width: 100%;
+  font-size: inherit;
+}
+.message-content th,
+.message-content td {
+  border: 1px solid var(--color-bunker-825);
+  padding: 4px 8px;
+  text-align: left;
+}
+.message-content th {
+  background: var(--color-bunker-900);
+  font-weight: bold;
+  color: var(--color-bunker-200);
+}
+.message-content td {
+  color: var(--color-bunker-300);
+}
+.message-content tr:nth-child(even) td {
+  background: var(--color-bunker-925);
+}
+.message-content .text-center {
+  text-align: center;
+}
+.message-content .text-right {
+  text-align: right;
+}
+.message-content hr {
+  border: none;
+  border-top: 1px solid var(--color-bunker-825);
+  margin: 8px 0;
 }
 .message-content a {
   color: var(--color-jordy-blue-400);
