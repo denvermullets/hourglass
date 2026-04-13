@@ -3,7 +3,7 @@ import { MentionNode, $createMentionNode } from "lexical/mention_node"
 import { ChannelNode, $createChannelNode } from "lexical/channel_node"
 
 export default class extends Controller {
-  static targets = ["editor", "hiddenInput", "placeholder"]
+  static targets = ["editor", "hiddenInput", "placeholder", "resizeBtn"]
   static values = { placeholder: String, content: String, serverId: String }
 
   async connect() {
@@ -43,7 +43,9 @@ export default class extends Controller {
     } = lexical
 
     const { registerRichText, HeadingNode, QuoteNode } = richText
-    const { registerMarkdownShortcuts, TRANSFORMERS } = markdown
+    const { TRANSFORMERS, $convertFromMarkdownString } = markdown
+    this._TRANSFORMERS = TRANSFORMERS
+    this._$convertFromMarkdownString = $convertFromMarkdownString
     const { CodeNode, CodeHighlightNode, $createCodeNode, $isCodeNode, registerCodeHighlighting } = code
     const { LinkNode, AutoLinkNode, $createAutoLinkNode, $isAutoLinkNode, $isLinkNode } = link
     const { ListNode, ListItemNode } = list
@@ -89,17 +91,26 @@ export default class extends Controller {
       onError: (error) => console.error("Lexical error:", error)
     })
 
+    this._editorNodes = [
+      HeadingNode, QuoteNode, CodeNode, CodeHighlightNode,
+      LinkNode, AutoLinkNode, ListNode, ListItemNode,
+      MentionNode, ChannelNode
+    ]
+
     this.editor.setRootElement(this.editorTarget)
     registerRichText(this.editor)
-    registerMarkdownShortcuts(this.editor, TRANSFORMERS)
     registerCodeHighlighting(this.editor)
     this._registerAutoLink(lexical)
 
     // Pre-populate editor with existing HTML content (used for editing messages)
     if (this.hasContentValue && this.contentValue) {
+      // Convert tables and HRs back to markdown so they're editable
+      // and will re-convert on send
+      let editableHtml = this._tablesToMarkdown(this.contentValue)
+      editableHtml = editableHtml.replace(/<hr\s*\/?>/g, "<p>---</p>")
       this.editor.update(() => {
         const parser = new DOMParser()
-        const dom = parser.parseFromString(this.contentValue, "text/html")
+        const dom = parser.parseFromString(editableHtml, "text/html")
         const nodes = this.htmlModule.$generateNodesFromDOM(this.editor, dom)
         const root = this.lexical.$getRoot()
         root.clear()
@@ -299,6 +310,49 @@ export default class extends Controller {
     })
   }
 
+  // Editor resize actions
+  resizeDefault(event) {
+    event.preventDefault()
+    this._applyEditorSize("default")
+  }
+
+  resizeHalf(event) {
+    event.preventDefault()
+    this._applyEditorSize("half")
+  }
+
+  resizeFull(event) {
+    event.preventDefault()
+    this._applyEditorSize("full")
+  }
+
+  _applyEditorSize(size) {
+    const editor = this.editorTarget
+
+    if (size === "default") {
+      editor.style.maxHeight = "200px"
+      editor.style.minHeight = "36px"
+    } else if (size === "half") {
+      editor.style.maxHeight = "50vh"
+      editor.style.minHeight = "50vh"
+    } else if (size === "full") {
+      // Find the message input wrapper (the fixed-bottom bar containing the form)
+      // and the channel header above the message area, then fill the space between
+      const messageArea = this.element.closest(".flex-1.flex.flex-col.min-h-0.overflow-hidden")
+      const areaHeight = messageArea ? messageArea.clientHeight : window.innerHeight - 100
+      // Subtract the form's own chrome: toolbar (~34px), padding (~24px), border
+      const height = `${Math.max(200, areaHeight - 60)}px`
+      editor.style.maxHeight = height
+      editor.style.minHeight = height
+    }
+
+    this.resizeBtnTargets.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.size === size)
+    })
+
+    this.editorTarget.focus()
+  }
+
   // Reset after successful form submission
   reset() {
     this._setSubmitDisabled(false)
@@ -315,6 +369,7 @@ export default class extends Controller {
       root.append(this.lexical.$createParagraphNode())
     })
 
+    this._applyEditorSize("default")
     this.editorTarget.focus()
   }
 
@@ -380,25 +435,169 @@ export default class extends Controller {
   }
 
   _serializeToHtml() {
+    // Check for raw markdown and convert using a temp editor to get clean HTML,
+    // without mutating the main editor state.
+    let plainText = ""
+    this.editor.getEditorState().read(() => {
+      plainText = this.lexical.$getRoot().getTextContent()
+    })
+
+    if (plainText && this._looksLikeMarkdown(plainText)) {
+      const normalized = plainText
+        .replace(/\n\n/g, "\n")
+        // Flatten nested blockquotes (>> or > > >) to single >
+        .replace(/^(?:>\s*){2,}/gm, "> ")
+      const tempEditor = this.lexical.createEditor({
+        namespace: "MarkdownTemp",
+        nodes: this._editorNodes
+      })
+      const tempEl = document.createElement("div")
+      tempEditor.setRootElement(tempEl)
+      tempEditor.update(() => {
+        this._$convertFromMarkdownString(normalized, this._TRANSFORMERS)
+      }, { discrete: true })
+
+      let html = ""
+      tempEditor.getEditorState().read(() => {
+        html = this.htmlModule.$generateHtmlFromNodes(tempEditor)
+      })
+      tempEditor.setRootElement(null)
+      return this._cleanHtml(html)
+    }
+
     let html = ""
     this.editor.getEditorState().read(() => {
       html = this.htmlModule.$generateHtmlFromNodes(this.editor)
     })
-    // Clean up Lexical's verbose code block output — it wraps every token
-    // in <span style="white-space: pre-wrap;"> which bloats storage.
-    // Extract plain text and keep just the <pre> with a language attr.
+    return this._cleanHtml(html)
+  }
+
+  _cleanHtml(html) {
+    // Clean up Lexical's verbose code block output
     html = html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_match, attrs, inner) => {
       const plain = inner
         .replace(/<br\s*\/?>/g, "\n")
         .replace(/<[^>]*>/g, "")
       return `<pre${attrs}>${plain}</pre>`
     })
-
-    // Strip leading/trailing empty paragraphs (whitespace-only lines)
+    // Strip leading/trailing empty paragraphs
     html = html.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
     html = html.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
-
+    // Convert horizontal rules (---, ___, ***) that survived as plain text
+    html = html.replace(/<p[^>]*>\s*(?:<span[^>]*>)?\s*([-_*])\1{2,}\s*(?:<\/span>)?\s*<\/p>/g, "<hr>")
+    // Convert markdown tables that survived as plain text in <p> tags
+    html = this._convertMarkdownTables(html)
     return html
+  }
+
+  _convertMarkdownTables(html) {
+    // First, split <p> tags that contain <br> followed by pipe content
+    // into separate chunks so table rows aren't merged with preceding text.
+    html = html.replace(/(<p[^>]*>)([\s\S]*?)<\/p>/g, (_match, openTag, inner) => {
+      // Split on <br> boundaries
+      const segments = inner.split(/<br\s*\/?>/)
+      if (segments.length <= 1) return _match
+
+      const parts = []
+      let current = []
+      for (const seg of segments) {
+        const text = seg.replace(/<[^>]*>/g, "").trim()
+        if (text.startsWith("|") && text.endsWith("|") && current.length > 0) {
+          // Previous non-table content becomes its own <p>
+          parts.push(`${openTag}${current.join("<br>")}</p>`)
+          current = []
+        }
+        current.push(seg)
+      }
+      if (current.length > 0) {
+        parts.push(`${openTag}${current.join("<br>")}</p>`)
+      }
+      return parts.join("")
+    })
+
+    // Now split into <p> chunks and non-<p> content
+    const chunks = []
+    const pRegex = /(<p[^>]*>[\s\S]*?<\/p>)/g
+    let lastIndex = 0
+    let m
+
+    while ((m = pRegex.exec(html)) !== null) {
+      if (m.index > lastIndex) {
+        chunks.push({ type: "other", raw: html.slice(lastIndex, m.index) })
+      }
+      const raw = m[1]
+      const text = raw.replace(/<[^>]*>/g, "").trim()
+      chunks.push({ type: "p", raw, text })
+      lastIndex = pRegex.lastIndex
+    }
+    if (lastIndex < html.length) {
+      chunks.push({ type: "other", raw: html.slice(lastIndex) })
+    }
+
+    // Walk chunks, collecting consecutive pipe-rows into table groups
+    let result = ""
+    let tableRows = []
+    let tableRawParts = []
+
+    const flushTable = () => {
+      if (tableRows.length >= 3 && /^[\s|:-]+$/.test(tableRows[1])) {
+        result += this._buildTableHtml(tableRows)
+      } else {
+        result += tableRawParts.join("")
+      }
+      tableRows = []
+      tableRawParts = []
+    }
+
+    for (const chunk of chunks) {
+      if (chunk.type === "p") {
+        const t = chunk.text
+        if (t.startsWith("|") && t.endsWith("|")) {
+          tableRows.push(t)
+          tableRawParts.push(chunk.raw)
+          continue
+        }
+      }
+      if (tableRows.length > 0) flushTable()
+      result += chunk.raw
+    }
+    if (tableRows.length > 0) flushTable()
+
+    return result
+  }
+
+  _buildTableHtml(lines) {
+    // lines[0] = header, lines[1] = separator, lines[2+] = data
+    const parseRow = (line) =>
+      line.split("|").slice(1, -1).map(cell => cell.trim())
+
+    const separator = parseRow(lines[1])
+    const alignments = separator.map(cell => {
+      if (cell.startsWith(":") && cell.endsWith(":")) return "center"
+      if (cell.endsWith(":")) return "right"
+      return "left"
+    })
+
+    const alignClass = (a) => a === "center" ? ' class="text-center"' : a === "right" ? ' class="text-right"' : ""
+
+    const headerCells = parseRow(lines[0])
+    let tableHtml = "<table><thead><tr>"
+    headerCells.forEach((cell, i) => {
+      tableHtml += `<th${alignClass(alignments[i])}>${cell}</th>`
+    })
+    tableHtml += "</tr></thead><tbody>"
+
+    for (let r = 2; r < lines.length; r++) {
+      const cells = parseRow(lines[r])
+      tableHtml += "<tr>"
+      cells.forEach((cell, i) => {
+        tableHtml += `<td${alignClass(alignments[i])}>${cell}</td>`
+      })
+      tableHtml += "</tr>"
+    }
+
+    tableHtml += "</tbody></table>"
+    return tableHtml
   }
 
   _isEmpty(html) {
@@ -946,6 +1145,48 @@ export default class extends Controller {
 
       spaceNode.select()
     })
+  }
+
+  _tablesToMarkdown(html) {
+    // Convert <table> elements back to markdown pipe syntax for editing
+    return html.replace(/<table>[\s\S]*?<\/table>/g, (tableHtml) => {
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(tableHtml, "text/html")
+      const table = doc.querySelector("table")
+      if (!table) return tableHtml
+
+      const rows = []
+      const headerCells = table.querySelectorAll("thead th")
+      if (headerCells.length > 0) {
+        rows.push("| " + Array.from(headerCells).map(th => th.textContent.trim()).join(" | ") + " |")
+        rows.push("| " + Array.from(headerCells).map(() => "---").join(" | ") + " |")
+      }
+
+      table.querySelectorAll("tbody tr").forEach(tr => {
+        const cells = tr.querySelectorAll("td")
+        rows.push("| " + Array.from(cells).map(td => td.textContent.trim()).join(" | ") + " |")
+      })
+
+      return rows.map(row => `<p>${row}</p>`).join("")
+    })
+  }
+
+  _looksLikeMarkdown(text) {
+    const patterns = [
+      /^#{1,6}\s/m,           // headings
+      /\*\*.+?\*\*/,          // bold
+      /~~.+?~~/,              // strikethrough
+      /^```/m,                // fenced code block
+      /^>\s/m,                // blockquote
+      /^[-*+]\s/m,            // unordered list
+      /^\d+\.\s/m,            // ordered list
+      /\[.+?\]\(.+?\)/,       // link
+    ]
+
+    for (const pattern of patterns) {
+      if (pattern.test(text)) return true
+    }
+    return false
   }
 
   async _fetchChannels(query) {
