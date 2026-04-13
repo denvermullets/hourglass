@@ -104,9 +104,13 @@ export default class extends Controller {
 
     // Pre-populate editor with existing HTML content (used for editing messages)
     if (this.hasContentValue && this.contentValue) {
+      // Convert tables and HRs back to markdown so they're editable
+      // and will re-convert on send
+      let editableHtml = this._tablesToMarkdown(this.contentValue)
+      editableHtml = editableHtml.replace(/<hr\s*\/?>/g, "<p>---</p>")
       this.editor.update(() => {
         const parser = new DOMParser()
-        const dom = parser.parseFromString(this.contentValue, "text/html")
+        const dom = parser.parseFromString(editableHtml, "text/html")
         const nodes = this.htmlModule.$generateNodesFromDOM(this.editor, dom)
         const root = this.lexical.$getRoot()
         root.clear()
@@ -1140,6 +1144,30 @@ export default class extends Controller {
       }
 
       spaceNode.select()
+    })
+  }
+
+  _tablesToMarkdown(html) {
+    // Convert <table> elements back to markdown pipe syntax for editing
+    return html.replace(/<table>[\s\S]*?<\/table>/g, (tableHtml) => {
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(tableHtml, "text/html")
+      const table = doc.querySelector("table")
+      if (!table) return tableHtml
+
+      const rows = []
+      const headerCells = table.querySelectorAll("thead th")
+      if (headerCells.length > 0) {
+        rows.push("| " + Array.from(headerCells).map(th => th.textContent.trim()).join(" | ") + " |")
+        rows.push("| " + Array.from(headerCells).map(() => "---").join(" | ") + " |")
+      }
+
+      table.querySelectorAll("tbody tr").forEach(tr => {
+        const cells = tr.querySelectorAll("td")
+        rows.push("| " + Array.from(cells).map(td => td.textContent.trim()).join(" | ") + " |")
+      })
+
+      return rows.map(row => `<p>${row}</p>`).join("")
     })
   }
 
