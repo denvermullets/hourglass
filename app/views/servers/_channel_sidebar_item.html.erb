@@ -2,7 +2,7 @@
 <% active = current_channel&.id == channel.id %>
 <% is_unread = local_assigns.fetch(:unread, false) && !active %>
 <%= link_to server_channel_path(server, channel),
-  class: "flex items-center gap-2 mx-1.5 px-2 py-1 rounded text-[11px] transition-colors duration-100 no-underline relative #{active ? 'bg-bunker-875 text-bunker-050' : is_unread ? 'text-bunker-100 font-bold hover:bg-bunker-900' : 'text-bunker-400 hover:bg-bunker-900 hover:text-bunker-200'}" do %>
+  class: "flex items-center gap-2 mx-1.5 px-2 py-1 rounded text-[11px] transition-colors duration-100 no-underline relative #{active ? 'bg-bunker-875 text-bunker-50' : is_unread ? 'text-bunker-100 font-bold hover:bg-bunker-900' : 'text-bunker-400 hover:bg-bunker-900 hover:text-bunker-200'}" do %>
   <% if active %>
     <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-r bg-granny-smith-apple-300"></span>
   <% end %>

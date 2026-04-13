@@ -1,0 +1,67 @@
+<% content_for(:brand_description) do %>
+  your profile is how the community gets to know you.<br><br>
+  everything here is optional &mdash; you can fill it in later from settings.
+<% end %>
+<% content_for(:brand_footer) do %>
+  step 2 of 3 &middot; profile
+<% end %>
+
+<div>
+  <div class="mb-6">
+    <%= render "onboarding/progress_bar", current_step: 2 %>
+  </div>
+
+  <%= form_with model: @user, url: onboarding_profile_path, method: :patch, class: "flex flex-col gap-3.5" do |form| %>
+    <%# Avatar upload %>
+    <div class="flex flex-col gap-1" data-controller="avatar-preview">
+      <div class="flex items-center gap-3.5">
+        <label for="user_avatar" class="w-14 h-14 rounded-[10px] bg-bunker-875 border border-dashed border-bunker-775 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-granny-smith-apple-600 transition-colors duration-150 overflow-hidden flex-shrink-0" data-avatar-preview-target="box">
+          <svg data-avatar-preview-target="placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="w-4 h-4 text-bunker-600">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span data-avatar-preview-target="placeholder" class="text-[7px] tracking-[0.08em] text-bunker-600">upload</span>
+          <img data-avatar-preview-target="image" class="w-full h-full object-cover hidden">
+        </label>
+        <%= form.file_field :avatar,
+          accept: "image/jpeg,image/png",
+          class: "hidden",
+          data: { avatar_preview_target: "input", action: "change->avatar-preview#preview" } %>
+        <div>
+          <div class="text-[11px] text-bunker-300">profile photo</div>
+          <div class="text-[9px] text-bunker-500 mt-0.5 leading-relaxed">optional &middot; jpg or png &middot; max 2mb<br>shown next to every post you make</div>
+        </div>
+      </div>
+    </div>
+
+    <%# Display name %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
+        <span class="text-granny-smith-apple-600">$</span> display_name
+      </label>
+      <%= form.text_field :display_name,
+        placeholder: "optional \u2014 defaults to username",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300 placeholder:text-bunker-600 focus:border-granny-smith-apple-600" %>
+    </div>
+
+    <%# Bio %>
+    <div class="flex flex-col gap-1">
+      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
+        <span class="text-granny-smith-apple-600">$</span> bio
+      </label>
+      <%= form.text_area :bio,
+        rows: 2,
+        placeholder: "what do you listen to...",
+        maxlength: 160,
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 resize-none leading-7 bg-bunker-875 border border-bunker-775 text-bunker-300 placeholder:text-bunker-600 focus:border-granny-smith-apple-600" %>
+      <div class="text-[9px] leading-relaxed text-bunker-500">shown on your profile &middot; max 160 chars</div>
+    </div>
+
+    <%= form.submit "// next \u2192",
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+  <% end %>
+
+  <%= button_to "skip for now", onboarding_profile_path, method: :patch, params: { skip: true },
+    class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-bunker-775 text-bunker-500 hover:border-bunker-600 hover:text-bunker-400 mt-3.5" %>
+</div>
