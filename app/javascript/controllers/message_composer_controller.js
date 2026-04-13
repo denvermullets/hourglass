@@ -479,6 +479,8 @@ export default class extends Controller {
     // Strip leading/trailing empty paragraphs
     html = html.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
     html = html.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
+    // Convert horizontal rules (---, ___, ***) that survived as plain text
+    html = html.replace(/<p[^>]*>\s*(?:<span[^>]*>)?\s*([-_*])\1{2,}\s*(?:<\/span>)?\s*<\/p>/g, "<hr>")
     // Convert markdown tables that survived as plain text in <p> tags
     html = this._convertMarkdownTables(html)
     return html

@@ -287,6 +287,11 @@
 .message-content .text-right {
   text-align: right;
 }
+.message-content hr {
+  border: none;
+  border-top: 1px solid var(--color-bunker-825);
+  margin: 8px 0;
+}
 .message-content a {
   color: var(--color-jordy-blue-400);
   text-decoration: underline;
