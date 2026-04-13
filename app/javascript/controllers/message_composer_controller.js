@@ -147,6 +147,20 @@ export default class extends Controller {
       )
     )
 
+    // Ensure code blocks are never the last node — append an empty paragraph
+    // so the cursor always has somewhere to go after a code block
+    this._cleanups.push(
+      this.editor.registerUpdateListener(() => {
+        this.editor.update(() => {
+          const root = this.lexical.$getRoot()
+          const lastChild = root.getLastChild()
+          if (lastChild && this._isCodeNode(lastChild)) {
+            root.append(this.lexical.$createParagraphNode())
+          }
+        }, { tag: "history-merge" })
+      })
+    )
+
     // Track active formats for toolbar button states, code block language picker, and mentions
     this._cleanups.push(
       this.editor.registerUpdateListener(({ editorState }) => {
@@ -442,7 +456,7 @@ export default class extends Controller {
 
     if (plainText && this._looksLikeMarkdown(plainText)) {
       const normalized = plainText
-        .replace(/\n\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
         // Flatten nested blockquotes (>> or > > >) to single >
         .replace(/^(?:>\s*){2,}/gm, "> ")
       const tempEditor = this.lexical.createEditor({
