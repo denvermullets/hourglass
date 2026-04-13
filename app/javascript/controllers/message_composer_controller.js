@@ -336,11 +336,9 @@ export default class extends Controller {
       editor.style.maxHeight = "50vh"
       editor.style.minHeight = "50vh"
     } else if (size === "full") {
-      // Find the message input wrapper (the fixed-bottom bar containing the form)
-      // and the channel header above the message area, then fill the space between
       const messageArea = this.element.closest(".flex-1.flex.flex-col.min-h-0.overflow-hidden")
       const areaHeight = messageArea ? messageArea.clientHeight : window.innerHeight - 100
-      // Subtract the form's own chrome: toolbar (~34px), padding (~24px), border
+      // Subtract the form's own chrome: toolbar, padding, border, thread label etc.
       const height = `${Math.max(200, areaHeight - 60)}px`
       editor.style.maxHeight = height
       editor.style.minHeight = height
