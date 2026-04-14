@@ -39,7 +39,7 @@ export default class extends Controller {
 
     const {
       createEditor, $getSelection, $isRangeSelection,
-      KEY_ENTER_COMMAND, COMMAND_PRIORITY_HIGH
+      KEY_ENTER_COMMAND, PASTE_COMMAND, COMMAND_PRIORITY_HIGH
     } = lexical
 
     const { registerRichText, HeadingNode, QuoteNode } = richText
@@ -104,17 +104,19 @@ export default class extends Controller {
 
     // Pre-populate editor with existing HTML content (used for editing messages)
     if (this.hasContentValue && this.contentValue) {
-      // Convert tables and HRs back to markdown so they're editable
-      // and will re-convert on send
-      let editableHtml = this._tablesToMarkdown(this.contentValue)
-      editableHtml = editableHtml.replace(/<hr\s*\/?>/g, "<p>---</p>")
+      // Convert stored HTML back to markdown so editing shows raw markdown
+      // that will re-convert cleanly on save
+      const markdown = this._htmlToMarkdown(this.contentValue)
       this.editor.update(() => {
-        const parser = new DOMParser()
-        const dom = parser.parseFromString(editableHtml, "text/html")
-        const nodes = this.htmlModule.$generateNodesFromDOM(this.editor, dom)
         const root = this.lexical.$getRoot()
         root.clear()
-        nodes.forEach(node => root.append(node))
+        for (const line of markdown.split("\n")) {
+          const para = this.lexical.$createParagraphNode()
+          if (line) {
+            para.append(this.lexical.$createTextNode(line))
+          }
+          root.append(para)
+        }
       })
     }
 
@@ -159,6 +161,43 @@ export default class extends Controller {
           }
         }, { tag: "history-merge" })
       })
+    )
+
+    // Detect markdown on paste and wrap in a ```md code block
+    this._cleanups.push(
+      this.editor.registerCommand(
+        PASTE_COMMAND,
+        (event) => {
+          const clipboardData = event instanceof ClipboardEvent
+            ? event.clipboardData
+            : event instanceof InputEvent ? null : null
+          if (!clipboardData) return false
+
+          // Only intercept plain text pastes (no rich HTML from other apps)
+          const htmlData = clipboardData.getData("text/html")
+          if (htmlData) return false
+
+          const text = clipboardData.getData("text/plain")
+          if (!text || !this._looksLikeMarkdown(text)) return false
+
+          event.preventDefault()
+          this.editor.update(() => {
+            const codeNode = this._createCodeNode()
+            codeNode.setLanguage("md")
+            const textNode = this.lexical.$createTextNode(text)
+            codeNode.append(textNode)
+
+            const selection = $getSelection()
+            if ($isRangeSelection(selection)) {
+              selection.insertNodes([codeNode])
+            } else {
+              this.lexical.$getRoot().append(codeNode)
+            }
+          })
+          return true
+        },
+        COMMAND_PRIORITY_HIGH
+      )
     )
 
     // Track active formats for toolbar button states, code block language picker, and mentions
@@ -499,7 +538,45 @@ export default class extends Controller {
     html = html.replace(/<p[^>]*>\s*(?:<span[^>]*>)?\s*([-_*])\1{2,}\s*(?:<\/span>)?\s*<\/p>/g, "<hr>")
     // Convert markdown tables that survived as plain text in <p> tags
     html = this._convertMarkdownTables(html)
+    // Render ```md code blocks as formatted HTML instead of a code block
+    html = this._renderMarkdownCodeBlocks(html)
     return html
+  }
+
+  _renderMarkdownCodeBlocks(html) {
+    return html.replace(
+      /<pre[^>]*data-(?:highlight-)?language="(?:md|markdown)"[^>]*>([\s\S]*?)<\/pre>/g,
+      (_match, content) => {
+        const mdText = content
+          .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")
+        const tempEditor = this.lexical.createEditor({
+          namespace: "MdRender",
+          nodes: this._editorNodes
+        })
+        const tempEl = document.createElement("div")
+        tempEditor.setRootElement(tempEl)
+        tempEditor.update(() => {
+          this._$convertFromMarkdownString(mdText, this._TRANSFORMERS)
+        }, { discrete: true })
+
+        let rendered = ""
+        tempEditor.getEditorState().read(() => {
+          rendered = this.htmlModule.$generateHtmlFromNodes(tempEditor)
+        })
+        tempEditor.setRootElement(null)
+
+        // Clean the rendered output (strip Lexical's verbose code block formatting)
+        rendered = rendered.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_m, attrs, inner) => {
+          const plain = inner.replace(/<br\s*\/?>/g, "\n").replace(/<[^>]*>/g, "")
+          return `<pre${attrs}>${plain}</pre>`
+        })
+        rendered = rendered.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
+        rendered = rendered.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
+        rendered = rendered.replace(/<p[^>]*>\s*(?:<span[^>]*>)?\s*([-_*])\1{2,}\s*(?:<\/span>)?\s*<\/p>/g, "<hr>")
+        rendered = this._convertMarkdownTables(rendered)
+        return rendered
+      }
+    )
   }
 
   _convertMarkdownTables(html) {
@@ -1159,28 +1236,130 @@ export default class extends Controller {
     })
   }
 
-  _tablesToMarkdown(html) {
-    // Convert <table> elements back to markdown pipe syntax for editing
-    return html.replace(/<table>[\s\S]*?<\/table>/g, (tableHtml) => {
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(tableHtml, "text/html")
-      const table = doc.querySelector("table")
-      if (!table) return tableHtml
+  _htmlToMarkdown(html) {
+    const doc = new DOMParser().parseFromString(html, "text/html")
+    return this._convertBlock(doc.body).trim()
+  }
 
-      const rows = []
-      const headerCells = table.querySelectorAll("thead th")
-      if (headerCells.length > 0) {
-        rows.push("| " + Array.from(headerCells).map(th => th.textContent.trim()).join(" | ") + " |")
-        rows.push("| " + Array.from(headerCells).map(() => "---").join(" | ") + " |")
+  _convertBlock(node) {
+    let md = ""
+    for (const child of node.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const text = child.textContent.trim()
+        if (text) md += text + "\n\n"
+        continue
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) continue
+
+      const tag = child.tagName.toLowerCase()
+      switch (tag) {
+        case "h1": md += `# ${this._convertInline(child)}\n\n`; break
+        case "h2": md += `## ${this._convertInline(child)}\n\n`; break
+        case "h3": md += `### ${this._convertInline(child)}\n\n`; break
+        case "p": md += `${this._convertInline(child)}\n\n`; break
+        case "pre": {
+          const lang = child.getAttribute("data-highlight-language") ||
+                       child.getAttribute("data-language") || ""
+          md += `\`\`\`${lang}\n${child.textContent}\n\`\`\`\n\n`
+          break
+        }
+        case "hr": md += "---\n\n"; break
+        case "blockquote": {
+          const content = this._convertBlock(child).trim()
+          md += content.split("\n").map(l => `> ${l}`).join("\n") + "\n\n"
+          break
+        }
+        case "ul": md += this._convertList(child, 0, false) + "\n"; break
+        case "ol": md += this._convertList(child, 0, true) + "\n"; break
+        case "table": md += this._convertTable(child) + "\n\n"; break
+        default: md += this._convertBlock(child); break
+      }
+    }
+    return md
+  }
+
+  _convertInline(node) {
+    let text = ""
+    for (const child of node.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        text += child.textContent
+        continue
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) continue
+
+      const tag = child.tagName.toLowerCase()
+      switch (tag) {
+        case "strong": text += `**${this._convertInline(child)}**`; break
+        case "em": text += `*${this._convertInline(child)}*`; break
+        case "s": text += `~~${this._convertInline(child)}~~`; break
+        case "code": text += `\`${child.textContent}\``; break
+        case "a": {
+          const href = child.getAttribute("href") || ""
+          text += `[${this._convertInline(child)}](${href})`
+          break
+        }
+        case "br": text += "\n"; break
+        default: text += this._convertInline(child); break
+      }
+    }
+    return text
+  }
+
+  _convertList(listNode, indent, ordered) {
+    let md = ""
+    let counter = 1
+    for (const li of listNode.children) {
+      if (li.tagName?.toLowerCase() !== "li") continue
+
+      const prefix = "    ".repeat(indent) + (ordered ? `${counter}. ` : "- ")
+      let hasText = false
+      let textContent = ""
+      let nestedList = null
+
+      for (const child of li.childNodes) {
+        if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
+          hasText = true
+          textContent += child.textContent
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          const childTag = child.tagName.toLowerCase()
+          if (childTag === "ul" || childTag === "ol") {
+            nestedList = child
+          } else {
+            hasText = true
+            textContent += this._convertInline(child)
+          }
+        }
       }
 
-      table.querySelectorAll("tbody tr").forEach(tr => {
-        const cells = tr.querySelectorAll("td")
-        rows.push("| " + Array.from(cells).map(td => td.textContent.trim()).join(" | ") + " |")
-      })
+      if (hasText) {
+        md += `${prefix}${textContent.trim()}\n`
+      }
+      if (nestedList) {
+        const isOrdered = nestedList.tagName.toLowerCase() === "ol"
+        md += this._convertList(nestedList, indent + 1, isOrdered)
+      }
+      counter++
+    }
+    return md
+  }
 
-      return rows.map(row => `<p>${row}</p>`).join("")
+  _convertTable(table) {
+    const rows = []
+    const headerCells = table.querySelectorAll("thead th")
+    if (headerCells.length > 0) {
+      rows.push("| " + Array.from(headerCells).map(th => th.textContent.trim()).join(" | ") + " |")
+      rows.push("| " + Array.from(headerCells).map(th => {
+        const cls = th.className || ""
+        if (cls.includes("text-center")) return ":---:"
+        if (cls.includes("text-right")) return "---:"
+        return "---"
+      }).join(" | ") + " |")
+    }
+    table.querySelectorAll("tbody tr").forEach(tr => {
+      const cells = tr.querySelectorAll("td")
+      rows.push("| " + Array.from(cells).map(td => td.textContent.trim()).join(" | ") + " |")
     })
+    return rows.join("\n")
   }
 
   _looksLikeMarkdown(text) {
