@@ -35,6 +35,13 @@ module Authentication
     redirect_to new_session_path
   end
 
+  def redirect_if_onboarding_incomplete!
+    return unless Current.session
+    return if Current.user.onboarding_complete?
+
+    redirect_to Current.user.current_onboarding_path
+  end
+
   def after_authentication_url
     session.delete(:return_to_after_authenticating) || root_url
   end

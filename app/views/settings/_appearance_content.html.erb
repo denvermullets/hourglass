@@ -20,7 +20,7 @@
 %>
 
 <div class="max-w-2xl" data-controller="theme-preview">
-  <h2 class="font-syne text-[15px] font-bold text-bunker-050 tracking-tight mb-1">Appearance</h2>
+  <h2 class="font-syne text-[15px] font-bold text-bunker-50 tracking-tight mb-1">Appearance</h2>
   <p class="text-[10px] text-bunker-500 mb-6">Customize the look and feel</p>
 
   <%= form_with url: update_appearance_settings_path, method: :patch, class: "space-y-8", data: { turbo_frame: "_top" } do |f| %>
@@ -84,7 +84,7 @@
               peer-checked:border-granny-smith-apple-600
               border-bunker-775 hover:border-bunker-600
               bg-bunker-875">
-              <span class="font-syne font-bold text-bunker-050" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <span class="font-syne font-bold text-bunker-50" style="font-size: <%= size_font[value] %>"><%= label %></span>
               <div class="text-[8px] text-bunker-500 mt-1"><%= desc %></div>
             </div>
           </label>
@@ -105,7 +105,7 @@
               peer-checked:border-granny-smith-apple-600
               border-bunker-775 hover:border-bunker-600
               bg-bunker-875">
-              <span class="font-syne font-bold text-bunker-050" style="font-size: <%= size_font[value] %>"><%= label %></span>
+              <span class="font-syne font-bold text-bunker-50" style="font-size: <%= size_font[value] %>"><%= label %></span>
               <div class="text-[8px] text-bunker-500 mt-1"><%= desc %></div>
             </div>
           </label>

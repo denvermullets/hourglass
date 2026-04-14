@@ -6,7 +6,7 @@
 
   <div class="flex-1 min-w-0">
     <div class="flex items-baseline gap-2 mb-1">
-      <span class="font-syne text-[11px] font-bold text-bunker-050"><%= message.user.username %></span>
+      <span class="font-syne text-[11px] font-bold text-bunker-50"><%= message.user.username %></span>
       <span class="text-[9px] text-bunker-600">editing</span>
     </div>
 
@@ -46,7 +46,7 @@
                 <button type="button"
                         data-action="click->attachment-upload#removeExistingFile"
                         data-file-id="<%= file.id %>"
-                        class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-050">&times;</button>
+                        class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-50">&times;</button>
               </div>
             <% end %>
           <% end %>
@@ -57,7 +57,7 @@
           <div data-message-composer-target="editor"
                contenteditable="true"
                data-action="paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
-               class="min-h-[60px] max-h-[400px] overflow-y-auto px-3 py-2.5 text-[11px] text-bunker-050 font-dm-mono focus:outline-none">
+               class="min-h-[60px] max-h-[400px] overflow-y-auto px-3 py-2.5 text-[11px] text-bunker-50 font-dm-mono focus:outline-none">
           </div>
         </div>
 

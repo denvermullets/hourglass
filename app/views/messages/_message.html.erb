@@ -1,5 +1,8 @@
 <% grouped = local_assigns.fetch(:grouped, false) %>
 <% context = local_assigns.fetch(:context, :channel) %>
+<% if message.user_join? %>
+  <%= render "messages/user_join", message: message %>
+<% else %>
 <%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 #{ grouped ? '-mt-0.5' : 'py-1.5' } rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
   <% if message.deleted? %>
     <div class="flex-1 text-[11px] text-bunker-600 italic">
@@ -85,4 +88,5 @@
       </div>
     </div>
   <% end %>
+<% end %>
 <% end %>
