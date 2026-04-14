@@ -498,8 +498,13 @@ export default class extends Controller {
     })
 
     if (plainText && this._looksLikeMarkdown(plainText)) {
+      // Each blank line between blocks is \n\n\n\n (two block separators with
+      // an empty paragraph between). Replace each extra \n\n with a placeholder
+      // paragraph that the markdown converter won't swallow.
+      const BLANK_LINE = "\x00BLANKLINE\x00"
       const normalized = plainText
-        .replace(/\n{3,}/g, "\n\n")
+        .replace(/\n+$/, "")
+        .replace(/\n\n\n\n/g, `\n\n${BLANK_LINE}\n\n`)
         // Flatten nested blockquotes (>> or > > >) to single >
         .replace(/^(?:>\s*){2,}/gm, "> ")
       const tempEditor = this.lexical.createEditor({
@@ -518,6 +523,9 @@ export default class extends Controller {
       })
       tempEditor.setRootElement(null)
       html = this._restoreEntityPlaceholders(html, entities)
+      // Replace placeholder paragraphs with empty paragraphs for visual spacing
+      html = html.split(`<p>${BLANK_LINE}</p>`).join("<p><br></p>")
+      html = html.split(BLANK_LINE).join("")
       return this._cleanHtml(html)
     }
 
@@ -1242,8 +1250,11 @@ export default class extends Controller {
   }
 
   _getTextWithPlaceholders(root, entities) {
-    let text = ""
-    const walk = (node) => {
+    // Mirrors Lexical's getTextContent() but replaces MentionNode/ChannelNode
+    // with unique placeholders so they survive markdown conversion.
+    const parts = []
+
+    const walkInline = (node) => {
       if (node instanceof MentionNode) {
         const username = node.__username
         const placeholder = `\x00M${entities.length}\x00`
@@ -1251,8 +1262,7 @@ export default class extends Controller {
           placeholder,
           html: `<span class="editor-mention" data-mention-username="${username}">@${username}</span>`
         })
-        text += placeholder
-        return
+        return placeholder
       }
       if (node instanceof ChannelNode) {
         const { __channelId: cid, __channelName: cname, __serverId: sid } = node
@@ -1261,28 +1271,28 @@ export default class extends Controller {
           placeholder,
           html: `<span class="editor-channel" data-channel-id="${cid}" data-channel-name="${cname}" data-server-id="${sid}">#${cname}</span>`
         })
-        text += placeholder
-        return
+        return placeholder
       }
-      const children = node.getChildren ? node.getChildren() : []
-      if (children.length === 0) {
-        text += node.getTextContent()
+      const children = node.getChildren ? node.getChildren() : null
+      if (!children || children.length === 0) {
+        return node.getTextContent()
+      }
+      return children.map(walkInline).join("")
+    }
+
+    const topChildren = root.getChildren()
+    for (const block of topChildren) {
+      const children = block.getChildren ? block.getChildren() : null
+      if (!children || children.length === 0) {
+        // Empty paragraph — preserve as blank line
+        parts.push("")
       } else {
-        for (let i = 0; i < children.length; i++) {
-          walk(children[i])
-        }
-        // Add newlines between block-level nodes (paragraphs, headings, etc.)
-        if (node !== root && node.getType && node.getType() !== "text") {
-          text += "\n"
-        }
+        parts.push(children.map(walkInline).join(""))
       }
     }
-    const children = root.getChildren()
-    for (let i = 0; i < children.length; i++) {
-      walk(children[i])
-      if (i < children.length - 1) text += "\n"
-    }
-    return text
+
+    // Join with \n\n to match Lexical's getTextContent() block separator
+    return parts.join("\n\n")
   }
 
   _restoreEntityPlaceholders(html, entities) {
