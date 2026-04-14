@@ -103,9 +103,11 @@ export default class extends Controller {
     this._registerAutoLink(lexical)
 
     // Pre-populate editor with existing HTML content (used for editing messages)
+    // Convert back to markdown so users can edit raw syntax, but preserve
+    // structured mentions and channels as proper Lexical nodes.
     if (this.hasContentValue && this.contentValue) {
-      // Convert stored HTML back to markdown so editing shows raw markdown
-      // that will re-convert cleanly on save
+      const mentions = this._extractMentions(this.contentValue)
+      const channels = this._extractChannels(this.contentValue)
       const markdown = this._htmlToMarkdown(this.contentValue)
       this.editor.update(() => {
         const root = this.lexical.$getRoot()
@@ -113,7 +115,7 @@ export default class extends Controller {
         for (const line of markdown.split("\n")) {
           const para = this.lexical.$createParagraphNode()
           if (line) {
-            para.append(this.lexical.$createTextNode(line))
+            this._appendLineWithMentions(para, line, mentions, channels)
           }
           root.append(para)
         }
@@ -488,9 +490,11 @@ export default class extends Controller {
   _serializeToHtml() {
     // Check for raw markdown and convert using a temp editor to get clean HTML,
     // without mutating the main editor state.
+    // Mentions and channels are preserved through markdown conversion via placeholders.
     let plainText = ""
+    const entities = [] // { placeholder, html } for mentions/channels
     this.editor.getEditorState().read(() => {
-      plainText = this.lexical.$getRoot().getTextContent()
+      plainText = this._getTextWithPlaceholders(this.lexical.$getRoot(), entities)
     })
 
     if (plainText && this._looksLikeMarkdown(plainText)) {
@@ -513,6 +517,7 @@ export default class extends Controller {
         html = this.htmlModule.$generateHtmlFromNodes(tempEditor)
       })
       tempEditor.setRootElement(null)
+      html = this._restoreEntityPlaceholders(html, entities)
       return this._cleanHtml(html)
     }
 
@@ -1234,6 +1239,119 @@ export default class extends Controller {
 
       spaceNode.select()
     })
+  }
+
+  _getTextWithPlaceholders(root, entities) {
+    let text = ""
+    const walk = (node) => {
+      if (node instanceof MentionNode) {
+        const username = node.__username
+        const placeholder = `\x00M${entities.length}\x00`
+        entities.push({
+          placeholder,
+          html: `<span class="editor-mention" data-mention-username="${username}">@${username}</span>`
+        })
+        text += placeholder
+        return
+      }
+      if (node instanceof ChannelNode) {
+        const { __channelId: cid, __channelName: cname, __serverId: sid } = node
+        const placeholder = `\x00M${entities.length}\x00`
+        entities.push({
+          placeholder,
+          html: `<span class="editor-channel" data-channel-id="${cid}" data-channel-name="${cname}" data-server-id="${sid}">#${cname}</span>`
+        })
+        text += placeholder
+        return
+      }
+      const children = node.getChildren ? node.getChildren() : []
+      if (children.length === 0) {
+        text += node.getTextContent()
+      } else {
+        for (let i = 0; i < children.length; i++) {
+          walk(children[i])
+        }
+        // Add newlines between block-level nodes (paragraphs, headings, etc.)
+        if (node !== root && node.getType && node.getType() !== "text") {
+          text += "\n"
+        }
+      }
+    }
+    const children = root.getChildren()
+    for (let i = 0; i < children.length; i++) {
+      walk(children[i])
+      if (i < children.length - 1) text += "\n"
+    }
+    return text
+  }
+
+  _restoreEntityPlaceholders(html, entities) {
+    for (const { placeholder, html: entityHtml } of entities) {
+      html = html.split(placeholder).join(entityHtml)
+    }
+    return html
+  }
+
+  _extractMentions(html) {
+    const doc = new DOMParser().parseFromString(html, "text/html")
+    const spans = doc.querySelectorAll("span.editor-mention[data-mention-username]")
+    const set = new Set()
+    spans.forEach(s => set.add(s.dataset.mentionUsername))
+    return set
+  }
+
+  _extractChannels(html) {
+    const doc = new DOMParser().parseFromString(html, "text/html")
+    const spans = doc.querySelectorAll("span.editor-channel[data-channel-id]")
+    const map = new Map()
+    spans.forEach(s => {
+      map.set(s.dataset.channelName, {
+        channelId: s.dataset.channelId,
+        channelName: s.dataset.channelName,
+        serverId: s.dataset.serverId
+      })
+    })
+    return map
+  }
+
+  _appendLineWithMentions(para, line, mentions, channels) {
+    // Build a regex that matches @username for known mentions and #channel for known channels
+    const patterns = []
+    for (const username of mentions) {
+      patterns.push(`@${username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)
+    }
+    for (const channelName of channels.keys()) {
+      patterns.push(`#${channelName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)
+    }
+
+    if (patterns.length === 0) {
+      para.append(this.lexical.$createTextNode(line))
+      return
+    }
+
+    const regex = new RegExp(`(${patterns.join("|")})`, "g")
+    let lastIndex = 0
+    let match
+
+    while ((match = regex.exec(line)) !== null) {
+      if (match.index > lastIndex) {
+        para.append(this.lexical.$createTextNode(line.slice(lastIndex, match.index)))
+      }
+      const token = match[1]
+      if (token.startsWith("@")) {
+        const username = token.slice(1)
+        para.append($createMentionNode(username))
+      } else {
+        const channelName = token.slice(1)
+        const info = channels.get(channelName)
+        para.append($createChannelNode(info.channelId, info.channelName, info.serverId))
+      }
+      lastIndex = regex.lastIndex
+    }
+
+    if (lastIndex < line.length) {
+      para.append(this.lexical.$createTextNode(line.slice(lastIndex)))
+    }
   }
 
   _htmlToMarkdown(html) {
