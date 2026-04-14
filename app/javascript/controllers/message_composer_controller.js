@@ -1,6 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
-import { MentionNode, $createMentionNode } from "lexical/mention_node"
-import { ChannelNode, $createChannelNode } from "lexical/channel_node"
+import { MentionNode } from "lexical/mention_node"
+import { ChannelNode } from "lexical/channel_node"
+import { htmlToMarkdown } from "composer/html_to_markdown"
+import { createSerializer } from "composer/serializer"
+import {
+  getTextWithPlaceholders, restoreEntityPlaceholders,
+  extractMentions, extractChannels, appendLineWithMentions
+} from "composer/entity_utils"
+import { MentionAutocomplete } from "composer/mention_autocomplete"
+import { ChannelAutocomplete } from "composer/channel_autocomplete"
 
 export default class extends Controller {
   static targets = ["editor", "hiddenInput", "placeholder", "resizeBtn"]
@@ -97,6 +105,14 @@ export default class extends Controller {
       MentionNode, ChannelNode
     ]
 
+    this._serializer = createSerializer({
+      createEditor: lexical.createEditor,
+      editorNodes: this._editorNodes,
+      convertFromMarkdownString: $convertFromMarkdownString,
+      transformers: TRANSFORMERS,
+      generateHtmlFromNodes: html.$generateHtmlFromNodes
+    })
+
     this.editor.setRootElement(this.editorTarget)
     registerRichText(this.editor)
     registerCodeHighlighting(this.editor)
@@ -106,21 +122,33 @@ export default class extends Controller {
     // Convert back to markdown so users can edit raw syntax, but preserve
     // structured mentions and channels as proper Lexical nodes.
     if (this.hasContentValue && this.contentValue) {
-      const mentions = this._extractMentions(this.contentValue)
-      const channels = this._extractChannels(this.contentValue)
-      const markdown = this._htmlToMarkdown(this.contentValue)
+      const mentions = extractMentions(this.contentValue)
+      const channels = extractChannels(this.contentValue)
+      const md = htmlToMarkdown(this.contentValue)
       this.editor.update(() => {
         const root = this.lexical.$getRoot()
         root.clear()
-        for (const line of markdown.split("\n")) {
+        for (const line of md.split("\n")) {
           const para = this.lexical.$createParagraphNode()
           if (line) {
-            this._appendLineWithMentions(para, line, mentions, channels)
+            appendLineWithMentions(para, line, mentions, channels, this.lexical.$createTextNode)
           }
           root.append(para)
         }
       })
     }
+
+    this._mentionAC = new MentionAutocomplete({
+      editor: this.editor,
+      lexical: this.lexical,
+      serverId: this.serverIdValue
+    })
+
+    this._channelAC = new ChannelAutocomplete({
+      editor: this.editor,
+      lexical: this.lexical,
+      serverId: this.serverIdValue
+    })
 
     this._cleanups = []
 
@@ -129,15 +157,14 @@ export default class extends Controller {
       this.editor.registerCommand(
         KEY_ENTER_COMMAND,
         (event) => {
-          // If mention or channel dropdown is open, select the active item
-          if (this._mentionDropdown) {
+          if (this._mentionAC.isOpen) {
             event?.preventDefault()
-            this._selectActiveMention()
+            this._mentionAC.selectActive()
             return true
           }
-          if (this._channelDropdown) {
+          if (this._channelAC.isOpen) {
             event?.preventDefault()
-            this._selectActiveChannel()
+            this._channelAC.selectActive()
             return true
           }
           if (event && !event.shiftKey) {
@@ -180,7 +207,7 @@ export default class extends Controller {
           if (htmlData) return false
 
           const text = clipboardData.getData("text/plain")
-          if (!text || !this._looksLikeMarkdown(text)) return false
+          if (!text || !this._serializer.looksLikeMarkdown(text)) return false
 
           event.preventDefault()
           this.editor.update(() => {
@@ -210,26 +237,26 @@ export default class extends Controller {
           if ($isRangeSelection(selection)) {
             this._updateToolbarState(selection)
             this._updateLanguagePicker(selection)
-            this._checkMentionTrigger(selection)
-            this._checkChannelTrigger(selection)
+            this._mentionAC.checkTrigger(selection)
+            this._channelAC.checkTrigger(selection)
           }
           this._updatePlaceholder()
         })
       })
     )
 
-    // Intercept arrow keys, Tab, and Escape for mention dropdown navigation
+    // Intercept arrow keys, Tab, and Escape for autocomplete dropdown navigation
     this._cleanups.push(
       this.editor.registerCommand(
         lexical.KEY_ARROW_DOWN_COMMAND,
-        (event) => this._handleMentionNav(event, "down") || this._handleChannelNav(event, "down"),
+        (event) => this._mentionAC.handleNav(event, "down") || this._channelAC.handleNav(event, "down"),
         lexical.COMMAND_PRIORITY_HIGH
       )
     )
     this._cleanups.push(
       this.editor.registerCommand(
         lexical.KEY_ARROW_UP_COMMAND,
-        (event) => this._handleMentionNav(event, "up") || this._handleChannelNav(event, "up"),
+        (event) => this._mentionAC.handleNav(event, "up") || this._channelAC.handleNav(event, "up"),
         lexical.COMMAND_PRIORITY_HIGH
       )
     )
@@ -237,14 +264,14 @@ export default class extends Controller {
       this.editor.registerCommand(
         lexical.KEY_TAB_COMMAND,
         (event) => {
-          if (this._mentionDropdown) {
+          if (this._mentionAC.isOpen) {
             event.preventDefault()
-            this._selectActiveMention()
+            this._mentionAC.selectActive()
             return true
           }
-          if (this._channelDropdown) {
+          if (this._channelAC.isOpen) {
             event.preventDefault()
-            this._selectActiveChannel()
+            this._channelAC.selectActive()
             return true
           }
           return false
@@ -256,12 +283,12 @@ export default class extends Controller {
       this.editor.registerCommand(
         lexical.KEY_ESCAPE_COMMAND,
         () => {
-          if (this._mentionDropdown) {
-            this._hideMentionDropdown()
+          if (this._mentionAC.isOpen) {
+            this._mentionAC.hideDropdown()
             return true
           }
-          if (this._channelDropdown) {
-            this._hideChannelDropdown()
+          if (this._channelAC.isOpen) {
+            this._channelAC.hideDropdown()
             return true
           }
           return false
@@ -283,8 +310,8 @@ export default class extends Controller {
   disconnect() {
     this.isDisconnecting = true
     this._removeLanguagePicker()
-    this._hideMentionDropdown()
-    this._hideChannelDropdown()
+    this._mentionAC?.destroy()
+    this._channelAC?.destroy()
 
     if (this._handleQuote) {
       document.removeEventListener("message:quote", this._handleQuote)
@@ -352,7 +379,6 @@ export default class extends Controller {
       if (!topLevelNode) return
 
       const codeNode = $createCodeNode()
-      // Add an empty text node so the cursor has somewhere to land
       const textNode = $createTextNode("")
       codeNode.append(textNode)
 
@@ -393,7 +419,6 @@ export default class extends Controller {
     } else if (size === "full") {
       const messageArea = this.element.closest(".flex-1.flex.flex-col.min-h-0.overflow-hidden")
       const areaHeight = messageArea ? messageArea.clientHeight : window.innerHeight - 100
-      // Subtract the form's own chrome: toolbar, padding, border, thread label etc.
       const height = `${Math.max(200, areaHeight - 60)}px`
       editor.style.maxHeight = height
       editor.style.minHeight = height
@@ -465,7 +490,7 @@ export default class extends Controller {
   handleSubmit(event) {
     const html = this._serializeToHtml()
     const hasFiles = this.element.querySelectorAll('input[name="message[files][]"]').length > 0
-    if (this._isEmpty(html) && !hasFiles) {
+    if (this._serializer.isEmpty(html) && !hasFiles) {
       event.preventDefault()
       return
     }
@@ -481,7 +506,7 @@ export default class extends Controller {
   _submitMessage() {
     const html = this._serializeToHtml()
     const hasFiles = this.element.querySelectorAll('input[name="message[files][]"]').length > 0
-    if (this._isEmpty(html) && !hasFiles) return
+    if (this._serializer.isEmpty(html) && !hasFiles) return
 
     this.hiddenInputTarget.value = html
     this.element.requestSubmit()
@@ -492,12 +517,12 @@ export default class extends Controller {
     // without mutating the main editor state.
     // Mentions and channels are preserved through markdown conversion via placeholders.
     let plainText = ""
-    const entities = [] // { placeholder, html } for mentions/channels
+    const entities = []
     this.editor.getEditorState().read(() => {
-      plainText = this._getTextWithPlaceholders(this.lexical.$getRoot(), entities)
+      plainText = getTextWithPlaceholders(this.lexical.$getRoot(), entities)
     })
 
-    if (plainText && this._looksLikeMarkdown(plainText)) {
+    if (plainText && this._serializer.looksLikeMarkdown(plainText)) {
       // Each blank line between blocks is \n\n\n\n (two block separators with
       // an empty paragraph between). Replace each extra \n\n with a placeholder
       // paragraph that the markdown converter won't swallow.
@@ -522,190 +547,18 @@ export default class extends Controller {
         html = this.htmlModule.$generateHtmlFromNodes(tempEditor)
       })
       tempEditor.setRootElement(null)
-      html = this._restoreEntityPlaceholders(html, entities)
+      html = restoreEntityPlaceholders(html, entities)
       // Replace placeholder paragraphs with empty paragraphs for visual spacing
       html = html.split(`<p>${BLANK_LINE}</p>`).join("<p><br></p>")
       html = html.split(BLANK_LINE).join("")
-      return this._cleanHtml(html)
+      return this._serializer.cleanHtml(html)
     }
 
     let html = ""
     this.editor.getEditorState().read(() => {
       html = this.htmlModule.$generateHtmlFromNodes(this.editor)
     })
-    return this._cleanHtml(html)
-  }
-
-  _cleanHtml(html) {
-    // Clean up Lexical's verbose code block output
-    html = html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_match, attrs, inner) => {
-      const plain = inner
-        .replace(/<br\s*\/?>/g, "\n")
-        .replace(/<[^>]*>/g, "")
-      return `<pre${attrs}>${plain}</pre>`
-    })
-    // Strip leading/trailing empty paragraphs
-    html = html.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
-    html = html.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
-    // Convert horizontal rules (---, ___, ***) that survived as plain text
-    html = html.replace(/<p[^>]*>\s*(?:<span[^>]*>)?\s*([-_*])\1{2,}\s*(?:<\/span>)?\s*<\/p>/g, "<hr>")
-    // Convert markdown tables that survived as plain text in <p> tags
-    html = this._convertMarkdownTables(html)
-    // Render ```md code blocks as formatted HTML instead of a code block
-    html = this._renderMarkdownCodeBlocks(html)
-    return html
-  }
-
-  _renderMarkdownCodeBlocks(html) {
-    return html.replace(
-      /<pre[^>]*data-(?:highlight-)?language="(?:md|markdown)"[^>]*>([\s\S]*?)<\/pre>/g,
-      (_match, content) => {
-        const mdText = content
-          .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")
-        const tempEditor = this.lexical.createEditor({
-          namespace: "MdRender",
-          nodes: this._editorNodes
-        })
-        const tempEl = document.createElement("div")
-        tempEditor.setRootElement(tempEl)
-        tempEditor.update(() => {
-          this._$convertFromMarkdownString(mdText, this._TRANSFORMERS)
-        }, { discrete: true })
-
-        let rendered = ""
-        tempEditor.getEditorState().read(() => {
-          rendered = this.htmlModule.$generateHtmlFromNodes(tempEditor)
-        })
-        tempEditor.setRootElement(null)
-
-        // Clean the rendered output (strip Lexical's verbose code block formatting)
-        rendered = rendered.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_m, attrs, inner) => {
-          const plain = inner.replace(/<br\s*\/?>/g, "\n").replace(/<[^>]*>/g, "")
-          return `<pre${attrs}>${plain}</pre>`
-        })
-        rendered = rendered.replace(/^(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+/, "")
-        rendered = rendered.replace(/(<p(\s[^>]*)?>\s*(<br\s*\/?>)?\s*<\/p>)+$/, "")
-        rendered = rendered.replace(/<p[^>]*>\s*(?:<span[^>]*>)?\s*([-_*])\1{2,}\s*(?:<\/span>)?\s*<\/p>/g, "<hr>")
-        rendered = this._convertMarkdownTables(rendered)
-        return rendered
-      }
-    )
-  }
-
-  _convertMarkdownTables(html) {
-    // First, split <p> tags that contain <br> followed by pipe content
-    // into separate chunks so table rows aren't merged with preceding text.
-    html = html.replace(/(<p[^>]*>)([\s\S]*?)<\/p>/g, (_match, openTag, inner) => {
-      // Split on <br> boundaries
-      const segments = inner.split(/<br\s*\/?>/)
-      if (segments.length <= 1) return _match
-
-      const parts = []
-      let current = []
-      for (const seg of segments) {
-        const text = seg.replace(/<[^>]*>/g, "").trim()
-        if (text.startsWith("|") && text.endsWith("|") && current.length > 0) {
-          // Previous non-table content becomes its own <p>
-          parts.push(`${openTag}${current.join("<br>")}</p>`)
-          current = []
-        }
-        current.push(seg)
-      }
-      if (current.length > 0) {
-        parts.push(`${openTag}${current.join("<br>")}</p>`)
-      }
-      return parts.join("")
-    })
-
-    // Now split into <p> chunks and non-<p> content
-    const chunks = []
-    const pRegex = /(<p[^>]*>[\s\S]*?<\/p>)/g
-    let lastIndex = 0
-    let m
-
-    while ((m = pRegex.exec(html)) !== null) {
-      if (m.index > lastIndex) {
-        chunks.push({ type: "other", raw: html.slice(lastIndex, m.index) })
-      }
-      const raw = m[1]
-      const text = raw.replace(/<[^>]*>/g, "").trim()
-      chunks.push({ type: "p", raw, text })
-      lastIndex = pRegex.lastIndex
-    }
-    if (lastIndex < html.length) {
-      chunks.push({ type: "other", raw: html.slice(lastIndex) })
-    }
-
-    // Walk chunks, collecting consecutive pipe-rows into table groups
-    let result = ""
-    let tableRows = []
-    let tableRawParts = []
-
-    const flushTable = () => {
-      if (tableRows.length >= 3 && /^[\s|:-]+$/.test(tableRows[1])) {
-        result += this._buildTableHtml(tableRows)
-      } else {
-        result += tableRawParts.join("")
-      }
-      tableRows = []
-      tableRawParts = []
-    }
-
-    for (const chunk of chunks) {
-      if (chunk.type === "p") {
-        const t = chunk.text
-        if (t.startsWith("|") && t.endsWith("|")) {
-          tableRows.push(t)
-          tableRawParts.push(chunk.raw)
-          continue
-        }
-      }
-      if (tableRows.length > 0) flushTable()
-      result += chunk.raw
-    }
-    if (tableRows.length > 0) flushTable()
-
-    return result
-  }
-
-  _buildTableHtml(lines) {
-    // lines[0] = header, lines[1] = separator, lines[2+] = data
-    const parseRow = (line) =>
-      line.split("|").slice(1, -1).map(cell => cell.trim())
-
-    const separator = parseRow(lines[1])
-    const alignments = separator.map(cell => {
-      if (cell.startsWith(":") && cell.endsWith(":")) return "center"
-      if (cell.endsWith(":")) return "right"
-      return "left"
-    })
-
-    const alignClass = (a) => a === "center" ? ' class="text-center"' : a === "right" ? ' class="text-right"' : ""
-
-    const headerCells = parseRow(lines[0])
-    let tableHtml = "<table><thead><tr>"
-    headerCells.forEach((cell, i) => {
-      tableHtml += `<th${alignClass(alignments[i])}>${cell}</th>`
-    })
-    tableHtml += "</tr></thead><tbody>"
-
-    for (let r = 2; r < lines.length; r++) {
-      const cells = parseRow(lines[r])
-      tableHtml += "<tr>"
-      cells.forEach((cell, i) => {
-        tableHtml += `<td${alignClass(alignments[i])}>${cell}</td>`
-      })
-      tableHtml += "</tr>"
-    }
-
-    tableHtml += "</tbody></table>"
-    return tableHtml
-  }
-
-  _isEmpty(html) {
-    if (!html) return true
-    const stripped = html.replace(/<[^>]*>/g, "").trim()
-    return stripped.length === 0
+    return this._serializer.cleanHtml(html)
   }
 
   _updateToolbarState(selection) {
@@ -728,7 +581,6 @@ export default class extends Controller {
 
   _updateLanguagePicker(selection) {
     const anchorNode = selection.anchor.getNode()
-    // Walk up the tree to find a CodeNode ancestor
     let codeNode = null
     let node = anchorNode
     while (node) {
@@ -745,7 +597,6 @@ export default class extends Controller {
     }
 
     const codeNodeKey = codeNode.getKey()
-    // Don't rebuild if already showing for this node
     if (this._langPickerNodeKey === codeNodeKey) return
 
     this._removeLanguagePicker()
@@ -754,7 +605,6 @@ export default class extends Controller {
     const codeDomElement = this.editor.getElementByKey(codeNodeKey)
     if (!codeDomElement) return
 
-    // Place picker in the editor's relative parent, positioned over the code block
     const editorWrapper = this.editorTarget.parentElement
     const wrapperRect = editorWrapper.getBoundingClientRect()
     const codeRect = codeDomElement.getBoundingClientRect()
@@ -829,8 +679,6 @@ export default class extends Controller {
   _insertQuote({ body }) {
     if (!this._ready || !body) return
 
-    // Build a blockquote HTML string and parse it into Lexical nodes
-    // using the same DOM-to-Lexical approach used for editing pre-population
     const escaped = body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     const quoteHtml = `<blockquote><p>${escaped}</p></blockquote><p></p>`
 
@@ -850,7 +698,6 @@ export default class extends Controller {
 
       nodes.forEach(node => root.append(node))
 
-      // Place cursor in the trailing paragraph
       const lastChild = root.getLastChild()
       if (lastChild) lastChild.select()
     })
@@ -866,661 +713,5 @@ export default class extends Controller {
       const textContent = root.getTextContent()
       this.placeholderTarget.style.display = textContent.length === 0 ? "" : "none"
     })
-  }
-
-  // --- @Mention autocomplete ---
-
-  _checkMentionTrigger(selection) {
-    if (!selection.isCollapsed()) {
-      this._hideMentionDropdown()
-      return
-    }
-
-    const anchor = selection.anchor
-    const node = anchor.getNode()
-    const textContent = node.getTextContent()
-    const offset = anchor.offset
-
-    // Look backwards from cursor for @ trigger
-    const textBeforeCursor = textContent.substring(0, offset)
-    const match = textBeforeCursor.match(/@(\w{0,20})$/)
-
-    if (!match) {
-      this._hideMentionDropdown()
-      return
-    }
-
-    const query = match[1]
-    this._mentionQuery = query
-    this._mentionNodeKey = node.getKey()
-    this._mentionOffset = offset
-
-    // Get cursor position for dropdown placement
-    const nativeSelection = window.getSelection()
-    if (!nativeSelection || nativeSelection.rangeCount === 0) return
-
-    const range = nativeSelection.getRangeAt(0)
-    const rect = range.getBoundingClientRect()
-
-    if (query.length >= 1) {
-      this._fetchMembers(query).then(members => {
-        if (members.length > 0) {
-          this._showMentionDropdown(members, rect)
-        } else {
-          this._hideMentionDropdown()
-        }
-      })
-    } else {
-      // Show all members when just "@" is typed
-      this._fetchMembers("").then(members => {
-        if (members.length > 0) {
-          this._showMentionDropdown(members, rect)
-        }
-      })
-    }
-  }
-
-  _showMentionDropdown(members, anchorRect) {
-    this._hideMentionDropdown()
-
-    const dropdown = document.createElement("div")
-    dropdown.className = "mention-autocomplete"
-    this._mentionActiveIndex = 0
-
-    members.forEach((member, index) => {
-      const item = document.createElement("div")
-      item.className = `mention-autocomplete-item${index === 0 ? " active" : ""}`
-      item.dataset.username = member.username
-
-      const nameSpan = document.createElement("span")
-      nameSpan.textContent = `@${member.username}`
-
-      item.appendChild(nameSpan)
-
-      if (member.display_name && member.display_name !== member.username) {
-        const displaySpan = document.createElement("span")
-        displaySpan.className = "display-name"
-        displaySpan.textContent = member.display_name
-        item.appendChild(displaySpan)
-      }
-
-      item.addEventListener("mousedown", (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        this._insertMention(member.username)
-      })
-
-      item.addEventListener("mouseenter", () => {
-        this._setActiveIndex(index)
-      })
-
-      dropdown.appendChild(item)
-    })
-
-    this._mentionMembers = members
-
-    // Position fixed on document.body to avoid overflow-hidden clipping
-    dropdown.style.position = "fixed"
-    dropdown.style.left = `${anchorRect.left}px`
-    dropdown.style.bottom = `${window.innerHeight - anchorRect.top + 4}px`
-
-    document.body.appendChild(dropdown)
-    this._mentionDropdown = dropdown
-  }
-
-  _hideMentionDropdown() {
-    if (this._mentionDropdown) {
-      this._mentionDropdown.remove()
-      this._mentionDropdown = null
-      this._mentionMembers = null
-      this._mentionActiveIndex = 0
-    }
-  }
-
-  _handleMentionNav(event, direction) {
-    if (!this._mentionDropdown || !this._mentionMembers) return false
-
-    event.preventDefault()
-    const items = this._mentionDropdown.querySelectorAll(".mention-autocomplete-item")
-    const max = items.length - 1
-
-    if (direction === "down") {
-      this._setActiveIndex(Math.min(this._mentionActiveIndex + 1, max))
-    } else {
-      this._setActiveIndex(Math.max(this._mentionActiveIndex - 1, 0))
-    }
-
-    return true
-  }
-
-  _setActiveIndex(index) {
-    const items = this._mentionDropdown?.querySelectorAll(".mention-autocomplete-item")
-    if (!items) return
-
-    items.forEach((item, i) => {
-      item.classList.toggle("active", i === index)
-    })
-    this._mentionActiveIndex = index
-
-    // Scroll active item into view
-    items[index]?.scrollIntoView({ block: "nearest" })
-  }
-
-  _selectActiveMention() {
-    if (!this._mentionMembers || this._mentionActiveIndex == null) return
-    const member = this._mentionMembers[this._mentionActiveIndex]
-    if (member) {
-      this._insertMention(member.username)
-    }
-  }
-
-  _insertMention(username) {
-    this._hideMentionDropdown()
-
-    const nodeKey = this._mentionNodeKey
-    const offset = this._mentionOffset
-    const query = this._mentionQuery
-
-    this.editor.update(() => {
-      const node = this.lexical.$getNodeByKey(nodeKey)
-      if (!node) return
-
-      const textContent = node.getTextContent()
-      // Find the @ trigger position
-      const triggerStart = offset - query.length - 1 // -1 for the @
-
-      // Split the text node and insert mention
-      const mentionNode = $createMentionNode(username)
-      const spaceNode = this.lexical.$createTextNode(" ")
-
-      if (triggerStart === 0 && offset === textContent.length) {
-        // The entire node is the @query
-        node.replace(mentionNode)
-        mentionNode.insertAfter(spaceNode)
-      } else if (triggerStart === 0) {
-        // @ is at start of node
-        const remaining = node.getTextContent().substring(offset)
-        node.setTextContent(remaining)
-        node.insertBefore(mentionNode)
-        mentionNode.insertAfter(spaceNode)
-      } else {
-        // @ is in middle of text
-        const before = textContent.substring(0, triggerStart)
-        const after = textContent.substring(offset)
-        node.setTextContent(before)
-        node.insertAfter(spaceNode)
-        node.insertAfter(mentionNode)
-        if (after) {
-          const afterNode = this.lexical.$createTextNode(after)
-          spaceNode.insertAfter(afterNode)
-        }
-      }
-
-      spaceNode.select()
-    })
-  }
-
-  async _fetchMembers(query) {
-    if (!this.hasServerIdValue || !this.serverIdValue) return []
-
-    try {
-      const url = `/servers/${this.serverIdValue}/members?q=${encodeURIComponent(query)}`
-      const response = await fetch(url, {
-        headers: { "Accept": "application/json" }
-      })
-
-      if (!response.ok) return []
-      return await response.json()
-    } catch {
-      return []
-    }
-  }
-
-  // --- #Channel autocomplete ---
-
-  _checkChannelTrigger(selection) {
-    if (!selection.isCollapsed()) {
-      this._hideChannelDropdown()
-      return
-    }
-
-    const anchor = selection.anchor
-    const node = anchor.getNode()
-    const textContent = node.getTextContent()
-    const offset = anchor.offset
-
-    const textBeforeCursor = textContent.substring(0, offset)
-    const match = textBeforeCursor.match(/#([a-z0-9-]{0,30})$/)
-
-    if (!match) {
-      this._hideChannelDropdown()
-      return
-    }
-
-    const query = match[1]
-    this._channelQuery = query
-    this._channelNodeKey = node.getKey()
-    this._channelOffset = offset
-
-    const nativeSelection = window.getSelection()
-    if (!nativeSelection || nativeSelection.rangeCount === 0) return
-
-    const range = nativeSelection.getRangeAt(0)
-    const rect = range.getBoundingClientRect()
-
-    this._fetchChannels(query).then(channels => {
-      if (channels.length > 0) {
-        this._showChannelDropdown(channels, rect)
-      } else {
-        this._hideChannelDropdown()
-      }
-    })
-  }
-
-  _showChannelDropdown(channels, anchorRect) {
-    this._hideChannelDropdown()
-
-    const dropdown = document.createElement("div")
-    dropdown.className = "mention-autocomplete"
-    this._channelActiveIndex = 0
-
-    channels.forEach((channel, index) => {
-      const item = document.createElement("div")
-      item.className = `mention-autocomplete-item${index === 0 ? " active" : ""}`
-      item.dataset.channelId = channel.id
-      item.dataset.channelName = channel.name
-
-      const nameSpan = document.createElement("span")
-      nameSpan.textContent = `#${channel.name}`
-      item.appendChild(nameSpan)
-
-      if (channel.description) {
-        const descSpan = document.createElement("span")
-        descSpan.className = "display-name"
-        descSpan.textContent = channel.description
-        item.appendChild(descSpan)
-      }
-
-      item.addEventListener("mousedown", (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        this._insertChannel(channel.id, channel.name, channel.server_id)
-      })
-
-      item.addEventListener("mouseenter", () => {
-        this._setChannelActiveIndex(index)
-      })
-
-      dropdown.appendChild(item)
-    })
-
-    this._channelItems = channels
-
-    dropdown.style.position = "fixed"
-    dropdown.style.left = `${anchorRect.left}px`
-    dropdown.style.bottom = `${window.innerHeight - anchorRect.top + 4}px`
-
-    document.body.appendChild(dropdown)
-    this._channelDropdown = dropdown
-  }
-
-  _hideChannelDropdown() {
-    if (this._channelDropdown) {
-      this._channelDropdown.remove()
-      this._channelDropdown = null
-      this._channelItems = null
-      this._channelActiveIndex = 0
-    }
-  }
-
-  _handleChannelNav(event, direction) {
-    if (!this._channelDropdown || !this._channelItems) return false
-
-    event.preventDefault()
-    const items = this._channelDropdown.querySelectorAll(".mention-autocomplete-item")
-    const max = items.length - 1
-
-    if (direction === "down") {
-      this._setChannelActiveIndex(Math.min(this._channelActiveIndex + 1, max))
-    } else {
-      this._setChannelActiveIndex(Math.max(this._channelActiveIndex - 1, 0))
-    }
-
-    return true
-  }
-
-  _setChannelActiveIndex(index) {
-    const items = this._channelDropdown?.querySelectorAll(".mention-autocomplete-item")
-    if (!items) return
-
-    items.forEach((item, i) => {
-      item.classList.toggle("active", i === index)
-    })
-    this._channelActiveIndex = index
-    items[index]?.scrollIntoView({ block: "nearest" })
-  }
-
-  _selectActiveChannel() {
-    if (!this._channelItems || this._channelActiveIndex == null) return
-    const channel = this._channelItems[this._channelActiveIndex]
-    if (channel) {
-      this._insertChannel(channel.id, channel.name, channel.server_id)
-    }
-  }
-
-  _insertChannel(channelId, channelName, serverId) {
-    this._hideChannelDropdown()
-
-    const nodeKey = this._channelNodeKey
-    const offset = this._channelOffset
-    const query = this._channelQuery
-
-    this.editor.update(() => {
-      const node = this.lexical.$getNodeByKey(nodeKey)
-      if (!node) return
-
-      const textContent = node.getTextContent()
-      const triggerStart = offset - query.length - 1 // -1 for the #
-
-      const channelNode = $createChannelNode(channelId, channelName, serverId)
-      const spaceNode = this.lexical.$createTextNode(" ")
-
-      if (triggerStart === 0 && offset === textContent.length) {
-        node.replace(channelNode)
-        channelNode.insertAfter(spaceNode)
-      } else if (triggerStart === 0) {
-        const remaining = node.getTextContent().substring(offset)
-        node.setTextContent(remaining)
-        node.insertBefore(channelNode)
-        channelNode.insertAfter(spaceNode)
-      } else {
-        const before = textContent.substring(0, triggerStart)
-        const after = textContent.substring(offset)
-        node.setTextContent(before)
-        node.insertAfter(spaceNode)
-        node.insertAfter(channelNode)
-        if (after) {
-          const afterNode = this.lexical.$createTextNode(after)
-          spaceNode.insertAfter(afterNode)
-        }
-      }
-
-      spaceNode.select()
-    })
-  }
-
-  _getTextWithPlaceholders(root, entities) {
-    // Mirrors Lexical's getTextContent() but replaces MentionNode/ChannelNode
-    // with unique placeholders so they survive markdown conversion.
-    const parts = []
-
-    const walkInline = (node) => {
-      if (node instanceof MentionNode) {
-        const username = node.__username
-        const placeholder = `\x00M${entities.length}\x00`
-        entities.push({
-          placeholder,
-          html: `<span class="editor-mention" data-mention-username="${username}">@${username}</span>`
-        })
-        return placeholder
-      }
-      if (node instanceof ChannelNode) {
-        const { __channelId: cid, __channelName: cname, __serverId: sid } = node
-        const placeholder = `\x00M${entities.length}\x00`
-        entities.push({
-          placeholder,
-          html: `<span class="editor-channel" data-channel-id="${cid}" data-channel-name="${cname}" data-server-id="${sid}">#${cname}</span>`
-        })
-        return placeholder
-      }
-      const children = node.getChildren ? node.getChildren() : null
-      if (!children || children.length === 0) {
-        return node.getTextContent()
-      }
-      return children.map(walkInline).join("")
-    }
-
-    const topChildren = root.getChildren()
-    for (const block of topChildren) {
-      const children = block.getChildren ? block.getChildren() : null
-      if (!children || children.length === 0) {
-        // Empty paragraph — preserve as blank line
-        parts.push("")
-      } else {
-        parts.push(children.map(walkInline).join(""))
-      }
-    }
-
-    // Join with \n\n to match Lexical's getTextContent() block separator
-    return parts.join("\n\n")
-  }
-
-  _restoreEntityPlaceholders(html, entities) {
-    for (const { placeholder, html: entityHtml } of entities) {
-      html = html.split(placeholder).join(entityHtml)
-    }
-    return html
-  }
-
-  _extractMentions(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html")
-    const spans = doc.querySelectorAll("span.editor-mention[data-mention-username]")
-    const set = new Set()
-    spans.forEach(s => set.add(s.dataset.mentionUsername))
-    return set
-  }
-
-  _extractChannels(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html")
-    const spans = doc.querySelectorAll("span.editor-channel[data-channel-id]")
-    const map = new Map()
-    spans.forEach(s => {
-      map.set(s.dataset.channelName, {
-        channelId: s.dataset.channelId,
-        channelName: s.dataset.channelName,
-        serverId: s.dataset.serverId
-      })
-    })
-    return map
-  }
-
-  _appendLineWithMentions(para, line, mentions, channels) {
-    // Build a regex that matches @username for known mentions and #channel for known channels
-    const patterns = []
-    for (const username of mentions) {
-      patterns.push(`@${username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)
-    }
-    for (const channelName of channels.keys()) {
-      patterns.push(`#${channelName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)
-    }
-
-    if (patterns.length === 0) {
-      para.append(this.lexical.$createTextNode(line))
-      return
-    }
-
-    const regex = new RegExp(`(${patterns.join("|")})`, "g")
-    let lastIndex = 0
-    let match
-
-    while ((match = regex.exec(line)) !== null) {
-      if (match.index > lastIndex) {
-        para.append(this.lexical.$createTextNode(line.slice(lastIndex, match.index)))
-      }
-      const token = match[1]
-      if (token.startsWith("@")) {
-        const username = token.slice(1)
-        para.append($createMentionNode(username))
-      } else {
-        const channelName = token.slice(1)
-        const info = channels.get(channelName)
-        para.append($createChannelNode(info.channelId, info.channelName, info.serverId))
-      }
-      lastIndex = regex.lastIndex
-    }
-
-    if (lastIndex < line.length) {
-      para.append(this.lexical.$createTextNode(line.slice(lastIndex)))
-    }
-  }
-
-  _htmlToMarkdown(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html")
-    return this._convertBlock(doc.body).trim()
-  }
-
-  _convertBlock(node) {
-    let md = ""
-    for (const child of node.childNodes) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        const text = child.textContent.trim()
-        if (text) md += text + "\n\n"
-        continue
-      }
-      if (child.nodeType !== Node.ELEMENT_NODE) continue
-
-      const tag = child.tagName.toLowerCase()
-      switch (tag) {
-        case "h1": md += `# ${this._convertInline(child)}\n\n`; break
-        case "h2": md += `## ${this._convertInline(child)}\n\n`; break
-        case "h3": md += `### ${this._convertInline(child)}\n\n`; break
-        case "p": md += `${this._convertInline(child)}\n\n`; break
-        case "pre": {
-          const lang = child.getAttribute("data-highlight-language") ||
-                       child.getAttribute("data-language") || ""
-          md += `\`\`\`${lang}\n${child.textContent}\n\`\`\`\n\n`
-          break
-        }
-        case "hr": md += "---\n\n"; break
-        case "blockquote": {
-          const content = this._convertBlock(child).trim()
-          md += content.split("\n").map(l => `> ${l}`).join("\n") + "\n\n"
-          break
-        }
-        case "ul": md += this._convertList(child, 0, false) + "\n"; break
-        case "ol": md += this._convertList(child, 0, true) + "\n"; break
-        case "table": md += this._convertTable(child) + "\n\n"; break
-        default: md += this._convertBlock(child); break
-      }
-    }
-    return md
-  }
-
-  _convertInline(node) {
-    let text = ""
-    for (const child of node.childNodes) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        text += child.textContent
-        continue
-      }
-      if (child.nodeType !== Node.ELEMENT_NODE) continue
-
-      const tag = child.tagName.toLowerCase()
-      switch (tag) {
-        case "strong": text += `**${this._convertInline(child)}**`; break
-        case "em": text += `*${this._convertInline(child)}*`; break
-        case "s": text += `~~${this._convertInline(child)}~~`; break
-        case "code": text += `\`${child.textContent}\``; break
-        case "a": {
-          const href = child.getAttribute("href") || ""
-          text += `[${this._convertInline(child)}](${href})`
-          break
-        }
-        case "br": text += "\n"; break
-        default: text += this._convertInline(child); break
-      }
-    }
-    return text
-  }
-
-  _convertList(listNode, indent, ordered) {
-    let md = ""
-    let counter = 1
-    for (const li of listNode.children) {
-      if (li.tagName?.toLowerCase() !== "li") continue
-
-      const prefix = "    ".repeat(indent) + (ordered ? `${counter}. ` : "- ")
-      let hasText = false
-      let textContent = ""
-      let nestedList = null
-
-      for (const child of li.childNodes) {
-        if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
-          hasText = true
-          textContent += child.textContent
-        } else if (child.nodeType === Node.ELEMENT_NODE) {
-          const childTag = child.tagName.toLowerCase()
-          if (childTag === "ul" || childTag === "ol") {
-            nestedList = child
-          } else {
-            hasText = true
-            textContent += this._convertInline(child)
-          }
-        }
-      }
-
-      if (hasText) {
-        md += `${prefix}${textContent.trim()}\n`
-      }
-      if (nestedList) {
-        const isOrdered = nestedList.tagName.toLowerCase() === "ol"
-        md += this._convertList(nestedList, indent + 1, isOrdered)
-      }
-      counter++
-    }
-    return md
-  }
-
-  _convertTable(table) {
-    const rows = []
-    const headerCells = table.querySelectorAll("thead th")
-    if (headerCells.length > 0) {
-      rows.push("| " + Array.from(headerCells).map(th => th.textContent.trim()).join(" | ") + " |")
-      rows.push("| " + Array.from(headerCells).map(th => {
-        const cls = th.className || ""
-        if (cls.includes("text-center")) return ":---:"
-        if (cls.includes("text-right")) return "---:"
-        return "---"
-      }).join(" | ") + " |")
-    }
-    table.querySelectorAll("tbody tr").forEach(tr => {
-      const cells = tr.querySelectorAll("td")
-      rows.push("| " + Array.from(cells).map(td => td.textContent.trim()).join(" | ") + " |")
-    })
-    return rows.join("\n")
-  }
-
-  _looksLikeMarkdown(text) {
-    const patterns = [
-      /^#{1,6}\s/m,           // headings
-      /\*\*.+?\*\*/,          // bold
-      /~~.+?~~/,              // strikethrough
-      /^```/m,                // fenced code block
-      /^>\s/m,                // blockquote
-      /^[-*+]\s/m,            // unordered list
-      /^\d+\.\s/m,            // ordered list
-      /\[.+?\]\(.+?\)/,       // link
-    ]
-
-    for (const pattern of patterns) {
-      if (pattern.test(text)) return true
-    }
-    return false
-  }
-
-  async _fetchChannels(query) {
-    if (!this.hasServerIdValue || !this.serverIdValue) return []
-
-    try {
-      const url = `/servers/${this.serverIdValue}/channels/search?q=${encodeURIComponent(query)}`
-      const response = await fetch(url, {
-        headers: { "Accept": "application/json" }
-      })
-
-      if (!response.ok) return []
-      return await response.json()
-    } catch {
-      return []
-    }
   }
 }
