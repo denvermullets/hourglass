@@ -28,6 +28,7 @@ class Messages::CreateService < Service
 
     detect_mentions(message)
     broadcast_unread_indicators(message)
+    mark_author_read(message)
 
     message
   end
@@ -119,6 +120,11 @@ class Messages::CreateService < Service
     end
   end
 
+  def mark_author_read(message)
+    membership = ChannelMembership.find_or_create_by!(user: @user, channel: @channel)
+    membership.update!(last_read_at: message.created_at)
+  end
+
   def notifiable_member_ids
     scope = @channel.is_private? ? @channel.channel_memberships : @channel.server.memberships
     scope.where.not(user_id: @user.id).pluck(:user_id)
@@ -131,7 +137,7 @@ class Messages::CreateService < Service
       "user_#{user_id}_unread",
       target: target_id,
       html: <<~HTML
-        <span id="#{target_id}" class="flex-shrink-0 ml-auto flex items-center">
+        <span id="#{target_id}" data-unread="true" class="flex-shrink-0 ml-auto flex items-center">
           <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-400 block"></span>
         </span>
       HTML

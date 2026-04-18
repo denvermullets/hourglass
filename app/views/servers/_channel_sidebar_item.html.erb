@@ -1,8 +1,9 @@
 <%# Individual channel link in sidebar %>
 <% active = current_channel&.id == channel.id %>
 <% is_unread = local_assigns.fetch(:unread, false) && !active %>
-<%= link_to server_channel_path(server, channel),
-  class: "flex items-center gap-2 mx-1.5 px-2 py-1 rounded text-[11px] transition-colors duration-100 no-underline relative #{active ? 'bg-bunker-875 text-bunker-50' : is_unread ? 'text-bunker-100 font-bold hover:bg-bunker-900' : 'text-bunker-400 hover:bg-bunker-900 hover:text-bunker-200'}" do %>
+<% base_classes = "flex items-center gap-2 mx-1.5 px-2 py-1 rounded text-[11px] transition-colors duration-100 no-underline relative" %>
+<% state_classes = active ? 'bg-bunker-875 text-bunker-50' : 'text-bunker-400 hover:bg-bunker-900 hover:text-bunker-200 has-[[data-unread=true]]:text-bunker-100 has-[[data-unread=true]]:font-bold' %>
+<%= link_to server_channel_path(server, channel), class: "#{base_classes} #{state_classes}" do %>
   <% if active %>
     <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-r bg-granny-smith-apple-300"></span>
   <% end %>
@@ -22,7 +23,7 @@
     <% end %>
   </span>
   <span class="truncate flex-1"><%= channel.name %></span>
-  <span id="unread_indicator_channel_<%= channel.id %>" class="flex-shrink-0 ml-auto flex items-center">
+  <span id="unread_indicator_channel_<%= channel.id %>" data-unread="<%= is_unread %>" class="flex-shrink-0 ml-auto flex items-center">
     <% if is_unread %>
       <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-400 block"></span>
     <% end %>
