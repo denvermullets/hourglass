@@ -8,6 +8,7 @@ pin '@hotwired/stimulus-loading', to: 'stimulus-loading.js'
 pin '@rails/activestorage', to: 'activestorage.esm.js'
 pin_all_from 'app/javascript/controllers', under: 'controllers'
 pin_all_from 'app/javascript/lexical', under: 'lexical'
+pin_all_from 'app/javascript/composer', under: 'composer'
 
 # Lexical rich text editor
 # All @lexical/* packages must use ?external= to share module instances via importmap.
