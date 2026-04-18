@@ -21,6 +21,21 @@ module Messages
       end
     end
 
+    test "marks author's membership as read at the new message's timestamp" do
+      channel = channels(:general)
+      user = users(:one)
+
+      message = Messages::CreateService.call(
+        channel: channel,
+        user: user,
+        params: { body: 'Hello!' }
+      )
+
+      membership = ChannelMembership.find_by!(user: user, channel: channel)
+      assert_equal message.created_at.to_i, membership.last_read_at.to_i
+      assert membership.last_read_at >= channel.reload.last_message_at
+    end
+
     test 'raises on invalid params' do
       channel = channels(:general)
       user = users(:one)

@@ -27,6 +27,7 @@ class Conversations::CreateMessageService < Service
 
     detect_mentions(message)
     broadcast_unread_indicators(message)
+    mark_author_read(message)
 
     message
   end
@@ -119,6 +120,11 @@ class Conversations::CreateMessageService < Service
     end
 
     broadcast_sidebar_update
+  end
+
+  def mark_author_read(message)
+    membership = @conversation.conversation_memberships.find_or_create_by!(user: @user)
+    membership.update!(last_read_at: message.created_at)
   end
 
   def notifiable_member_ids

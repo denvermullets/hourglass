@@ -24,7 +24,7 @@ class Channels::MarkReadService < Service
     Turbo::StreamsChannel.broadcast_replace_to(
       "user_#{@user.id}_unread",
       target: target_id,
-      html: "<span id=\"#{target_id}\" class=\"#{classes}\"></span>"
+      html: "<span id=\"#{target_id}\" data-unread=\"false\" class=\"#{classes}\"></span>"
     )
 
     broadcast_title_indicator
