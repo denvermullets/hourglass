@@ -35,12 +35,14 @@
       </div>
     </div>
 
-    <%# Unread title indicator — Turbo Stream target for tab dot %>
-    <span id="unread_title_indicator"
-          data-controller="unread-title"
+    <%# Unread title indicator — Turbo Stream target for tab dot.
+        Controller lives on the wrapper so it survives replacement of #unread_title_indicator. %>
+    <span data-controller="unread-title"
           data-unread-title-base-value="<%= content_for(:title) || 'Hourglass' %>"
           class="hidden">
-      <% if Current.user&.unread_channels? || Current.user&.unread_conversations? %><span data-unread="true"></span><% end %>
+      <span id="unread_title_indicator">
+        <% if Current.user&.unread_channels? || Current.user&.unread_conversations? %><span data-unread="true"></span><% end %>
+      </span>
     </span>
     <%= turbo_stream_from "user_#{Current.user.id}_unread_title" %>
 
