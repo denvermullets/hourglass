@@ -414,8 +414,8 @@ export default class extends Controller {
     const editor = this.editorTarget
 
     if (size === "default") {
-      editor.style.maxHeight = "200px"
-      editor.style.minHeight = "36px"
+      editor.style.maxHeight = "12.5rem"
+      editor.style.minHeight = "2.25rem"
     } else if (size === "half") {
       editor.style.maxHeight = "50vh"
       editor.style.minHeight = "50vh"

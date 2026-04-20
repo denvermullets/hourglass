@@ -1,13 +1,13 @@
 <%# Individual channel link in sidebar %>
 <% active = current_channel&.id == channel.id %>
 <% is_unread = local_assigns.fetch(:unread, false) && !active %>
-<% base_classes = "flex items-center gap-2 mx-1.5 px-2 py-1 rounded text-[11px] transition-colors duration-100 no-underline relative" %>
+<% base_classes = "flex items-center gap-2 mx-1.5 px-2 py-1 rounded text-xs transition-colors duration-100 no-underline relative" %>
 <% state_classes = active ? 'bg-bunker-875 text-bunker-50' : 'text-bunker-400 hover:bg-bunker-900 hover:text-bunker-200 has-[[data-unread=true]]:text-bunker-100 has-[[data-unread=true]]:font-bold' %>
 <%= link_to server_channel_path(server, channel), class: "#{base_classes} #{state_classes}" do %>
   <% if active %>
     <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-r bg-granny-smith-apple-300"></span>
   <% end %>
-  <span class="text-bunker-500 text-[10px] flex-shrink-0">
+  <span class="text-bunker-500 text-xs flex-shrink-0">
     <% if channel.voice? %>
       <svg class="w-3 h-3 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>

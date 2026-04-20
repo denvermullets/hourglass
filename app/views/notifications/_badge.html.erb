@@ -1,6 +1,6 @@
 <% count = local_assigns[:count] || Current.user&.unread_notification_count || 0 %>
 <% if count > 0 %>
-  <span class="absolute -top-1 -right-1 bg-granny-smith-apple-600 text-bunker-950 text-[7px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5">
+  <span class="absolute -top-1 -right-1 bg-granny-smith-apple-600 text-bunker-950 text-xs font-bold rounded-full min-w-3.5 h-3.5 flex items-center justify-center px-0.5">
     <%= count > 99 ? "99+" : count %>
   </span>
 <% end %>

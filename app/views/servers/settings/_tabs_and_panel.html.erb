@@ -6,59 +6,59 @@
   <div class="lg:hidden flex border-b border-bunker-825">
     <%= link_to settings_general_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'general' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
+      class: "flex-1 text-center py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'general' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
       general
     <% end %>
     <%= link_to settings_invite_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'invite' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
+      class: "flex-1 text-center py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'invite' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
       invite
     <% end %>
     <%= link_to settings_channels_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'channels' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
+      class: "flex-1 text-center py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'channels' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
       channels
     <% end %>
     <%= link_to settings_permissions_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
+      class: "flex-1 text-center py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
       permissions
     <% end %>
     <%= link_to settings_danger_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "flex-1 text-center py-2.5 text-[10px] no-underline transition-colors duration-100 #{tab == 'danger' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
+      class: "flex-1 text-center py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'danger' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
       danger
     <% end %>
   </div>
 
   <%# Desktop sidebar nav %>
   <div class="hidden lg:block w-[200px] border-r border-bunker-825 py-4 flex-shrink-0">
-    <div class="text-[8px] tracking-[0.2em] text-bunker-500 px-4 mb-2">
+    <div class="text-xs tracking-[0.2em] text-bunker-500 px-4 mb-2">
       <span class="text-bunker-600">//</span> settings
     </div>
     <%= link_to settings_general_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'general' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
+      class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == 'general' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
       general
     <% end %>
     <%= link_to settings_invite_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'invite' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
+      class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == 'invite' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
       invite
     <% end %>
     <%= link_to settings_channels_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'channels' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
+      class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == 'channels' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
       channels
     <% end %>
     <%= link_to settings_permissions_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
+      class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
       permissions
     <% end %>
     <%= link_to settings_danger_server_path(server),
       data: { turbo_frame: "settings_panel" },
-      class: "block w-full text-left px-4 py-2 text-[11px] no-underline transition-colors duration-100 #{tab == 'danger' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
+      class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == 'danger' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
       danger zone
     <% end %>
   </div>

@@ -1,6 +1,6 @@
 <div class="max-w-[480px]">
   <%= form_with url: update_permissions_server_path(server), method: :patch, class: "flex flex-col gap-4" do |form| %>
-    <div class="text-[8px] tracking-[0.16em] text-bunker-500 mb-1">
+    <div class="text-xs tracking-[0.16em] text-bunker-500 mb-1">
       <span class="text-bunker-600">//</span> member permissions
     </div>
 
@@ -8,8 +8,8 @@
       <%= check_box_tag :members_can_create_channels, '1', server.members_can_create_channels?,
         class: "w-4 h-4 rounded border border-bunker-775 bg-bunker-875 accent-granny-smith-apple-600 cursor-pointer" %>
       <div>
-        <div class="text-[11px] text-bunker-300 group-hover:text-bunker-200 transition-colors duration-100">allow members to create channels</div>
-        <div class="text-[9px] text-bunker-600 mt-0.5">members can create new channels inside existing categories</div>
+        <div class="text-xs text-bunker-300 group-hover:text-bunker-200 transition-colors duration-100">allow members to create channels</div>
+        <div class="text-xs text-bunker-600 mt-0.5">members can create new channels inside existing categories</div>
       </div>
     </label>
 
@@ -17,12 +17,12 @@
       <%= check_box_tag :members_can_create_categories, '1', server.members_can_create_categories?,
         class: "w-4 h-4 rounded border border-bunker-775 bg-bunker-875 accent-granny-smith-apple-600 cursor-pointer" %>
       <div>
-        <div class="text-[11px] text-bunker-300 group-hover:text-bunker-200 transition-colors duration-100">allow members to create categories</div>
-        <div class="text-[9px] text-bunker-600 mt-0.5">members can create new category groups in the sidebar</div>
+        <div class="text-xs text-bunker-300 group-hover:text-bunker-200 transition-colors duration-100">allow members to create categories</div>
+        <div class="text-xs text-bunker-600 mt-0.5">members can create new category groups in the sidebar</div>
       </div>
     </label>
 
     <%= form.submit "// save permissions \u2192",
-      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950 mt-2" %>
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950 mt-2" %>
   <% end %>
 </div>

@@ -5,7 +5,7 @@
 <% else %>
 <%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 #{ grouped ? '-mt-0.5' : 'py-1.5' } rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
   <% if message.deleted? %>
-    <div class="flex-1 text-[11px] text-bunker-600 italic">
+    <div class="flex-1 text-xs text-bunker-600 italic">
       [message deleted]
     </div>
   <% else %>
@@ -18,7 +18,7 @@
         <% if message.user.avatar.attached? %>
           <%= image_tag polymorphic_path(message.user.avatar), alt: "", class: "w-full h-full object-cover" %>
         <% else %>
-          <span class="text-[11px] font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
+          <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
         <% end %>
       </div>
     <% end %>
@@ -27,17 +27,17 @@
       <% unless grouped %>
         <%# Header: username + timestamp %>
         <div class="flex items-baseline gap-2">
-          <span class="font-syne text-[11px] font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
-          <span class="text-[9px] text-bunker-600"><%= format_timestamp(message.created_at, style: :message) %></span>
+          <span class="font-syne text-xs font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
+          <span class="text-xs text-bunker-600"><%= format_timestamp(message.created_at, style: :message) %></span>
           <% if message.edited? %>
-            <span class="text-[9px] text-bunker-600">(edited)</span>
+            <span class="text-xs text-bunker-600">(edited)</span>
           <% end %>
         </div>
       <% end %>
 
       <%# Body %>
       <% if message.body.present? %>
-        <div class="text-[11px] text-bunker-300 break-words message-content"><%= sanitize_message(message.body) %></div>
+        <div class="text-xs text-bunker-300 break-words message-content"><%= sanitize_message(message.body) %></div>
       <% end %>
 
       <%# Attachments %>
@@ -57,7 +57,7 @@
         <% if message.parent_message_id.nil? %>
           <% thread_path = context == :conversation ? conversation_message_thread_path(message.conversation, message) : server_channel_message_thread_path(message.channel.server, message.channel, message) %>
           <%= link_to "reply", thread_path,
-                class: "text-[9px] leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
+                class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
         <% end %>
 
         <%# Quote — visible to all users %>
@@ -65,7 +65,7 @@
         <button type="button"
                 onclick="document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))"
                 data-quote-body="<%= quote_body %>"
-                class="text-[9px] leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
+                class="text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
           quote
         </button>
 
@@ -79,10 +79,10 @@
         <% end %>
         <div class="hidden items-center gap-2" data-author-only>
           <%= link_to "edit", edit_path,
-                class: "text-[9px] leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline",
+                class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline",
                 data: { turbo_method: :get, turbo_prefetch: false } %>
           <%= link_to "delete", delete_path,
-                class: "text-[9px] leading-none text-bunker-600 hover:text-danger-400 transition-colors duration-100 no-underline",
+                class: "text-xs leading-none text-bunker-600 hover:text-danger-400 transition-colors duration-100 no-underline",
                 data: { turbo_method: :delete, turbo_confirm: "Delete this message?" } %>
         </div>
       </div>

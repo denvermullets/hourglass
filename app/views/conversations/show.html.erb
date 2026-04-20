@@ -12,7 +12,7 @@
     <div class="px-4 lg:px-5 py-3 border-b border-bunker-825 flex-shrink-0">
       <div class="flex items-center gap-2.5">
         <%# Mobile back button %>
-        <%= link_to conversations_path, class: "lg:hidden text-[10px] text-granny-smith-apple-600 no-underline flex-shrink-0" do %>
+        <%= link_to conversations_path, class: "lg:hidden text-xs text-granny-smith-apple-600 no-underline flex-shrink-0" do %>
           &larr; back
         <% end %>
 
@@ -22,7 +22,7 @@
             <% if other&.avatar&.attached? %>
               <%= image_tag polymorphic_path(other.avatar), alt: "", class: "w-full h-full object-cover" %>
             <% else %>
-              <span class="text-[9px] font-syne font-bold text-bunker-300 uppercase"><%= other&.username&.first || "?" %></span>
+              <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= other&.username&.first || "?" %></span>
             <% end %>
           </div>
         <% else %>
@@ -36,11 +36,11 @@
           </div>
         <% end %>
 
-        <span class="font-syne text-[13px] lg:text-[15px] font-bold text-bunker-50"><%= @conversation.display_name(Current.user) %></span>
+        <span class="font-syne text-sm lg:text-base font-bold text-bunker-50"><%= @conversation.display_name(Current.user) %></span>
       </div>
 
       <%# Stats row %>
-      <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-bunker-500 font-dm-mono">
+      <div class="flex items-center gap-1.5 mt-1.5 text-xs text-bunker-500 font-dm-mono">
         <span>msgs: <%= @message_count %></span>
         <span class="text-bunker-825">&bull;</span>
         <span><%= @conversation.members.count %> member<%= @conversation.members.count == 1 ? "" : "s" %></span>
@@ -67,7 +67,7 @@
             <%= link_to "load older messages",
                   conversation_messages_path(@conversation, before: @messages.first.created_at.iso8601(6), format: :turbo_stream),
                   data: { turbo_stream: true },
-                  class: "text-[9px] text-bunker-500 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
+                  class: "text-xs text-bunker-500 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
           </div>
         <% else %>
           <div id="load_older"></div>
@@ -77,8 +77,8 @@
         <div id="messages" class="px-4 lg:px-5 py-2 space-y-0.5">
           <% if @messages.empty? %>
             <div class="text-center py-8">
-              <div class="text-[11px] text-bunker-500 mb-1">start of your conversation with <span class="text-bunker-300"><%= @conversation.display_name(Current.user) %></span></div>
-              <div class="text-[9px] text-bunker-600">send the first message!</div>
+              <div class="text-xs text-bunker-500 mb-1">start of your conversation with <span class="text-bunker-300"><%= @conversation.display_name(Current.user) %></span></div>
+              <div class="text-xs text-bunker-600">send the first message!</div>
             </div>
           <% else %>
             <% previous_date = nil %>
@@ -108,17 +108,17 @@
       <div class="border-2 border-dashed border-granny-smith-apple-600 rounded-lg p-12 flex flex-col items-center gap-3.5 bg-granny-smith-apple-925">
         <div class="font-syne text-4xl font-extrabold text-granny-smith-apple-300 leading-none">&darr;</div>
         <div class="text-sm text-granny-smith-apple-300 tracking-[0.06em]">// drop to attach</div>
-        <div class="text-[10px] text-granny-smith-apple-600 leading-relaxed text-center">
+        <div class="text-xs text-granny-smith-apple-600 leading-relaxed text-center">
           files will be attached to your next message to<br>
           <span class="text-bunker-300"><%= @conversation.display_name(Current.user) %></span>
         </div>
         <div class="flex gap-1.5 flex-wrap justify-center mt-1">
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">jpg &middot; png &middot; gif &middot; webp</span>
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">mp3 &middot; wav</span>
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">mp4 &middot; mov</span>
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">pdf &middot; zip &middot; any</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">jpg &middot; png &middot; gif &middot; webp</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">mp3 &middot; wav</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">mp4 &middot; mov</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">pdf &middot; zip &middot; any</span>
         </div>
-        <div class="text-[9px] text-granny-smith-apple-600 mt-1">max 50mb per file</div>
+        <div class="text-xs text-granny-smith-apple-600 mt-1">max 50mb per file</div>
       </div>
     </div>
   </div>

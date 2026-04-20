@@ -6,7 +6,7 @@
       <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
 
       <%# Header %>
-      <div class="text-[9px] tracking-[0.08em] text-granny-smith-apple-400 mb-3">
+      <div class="text-xs tracking-[0.08em] text-granny-smith-apple-400 mb-3">
         // <%= message.user.username %> has joined this server
       </div>
 
@@ -23,14 +23,14 @@
 
         <%# Info %>
         <div class="min-w-0">
-          <div class="font-syne text-[12px] font-bold text-bunker-50"><%= message.user.display_name.presence || message.user.username %></div>
-          <div class="text-[10px] text-bunker-500">@<%= message.user.username %></div>
+          <div class="font-syne text-xs font-bold text-bunker-50"><%= message.user.display_name.presence || message.user.username %></div>
+          <div class="text-xs text-bunker-500">@<%= message.user.username %></div>
         </div>
       </div>
 
       <%# Bio %>
       <% if message.user.bio.present? %>
-        <div class="mt-2.5 text-[10px] text-bunker-400 leading-relaxed italic">
+        <div class="mt-2.5 text-xs text-bunker-400 leading-relaxed italic">
           &ldquo;<%= message.user.bio %>&rdquo;
         </div>
       <% end %>
