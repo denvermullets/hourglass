@@ -167,7 +167,10 @@ export default class extends Controller {
             this._channelAC.selectActive()
             return true
           }
-          if (event && !event.shiftKey) {
+          // On touch devices, Enter inserts a newline — software keyboards
+          // don't reliably fire keydown, so Enter-to-send is inconsistent.
+          // Users tap the send button explicitly on mobile.
+          if (event && !event.shiftKey && !this._isTouchDevice()) {
             event.preventDefault()
             this._submitMessage()
             return true
@@ -433,6 +436,7 @@ export default class extends Controller {
 
   // Reset after successful form submission
   reset() {
+    this._submitting = false
     this._setSubmitDisabled(false)
     if (this._submitTimeout) {
       clearTimeout(this._submitTimeout)
@@ -488,6 +492,11 @@ export default class extends Controller {
   }
 
   handleSubmit(event) {
+    if (this._submitting) {
+      event.preventDefault()
+      return
+    }
+
     const html = this._serializeToHtml()
     const hasFiles = this.element.querySelectorAll('input[name="message[files][]"]').length > 0
     if (this._serializer.isEmpty(html) && !hasFiles) {
@@ -495,10 +504,12 @@ export default class extends Controller {
       return
     }
     this.hiddenInputTarget.value = html
+    this._submitting = true
     this._setSubmitDisabled(true)
 
     // Safety: re-enable after 3s in case turbo:submit-end doesn't fire
     this._submitTimeout = setTimeout(() => {
+      this._submitting = false
       this._setSubmitDisabled(false)
     }, 3000)
   }
@@ -510,6 +521,12 @@ export default class extends Controller {
 
     this.hiddenInputTarget.value = html
     this.element.requestSubmit()
+  }
+
+  _isTouchDevice() {
+    return typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: coarse)").matches
   }
 
   _serializeToHtml() {
