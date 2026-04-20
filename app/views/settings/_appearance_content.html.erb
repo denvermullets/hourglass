@@ -73,7 +73,7 @@
     %>
     <div>
       <h3 class="text-xs text-bunker-300 font-medium mb-3">text size — desktop</h3>
-      <div class="grid grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <% text_sizes.each do |value, label, desc| %>
           <label class="relative cursor-pointer">
             <%= tag.input type: "radio", name: "text_size", value: value,
@@ -94,7 +94,7 @@
 
     <div>
       <h3 class="text-xs text-bunker-300 font-medium mb-3 mt-4">text size — mobile</h3>
-      <div class="grid grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <% text_sizes.each do |value, label, desc| %>
           <label class="relative cursor-pointer">
             <%= tag.input type: "radio", name: "text_size_mobile", value: value,

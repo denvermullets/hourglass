@@ -1,10 +1,10 @@
 <%= turbo_frame_tag "user_settings_panel", class: "flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden" do %>
   <%# Mobile tab nav %>
-  <div class="lg:hidden flex border-b border-bunker-825">
+  <div class="lg:hidden flex border-b border-bunker-825 overflow-x-auto scrollbar-none">
     <% %w[profile account notifications appearance].each do |t| %>
       <%= link_to send("#{t}_settings_path"),
         data: { turbo_frame: "user_settings_panel" },
-        class: "flex-1 text-center py-2.5 text-xs no-underline transition-colors duration-100 #{tab == t ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
+        class: "shrink-0 whitespace-nowrap px-4 py-2.5 text-xs no-underline transition-colors duration-100 #{tab == t ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
         <%= t %>
       <% end %>
     <% end %>
