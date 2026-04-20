@@ -10,7 +10,7 @@ export default class extends Controller {
     this.barTarget.style.width = width
     this.barTarget.className = `rounded-sm h-1 transition-all duration-200 ${color}`
     this.labelTarget.textContent = text
-    this.labelTarget.className = `text-[8px] tracking-[0.08em] ${color.replace("bg-", "text-")}`
+    this.labelTarget.className = `text-xs tracking-[0.08em] ${color.replace("bg-", "text-")}`
   }
 
   strength(password) {

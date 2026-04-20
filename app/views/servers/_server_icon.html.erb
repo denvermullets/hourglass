@@ -1,7 +1,7 @@
 <%# Renders a server icon — image or initials fallback
     Locals: server (required), size: "sm" | "md" | "lg" (default: "md") %>
 <% size ||= "md" %>
-<% size_classes = { "sm" => "w-[28px] h-[28px] rounded-md text-[8px]", "md" => "w-[34px] h-[34px] rounded-lg text-[9px]", "lg" => "w-[48px] h-[48px] rounded-xl text-[13px]" }[size] %>
+<% size_classes = { "sm" => "w-7 h-7 rounded-md text-xs", "md" => "w-8.5 h-8.5 rounded-lg text-xs", "lg" => "w-12 h-12 rounded-xl text-sm" }[size] %>
 
 <div class="<%= size_classes %> bg-bunker-875 border border-bunker-775 flex items-center justify-center text-bunker-500 flex-shrink-0 overflow-hidden">
   <% if server.icon.attached? %>

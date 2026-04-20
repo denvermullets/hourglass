@@ -2,7 +2,7 @@
   <div class="border border-bunker-825 rounded bg-bunker-875 max-h-40 overflow-y-auto">
     <% @users.each do |user| %>
       <button type="button"
-              class="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-bunker-200 hover:bg-bunker-825 transition-colors duration-100 border-0 bg-transparent cursor-pointer text-left"
+              class="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-bunker-200 hover:bg-bunker-825 transition-colors duration-100 border-0 bg-transparent cursor-pointer text-left"
               data-action="click->user-search#selectUser"
               data-user-id="<%= user.id %>"
               data-username="<%= user.username %>">
@@ -10,7 +10,7 @@
           <% if user.avatar.attached? %>
             <%= image_tag polymorphic_path(user.avatar), alt: "", class: "w-full h-full object-cover" %>
           <% else %>
-            <span class="text-[7px] font-syne font-bold text-bunker-300 uppercase"><%= user.username[0] %></span>
+            <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= user.username[0] %></span>
           <% end %>
         </div>
         <span><%= user.username %></span>

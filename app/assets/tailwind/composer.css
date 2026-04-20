@@ -1,12 +1,12 @@
 /* Composer toolbar buttons */
 .toolbar-btn {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  font-size: 10px;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
   font-family: var(--font-dm-mono);
   color: var(--color-bunker-600);
   background: transparent;
@@ -31,9 +31,9 @@
 .editor-code {
   background: var(--color-bunker-875);
   color: var(--color-granny-smith-apple-300);
-  padding: 0 4px;
-  border-radius: 2px;
-  font-size: 10px;
+  padding: 0 0.25rem;
+  border-radius: 0.125rem;
+  font-size: 0.625rem;
   font-family: var(--font-dm-mono);
 }
 .editor-link {
@@ -45,12 +45,12 @@
   width: 100%;
   background: var(--color-bunker-925);
   border: 1px solid var(--color-bunker-825);
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 10px;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  font-size: 0.625rem;
   font-family: var(--font-dm-mono);
   color: var(--color-bunker-200);
-  margin: 4px 0;
+  margin: 0.25rem 0;
   overflow-x: auto;
   white-space: pre;
   tab-size: 2;
@@ -61,15 +61,15 @@
 /* Code block language picker */
 .code-lang-picker {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 0.25rem;
+  right: 0.25rem;
   background: var(--color-bunker-875);
   border: 1px solid var(--color-bunker-825);
-  border-radius: 3px;
+  border-radius: 0.1875rem;
   color: var(--color-bunker-600);
   font-family: var(--font-dm-mono);
-  font-size: 9px;
-  padding: 1px 2px;
+  font-size: 0.5625rem;
+  padding: 0.0625rem 0.125rem;
   cursor: pointer;
   outline: none;
   appearance: none;
@@ -88,33 +88,33 @@
   color: var(--color-bunker-200);
 }
 
-/* Lexical editor headings — sized relative to the 11px editor base */
+/* Lexical editor headings */
 .editor-heading-h1 {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
   color: var(--color-bunker-100);
-  margin: 4px 0 2px 0;
+  margin: 0.25rem 0 0.125rem 0;
   line-height: 1.3;
 }
 .editor-heading-h2 {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   color: var(--color-bunker-100);
-  margin: 3px 0 2px 0;
+  margin: 0.1875rem 0 0.125rem 0;
   line-height: 1.3;
 }
 .editor-heading-h3 {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: bold;
   color: var(--color-bunker-100);
-  margin: 2px 0 1px 0;
+  margin: 0.125rem 0 0.0625rem 0;
   line-height: 1.4;
 }
 /* Lexical editor lists — 3 nesting levels */
 [data-message-composer-target="editor"] ul {
   list-style: disc;
-  padding-left: 20px;
-  margin: 2px 0;
+  padding-left: 1.25rem;
+  margin: 0.125rem 0;
 }
 [data-message-composer-target="editor"] ul ul {
   list-style: circle;
@@ -124,8 +124,8 @@
 }
 [data-message-composer-target="editor"] ol {
   list-style: decimal;
-  padding-left: 20px;
-  margin: 2px 0;
+  padding-left: 1.25rem;
+  margin: 0.125rem 0;
 }
 [data-message-composer-target="editor"] ol ol {
   list-style: lower-alpha;
@@ -134,7 +134,7 @@
   list-style: lower-roman;
 }
 [data-message-composer-target="editor"] li {
-  margin: 1px 0;
+  margin: 0.0625rem 0;
 }
 [data-message-composer-target="editor"] li:has(> ul:only-child),
 [data-message-composer-target="editor"] li:has(> ol:only-child) {
@@ -151,7 +151,7 @@
   font-weight: normal;
 }
 [data-message-composer-target="editor"] p + p {
-  margin-top: 4px;
+  margin-top: 0.25rem;
 }
 
 /* Message display content styles */
@@ -164,7 +164,7 @@
   min-height: 1em;
 }
 .message-content p + p {
-  margin-top: 4px;
+  margin-top: 0.25rem;
 }
 .message-content strong {
   font-weight: bold;
@@ -180,20 +180,20 @@
 .message-content code {
   background: var(--color-bunker-875);
   color: var(--color-granny-smith-apple-300);
-  padding: 0 4px;
-  border-radius: 2px;
-  font-size: 10px;
+  padding: 0 0.25rem;
+  border-radius: 0.125rem;
+  font-size: 0.625rem;
   font-family: var(--font-dm-mono);
 }
 .message-content pre {
   background: var(--color-bunker-925);
   border: 1px solid var(--color-bunker-825);
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 10px;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  font-size: 0.625rem;
   font-family: var(--font-dm-mono);
   color: var(--color-bunker-200);
-  margin: 4px 0;
+  margin: 0.25rem 0;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;
@@ -206,30 +206,30 @@
   font-size: inherit;
 }
 .message-content h1 {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
   color: var(--color-bunker-100);
-  margin: 4px 0 2px 0;
+  margin: 0.25rem 0 0.125rem 0;
   line-height: 1.3;
 }
 .message-content h2 {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   color: var(--color-bunker-100);
-  margin: 3px 0 2px 0;
+  margin: 0.1875rem 0 0.125rem 0;
   line-height: 1.3;
 }
 .message-content h3 {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: bold;
   color: var(--color-bunker-100);
-  margin: 2px 0 1px 0;
+  margin: 0.125rem 0 0.0625rem 0;
   line-height: 1.4;
 }
 .message-content ul {
   list-style: disc;
-  padding-left: 20px;
-  margin: 2px 0;
+  padding-left: 1.25rem;
+  margin: 0.125rem 0;
 }
 .message-content ul ul {
   list-style: circle;
@@ -239,8 +239,8 @@
 }
 .message-content ol {
   list-style: decimal;
-  padding-left: 20px;
-  margin: 2px 0;
+  padding-left: 1.25rem;
+  margin: 0.125rem 0;
 }
 .message-content ol ol {
   list-style: lower-alpha;
@@ -249,7 +249,7 @@
   list-style: lower-roman;
 }
 .message-content li {
-  margin: 1px 0;
+  margin: 0.0625rem 0;
 }
 /* Hide bullet on li that wraps a nested list without its own text */
 .message-content li:has(> ul:only-child),
@@ -260,14 +260,14 @@
 /* Tables */
 .message-content table {
   border-collapse: collapse;
-  margin: 4px 0;
+  margin: 0.25rem 0;
   width: 100%;
   font-size: inherit;
 }
 .message-content th,
 .message-content td {
   border: 1px solid var(--color-bunker-825);
-  padding: 4px 8px;
+  padding: 0.25rem 0.5rem;
   text-align: left;
 }
 .message-content th {
@@ -290,7 +290,7 @@
 .message-content hr {
   border: none;
   border-top: 1px solid var(--color-bunker-825);
-  margin: 8px 0;
+  margin: 0.5rem 0;
 }
 .message-content a {
   color: var(--color-jordy-blue-400);
@@ -303,8 +303,8 @@
 /* Blockquote / quote reply — editor */
 [data-message-composer-target="editor"] blockquote {
   border-left: 3px solid var(--color-bunker-700);
-  padding: 4px 0 4px 12px;
-  margin: 4px 0;
+  padding: 0.25rem 0 0.25rem 0.75rem;
+  margin: 0.25rem 0;
   color: var(--color-bunker-400);
   font-style: italic;
 }
@@ -313,9 +313,9 @@
 .message-content blockquote {
   position: relative;
   border: 1px solid var(--color-bunker-825);
-  border-radius: 8px;
-  padding: 10px 14px 10px 32px;
-  margin: 6px 0;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem 0.625rem 2rem;
+  margin: 0.375rem 0;
   background: var(--color-bunker-925);
   color: var(--color-bunker-300);
   font-style: normal;
@@ -323,9 +323,9 @@
 .message-content blockquote::before {
   content: "\201C";
   position: absolute;
-  left: 10px;
-  top: 4px;
-  font-size: 24px;
+  left: 0.625rem;
+  top: 0.25rem;
+  font-size: 1.5rem;
   line-height: 1;
   color: var(--color-bunker-600);
   font-family: Georgia, serif;
@@ -374,8 +374,8 @@
 .mention {
   color: var(--color-jordy-blue-400);
   background: color-mix(in srgb, var(--color-jordy-blue-400) 12%, transparent);
-  padding: 0 3px;
-  border-radius: 3px;
+  padding: 0 0.1875rem;
+  border-radius: 0.1875rem;
   font-weight: 500;
   cursor: pointer;
 }
@@ -401,8 +401,8 @@
 .channel-mention {
   color: var(--color-jordy-blue-400);
   background: color-mix(in srgb, var(--color-jordy-blue-400) 12%, transparent);
-  padding: 0 3px;
-  border-radius: 3px;
+  padding: 0 0.1875rem;
+  border-radius: 0.1875rem;
   font-weight: 500;
   cursor: pointer;
 }
@@ -412,22 +412,22 @@
   position: fixed;
   background: var(--color-bunker-925);
   border: 1px solid var(--color-bunker-825);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  max-height: 200px;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.3);
+  max-height: 12.5rem;
   overflow-y: auto;
   z-index: 100;
-  min-width: 180px;
+  min-width: 11.25rem;
 }
 
 .mention-autocomplete-item {
-  padding: 6px 12px;
-  font-size: 11px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.6875rem;
   color: var(--color-bunker-400);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .mention-autocomplete-item:hover,
@@ -438,5 +438,5 @@
 
 .mention-autocomplete-item .display-name {
   color: var(--color-bunker-600);
-  font-size: 9px;
+  font-size: 0.5625rem;
 }

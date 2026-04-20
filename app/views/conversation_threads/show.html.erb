@@ -12,20 +12,20 @@
     <div class="px-4 lg:px-7 py-3.5 border-b border-bunker-825 flex-shrink-0 flex items-center gap-3">
       <%# Back button %>
       <%= link_to conversation_path(@conversation),
-        class: "text-[10px] text-granny-smith-apple-600 no-underline flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 border border-bunker-825 rounded hover:border-granny-smith-apple-600 transition-colors duration-100" do %>
+        class: "text-xs text-granny-smith-apple-600 no-underline flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 border border-bunker-825 rounded hover:border-granny-smith-apple-600 transition-colors duration-100" do %>
         &larr; back
       <% end %>
 
-      <div class="w-px h-[18px] bg-bunker-825 flex-shrink-0"></div>
+      <div class="w-px h-4.5 bg-bunker-825 flex-shrink-0"></div>
 
       <div class="flex-1 min-w-0">
         <%# Breadcrumb %>
-        <div class="text-[8px] text-bunker-500 tracking-[0.12em] flex items-center gap-1.5">
+        <div class="text-xs text-bunker-500 tracking-[0.12em] flex items-center gap-1.5">
           <span><%= @conversation.display_name(Current.user) %></span>
           <span class="text-bunker-775">/</span>
           <span class="text-granny-smith-apple-600">thread · <%= format_timestamp(@parent_message.created_at, style: :thread_breadcrumb) %></span>
         </div>
-        <div class="font-syne text-[16px] font-bold text-bunker-50 mt-0.5 tracking-tight">thread</div>
+        <div class="font-syne text-base font-bold text-bunker-50 mt-0.5 tracking-tight">thread</div>
         <%= render "threads/header_meta", parent_message: @parent_message, participant_count: @participant_count %>
       </div>
     </div>
@@ -67,17 +67,17 @@
       <div class="border-2 border-dashed border-granny-smith-apple-600 rounded-lg p-12 flex flex-col items-center gap-3.5 bg-granny-smith-apple-925">
         <div class="font-syne text-4xl font-extrabold text-granny-smith-apple-300 leading-none">&darr;</div>
         <div class="text-sm text-granny-smith-apple-300 tracking-[0.06em]">// drop to attach</div>
-        <div class="text-[10px] text-granny-smith-apple-600 leading-relaxed text-center">
+        <div class="text-xs text-granny-smith-apple-600 leading-relaxed text-center">
           files will be attached to your next message in<br>
           <span class="text-bunker-300">thread</span>
         </div>
         <div class="flex gap-1.5 flex-wrap justify-center mt-1">
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">jpg &middot; png &middot; gif &middot; webp</span>
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">mp3 &middot; wav</span>
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">mp4 &middot; mov</span>
-          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-[9px] text-granny-smith-apple-600">pdf &middot; zip &middot; any</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">jpg &middot; png &middot; gif &middot; webp</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">mp3 &middot; wav</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">mp4 &middot; mov</span>
+          <span class="border border-granny-smith-apple-600 rounded-sm px-2 py-0.5 text-xs text-granny-smith-apple-600">pdf &middot; zip &middot; any</span>
         </div>
-        <div class="text-[9px] text-granny-smith-apple-600 mt-1">max 50mb per file</div>
+        <div class="text-xs text-granny-smith-apple-600 mt-1">max 50mb per file</div>
       </div>
     </div>
   </div>

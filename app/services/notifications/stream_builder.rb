@@ -38,8 +38,8 @@ class Notifications::StreamBuilder
       badge_classes = [
         'absolute -top-1 -right-1',
         'bg-granny-smith-apple-600 text-bunker-950',
-        'text-[7px] font-bold rounded-full',
-        'min-w-[14px] h-[14px]',
+        'text-xs font-bold rounded-full',
+        'min-w-3.5 h-3.5',
         'flex items-center justify-center px-0.5'
       ].join(' ')
 
@@ -79,11 +79,11 @@ class Notifications::StreamBuilder
               <div class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-500"></div>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-[10px] text-bunker-200 leading-relaxed m-0">
+              <p class="text-xs text-bunker-200 leading-relaxed m-0">
                 <span class="font-bold text-bunker-100">#{attrs[:actor]}</span> #{attrs[:body]}
               </p>
               #{attrs[:preview]}
-              <time class="text-[8px] text-bunker-600 mt-0.5 block">just now</time>
+              <time class="text-xs text-bunker-600 mt-0.5 block">just now</time>
             </div>
           </a>
         </div>
@@ -108,7 +108,7 @@ class Notifications::StreamBuilder
       return '' if data['preview'].blank?
 
       escaped = ERB::Util.html_escape(data['preview'])
-      %(<p class="text-[9px] text-bunker-500 mt-0.5 truncate m-0">#{escaped}</p>)
+      %(<p class="text-xs text-bunker-500 mt-0.5 truncate m-0">#{escaped}</p>)
     end
 
     def notification_url(data)

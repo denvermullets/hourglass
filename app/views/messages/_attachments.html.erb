@@ -19,7 +19,7 @@
         <%= image_tag full_src,
                       alt: image.filename.to_s,
                       class: "w-full h-full object-cover",
-                      style: "height: #{is_single ? '280px' : (is_first_of_three ? '200px' : '140px')}",
+                      style: "height: #{is_single ? '17.5rem' : (is_first_of_three ? '12.5rem' : '8.75rem')}",
                       loading: "lazy" %>
         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity duration-150 flex items-center justify-center">
           <span class="text-white text-lg">&#x2922;</span>
@@ -32,7 +32,7 @@
       </div>
     <% end %>
   </div>
-  <div class="text-[9px] text-bunker-600 mt-1">
+  <div class="text-xs text-bunker-600 mt-1">
     <% if images.size == 1 %>
       <%= images.first.filename %> &middot; <%= human_file_size(images.first.byte_size) %>
     <% else %>
@@ -49,7 +49,7 @@
        data-lightbox-src-value="<%= video_src %>"
        data-lightbox-type-value="video"
        data-action="click->lightbox#open">
-    <video preload="metadata" class="w-full pointer-events-none" style="max-height: 240px">
+    <video preload="metadata" class="w-full pointer-events-none" style="max-height: 15rem">
       <source src="<%= video_src %>" type="<%= video.content_type %>">
     </video>
     <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-80 group-hover/vid:opacity-100 transition-opacity duration-150">
@@ -58,8 +58,8 @@
       </div>
     </div>
     <div class="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-bunker-950/90 to-transparent flex items-center justify-between">
-      <span class="text-[9px] text-bunker-300"><%= video.filename %></span>
-      <span class="text-[9px] text-bunker-600"><%= human_file_size(video.byte_size) %></span>
+      <span class="text-xs text-bunker-300"><%= video.filename %></span>
+      <span class="text-xs text-bunker-600"><%= human_file_size(video.byte_size) %></span>
     </div>
   </div>
 <% end %>
@@ -68,13 +68,13 @@
 <% other_files.each do |file| %>
   <%= link_to rails_blob_path(file, disposition: :attachment),
               class: "flex items-center gap-3 border border-bunker-825 rounded-md px-3.5 py-2.5 bg-bunker-925 max-w-[340px] mt-2 no-underline hover:border-bunker-775 transition-colors duration-150" do %>
-    <div class="w-9 h-9 rounded-[5px] flex items-center justify-center flex-shrink-0 text-[9px] font-medium tracking-[0.06em] border <%= file_icon_classes(file) %>">
+    <div class="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0 text-xs font-medium tracking-[0.06em] border <%= file_icon_classes(file) %>">
       <%= file_extension_label(file) %>
     </div>
     <div class="flex-1 min-w-0">
-      <div class="text-[11px] text-bunker-50 truncate"><%= file.filename %></div>
-      <div class="text-[9px] text-bunker-600 mt-0.5"><%= file_extension_label(file) %> &middot; <%= human_file_size(file.byte_size) %></div>
+      <div class="text-xs text-bunker-50 truncate"><%= file.filename %></div>
+      <div class="text-xs text-bunker-600 mt-0.5"><%= file_extension_label(file) %> &middot; <%= human_file_size(file.byte_size) %></div>
     </div>
-    <div class="text-[9px] text-granny-smith-apple-600 flex-shrink-0">&darr;</div>
+    <div class="text-xs text-granny-smith-apple-600 flex-shrink-0">&darr;</div>
   <% end %>
 <% end %>

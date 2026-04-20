@@ -4,18 +4,18 @@
 
 <div>
   <div class="mb-6">
-    <div class="text-[8px] tracking-[0.2em] flex items-center gap-1 text-bunker-500">
+    <div class="text-xs tracking-[0.2em] flex items-center gap-1 text-bunker-500">
       <span class="text-bunker-600">//</span> account
     </div>
-    <h1 class="font-syne text-[22px] font-bold tracking-tight mt-1 text-bunker-50">sign in</h1>
-    <p class="text-[10px] mt-1 leading-relaxed text-bunker-500">welcome back.</p>
+    <h1 class="font-syne text-2xl font-bold tracking-tight mt-1 text-bunker-50">sign in</h1>
+    <p class="text-xs mt-1 leading-relaxed text-bunker-500">welcome back.</p>
   </div>
 
   <%= render "shared/auth_flash" %>
 
   <%= form_with url: session_url, class: "flex flex-col gap-3.5" do |form| %>
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
+      <label class="text-xs tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
         <span class="text-granny-smith-apple-600">$</span> username_or_email <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.text_field :login,
@@ -23,13 +23,13 @@
         autofocus: true,
         autocomplete: "username",
         placeholder: "denvermullets",
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
         onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
         onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
     </div>
 
     <div class="flex flex-col gap-1">
-      <label class="text-[8px] tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
+      <label class="text-xs tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
         <span class="text-granny-smith-apple-600">$</span> password <span class="text-danger-400 opacity-80">*</span>
       </label>
       <%= form.password_field :password,
@@ -37,24 +37,24 @@
         autocomplete: "current-password",
         placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
         maxlength: 72,
-        class: "w-full rounded px-3 py-2.5 font-dm-mono text-[11px] outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
+        class: "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
         onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
         onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
     </div>
 
     <%= form.submit "// sign in \u2192",
-      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+      class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
 
     <div class="flex items-center gap-2.5">
       <div class="flex-1 h-px bg-bunker-825"></div>
-      <span class="text-[8px] tracking-[0.1em] text-bunker-600">or</span>
+      <span class="text-xs tracking-[0.1em] text-bunker-600">or</span>
       <div class="flex-1 h-px bg-bunker-825"></div>
     </div>
 
     <%= link_to "create an account", new_onboarding_credentials_path,
-      class: "block w-full rounded px-3.5 py-2.5 font-dm-mono text-[11px] tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-bunker-775 text-bunker-500" %>
+      class: "block w-full rounded px-3.5 py-2.5 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-bunker-775 text-bunker-500" %>
 
-    <div class="text-[9px] text-center text-bunker-500">
+    <div class="text-xs text-center text-bunker-500">
       forgot password? <%= link_to "reset via email", new_password_path, class: "text-granny-smith-apple-600 no-underline" %>
     </div>
   <% end %>
