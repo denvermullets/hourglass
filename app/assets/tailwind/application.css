@@ -180,16 +180,19 @@
   --color-emerald-950: #082b18;
 }
 
-/* Text size — desktop uses data-text-size, mobile uses data-text-size-mobile */
+/* Text size — desktop uses data-text-size, mobile uses data-text-size-mobile.
+   Drives rem-based sizing across the app via root font-size. */
 @media (min-width: 1024px) {
-  [data-text-size="sm"] .text-scaled { zoom: 1.12; }
-  [data-text-size="md"] .text-scaled { zoom: 1.25; }
-  [data-text-size="lg"] .text-scaled { zoom: 1.4; }
+  :root { font-size: 16px; }
+  :root[data-text-size="sm"] { font-size: 17.92px; }
+  :root[data-text-size="md"] { font-size: 20px; }
+  :root[data-text-size="lg"] { font-size: 22.4px; }
 }
 @media (max-width: 1023px) {
-  [data-text-size-mobile="sm"] .text-scaled { zoom: 1.12; }
-  [data-text-size-mobile="md"] .text-scaled { zoom: 1.25; }
-  [data-text-size-mobile="lg"] .text-scaled { zoom: 1.4; }
+  :root { font-size: 16px; }
+  :root[data-text-size-mobile="sm"] { font-size: 17.92px; }
+  :root[data-text-size-mobile="md"] { font-size: 20px; }
+  :root[data-text-size-mobile="lg"] { font-size: 22.4px; }
 }
 
 /* Sidebar position — right-hand layout */

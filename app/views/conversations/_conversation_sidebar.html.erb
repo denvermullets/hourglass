@@ -4,14 +4,14 @@
   <%# Header %>
   <div class="px-3.5 py-3 border-b border-bunker-825 flex items-center justify-between">
     <div class="flex-1 min-w-0">
-      <h2 class="font-syne text-[15px] font-bold text-bunker-50 truncate">direct messages</h2>
-      <div class="text-[10px] tracking-[0.1em] mt-1.5 text-bunker-500 font-dm-mono">
+      <h2 class="font-syne text-base font-bold text-bunker-50 truncate">direct messages</h2>
+      <div class="text-xs tracking-[0.1em] mt-1.5 text-bunker-500 font-dm-mono">
         <span class="text-granny-smith-apple-600">//</span> <%= conversations.size %> conversation<%= conversations.size == 1 ? "" : "s" %>
       </div>
     </div>
     <%= link_to new_conversation_path,
       class: "w-7 h-7 rounded flex items-center justify-center border border-bunker-775 text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 transition-colors duration-100 no-underline" do %>
-      <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 5v14M5 12h14"/>
       </svg>
     <% end %>
@@ -25,8 +25,8 @@
       <% end %>
     <% else %>
       <div class="text-center py-8">
-        <div class="text-[11px] text-bunker-500 mb-1">no conversations yet</div>
-        <div class="text-[9px] text-bunker-600">start a new message.</div>
+        <div class="text-xs text-bunker-500 mb-1">no conversations yet</div>
+        <div class="text-xs text-bunker-600">start a new message.</div>
       </div>
     <% end %>
   </div>

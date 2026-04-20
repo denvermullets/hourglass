@@ -218,7 +218,7 @@ export default class extends Controller {
     // Add "+" button
     this.previewStripTarget.insertAdjacentHTML("beforeend", `
       <button type="button" data-action="click->attachment-upload#openFilePicker" data-add-more
-              class="flex items-center justify-center w-[52px] h-[52px] border border-dashed border-bunker-825 rounded cursor-pointer flex-shrink-0 hover:border-bunker-700 transition-colors duration-150">
+              class="flex items-center justify-center w-13 h-13 border border-dashed border-bunker-825 rounded cursor-pointer flex-shrink-0 hover:border-bunker-700 transition-colors duration-150">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-bunker-600" stroke-width="1.5" stroke-linecap="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -233,10 +233,10 @@ export default class extends Controller {
       : ""
 
     return `
-      <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative overflow-hidden border border-bunker-825 bg-bunker-875" data-pending-file>
+      <div class="w-13 h-13 rounded flex-shrink-0 relative overflow-hidden border border-bunker-825 bg-bunker-875" data-pending-file>
         <img src="${entry.previewUrl}" class="w-full h-full object-cover" />
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"
-                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-50">&times;</button>
+                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-xs text-bunker-300 cursor-pointer leading-none hover:text-bunker-50">&times;</button>
         ${progressBar}
       </div>
     `
@@ -250,11 +250,11 @@ export default class extends Controller {
       : ""
 
     return `
-      <div class="w-[52px] h-[52px] rounded flex-shrink-0 relative border border-bunker-825 bg-bunker-875 flex flex-col items-center justify-center gap-0.5" data-pending-file>
-        <span class="text-[8px] font-medium ${extColor}">${ext}</span>
-        <span class="text-[6px] text-bunker-600 text-center px-0.5 truncate max-w-full">${entry.file.name}</span>
+      <div class="w-13 h-13 rounded flex-shrink-0 relative border border-bunker-825 bg-bunker-875 flex flex-col items-center justify-center gap-0.5" data-pending-file>
+        <span class="text-xs font-medium ${extColor}">${ext}</span>
+        <span class="text-xs text-bunker-600 text-center px-0.5 truncate max-w-full">${entry.file.name}</span>
         <button type="button" data-action="click->attachment-upload#removeFile" data-file-id="${entry.id}"
-                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-[8px] text-bunker-300 cursor-pointer leading-none hover:text-bunker-50">&times;</button>
+                class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-bunker-950/90 border border-bunker-825 flex items-center justify-center text-xs text-bunker-300 cursor-pointer leading-none hover:text-bunker-50">&times;</button>
         ${progressBar}
       </div>
     `
@@ -285,7 +285,7 @@ export default class extends Controller {
   _showError(message) {
     // Create a temporary error toast
     const toast = document.createElement("div")
-    toast.className = "fixed bottom-4 left-1/2 -translate-x-1/2 bg-danger-800 text-danger-400 text-[10px] font-dm-mono px-4 py-2 rounded border border-danger-800 z-50"
+    toast.className = "fixed bottom-4 left-1/2 -translate-x-1/2 bg-danger-800 text-danger-400 text-xs font-dm-mono px-4 py-2 rounded border border-danger-800 z-50"
     toast.textContent = message
     document.body.appendChild(toast)
     setTimeout(() => toast.remove(), 3000)

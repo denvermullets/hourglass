@@ -56,11 +56,11 @@ export default class extends Controller {
 
     this.selectedUsers.forEach((username, userId) => {
       const chip = document.createElement("div")
-      chip.className = "flex items-center gap-1 bg-bunker-875 border border-bunker-825 rounded px-2 py-1 text-[10px] text-bunker-200"
+      chip.className = "flex items-center gap-1 bg-bunker-875 border border-bunker-825 rounded px-2 py-1 text-xs text-bunker-200"
       chip.innerHTML = `
         <span>${username}</span>
         <input type="hidden" name="user_ids[]" value="${userId}">
-        <button type="button" class="text-bunker-500 hover:text-bunker-300 ml-1 cursor-pointer bg-transparent border-0 p-0 text-[10px]" data-action="click->user-search#removeUser" data-user-id="${userId}">&times;</button>
+        <button type="button" class="text-bunker-500 hover:text-bunker-300 ml-1 cursor-pointer bg-transparent border-0 p-0 text-xs" data-action="click->user-search#removeUser" data-user-id="${userId}">&times;</button>
       `
       container.appendChild(chip)
     })
