@@ -50,11 +50,11 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal '3/15/2026 1:30 PM', result
   end
 
-  test 'absolute reply format shows time in user timezone' do
+  test 'absolute reply format matches message format in user timezone' do
     @user.update!(settings: { 'appearance' => { 'timestamp_format' => 'absolute', 'timezone' => 'Tokyo' } })
     time = Time.utc(2026, 3, 15, 14, 30, 45) # 2:30:45 PM UTC = 11:30:45 PM JST
     result = format_timestamp(time, style: :reply)
-    assert_equal '11:30:45 pm', result
+    assert_equal '3/15/2026 11:30 PM', result
   end
 
   test 'absolute thread_root format' do
