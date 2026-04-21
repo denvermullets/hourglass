@@ -27,7 +27,7 @@ module ApplicationHelper
 
   def format_relative_timestamp(local, zone, style)
     case style
-    when :message
+    when :message, :reply
       relative_message_timestamp(local, zone)
     when :notification
       "#{time_ago_in_words(local)} ago"
@@ -55,14 +55,12 @@ module ApplicationHelper
 
   def format_absolute_timestamp(local, style)
     case style
-    when :message, :notification
+    when :message, :notification, :reply
       local.strftime('%-m/%-d/%Y %-I:%M %p')
     when :thread_root
       local.strftime('%b %d · %-I:%M:%S %p').downcase
     when :thread_breadcrumb
       local.strftime('%b %d · %-I:%M %p').downcase
-    when :reply
-      local.strftime('%-I:%M:%S %p').downcase
     when :date_separator
       local.strftime('%B %-d, %Y')
     end

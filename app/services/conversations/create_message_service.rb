@@ -149,6 +149,8 @@ class Conversations::CreateMessageService < Service
       target: 'unread_title_indicator',
       html: unread_title_html(has_unread: true)
     )
+
+    Conversations::DmIconBroadcaster.broadcast(user_id: user_id, has_unread: true)
   end
 
   def unread_title_html(has_unread:)
