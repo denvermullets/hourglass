@@ -32,11 +32,16 @@
 
   <%# DMs %>
   <%= link_to conversations_path,
-    class: "w-8.5 h-8.5 rounded-lg flex items-center justify-center transition-all duration-100 border #{controller_name == 'conversations' || controller_name == 'conversation_messages' || controller_name == 'conversation_threads' ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 border-transparent'}",
+    class: "relative w-8.5 h-8.5 rounded-lg flex items-center justify-center transition-all duration-100 border #{controller_name == 'conversations' || controller_name == 'conversation_messages' || controller_name == 'conversation_threads' ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 border-transparent'}",
     title: "Direct messages" do %>
     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
+    <span id="dm_unread_badge">
+      <% if Current.user&.unread_conversations? %>
+        <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-granny-smith-apple-600"></span>
+      <% end %>
+    </span>
   <% end %>
 
   <%# Notifications %>
