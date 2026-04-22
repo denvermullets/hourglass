@@ -28,6 +28,7 @@ class Conversations::MarkReadService < Service
     )
 
     broadcast_title_indicator
+    broadcast_dm_icon_indicator
   end
 
   def broadcast_title_indicator
@@ -39,6 +40,13 @@ class Conversations::MarkReadService < Service
       "user_#{@user.id}_unread_title",
       target: 'unread_title_indicator',
       html: html
+    )
+  end
+
+  def broadcast_dm_icon_indicator
+    Conversations::DmIconBroadcaster.broadcast(
+      user_id: @user.id,
+      has_unread: @user.unread_conversations?
     )
   end
 

@@ -14,7 +14,6 @@ class NotificationsController < ApplicationController
 
   def mark_all_read
     Notifications::MarkReadService.call(user: Current.user)
-    Channels::MarkAllReadService.call(user: Current.user)
     head :ok
   end
 end
