@@ -34,7 +34,7 @@
 
       <%# Body %>
       <% if reply.body.present? %>
-        <div class="text-xs text-bunker-300 leading-[1.8] font-light message-content"><%= sanitize_message(reply.body) %></div>
+        <div class="text-xs text-bunker-300 leading-[1.8] font-light message-content"><%= sanitize_message(reply) %></div>
       <% end %>
 
       <%# Attachments %>

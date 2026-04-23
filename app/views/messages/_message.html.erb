@@ -37,7 +37,7 @@
 
       <%# Body %>
       <% if message.body.present? %>
-        <div class="text-xs text-bunker-300 break-words message-content"><%= sanitize_message(message.body) %></div>
+        <div class="text-xs text-bunker-300 break-words message-content"><%= sanitize_message(message) %></div>
       <% end %>
 
       <%# Attachments %>

@@ -1,0 +1,67 @@
+<%# locals: server, integration %>
+<div class="max-w-[480px]">
+  <%= render "shared/auth_flash" %>
+
+  <div class="rounded-lg border border-bunker-825 bg-bunker-925 p-4">
+    <div class="flex items-start justify-between mb-3">
+      <div>
+        <div class="text-xs tracking-[0.16em] text-granny-smith-apple-300 font-dm-mono">JAIT</div>
+        <div class="text-sm text-bunker-50 font-semibold">Just Another Issue Tracker</div>
+        <div class="text-[11px] text-bunker-500 mt-0.5">unfurl JAIT links and identifiers like CLM-48 in chat</div>
+      </div>
+      <% if integration.last_verified_at.present? %>
+        <span class="text-[10px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded border border-granny-smith-apple-600 text-granny-smith-apple-300">
+          verified <%= time_ago_in_words(integration.last_verified_at) %> ago
+        </span>
+      <% end %>
+    </div>
+
+    <% if integration.discovered_teams.is_a?(Array) && integration.discovered_teams.any? %>
+      <div class="mb-3 flex flex-wrap gap-1.5">
+        <% integration.discovered_teams.each do |t| %>
+          <span class="text-[11px] px-1.5 py-0.5 rounded border border-bunker-775 text-bunker-300 font-dm-mono">
+            <%= t['identifier'] %><% if t['name'].present? %> · <%= t['name'] %><% end %>
+          </span>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= form_with model: integration, scope: :integration, url: update_jait_integration_server_path(server), method: :patch, class: "flex flex-col gap-3.5" do |form| %>
+      <%# enabled toggle %>
+      <label class="flex items-center gap-2 cursor-pointer">
+        <%= form.check_box :enabled, class: "accent-granny-smith-apple-400 w-4 h-4" %>
+        <span class="text-xs text-bunker-300">enable integration</span>
+      </label>
+
+      <%# api token %>
+      <% token_present = integration.api_token.present? %>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
+          <span class="text-granny-smith-apple-600">$</span> api token
+          <% unless token_present %><span class="text-danger-400 opacity-80">*</span><% end %>
+        </label>
+        <%= form.password_field :api_token,
+          autocomplete: "off",
+          placeholder: token_present ? "•••• (leave blank to keep current)" : "paste a JAIT read-only token",
+          class: "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
+          onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
+          onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
+        <span class="text-[11px] text-bunker-500">tokens already define which teams they can read; the integration will discover them on save</span>
+      </div>
+
+      <%# base url %>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs tracking-[0.16em] flex items-center gap-1.5 text-bunker-500">
+          <span class="text-granny-smith-apple-600">$</span> base url
+        </label>
+        <%= form.text_field :base_url,
+          class: "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300",
+          onfocus: "this.classList.replace('border-bunker-775','border-granny-smith-apple-600')",
+          onblur: "this.classList.replace('border-granny-smith-apple-600','border-bunker-775')" %>
+      </div>
+
+      <%= form.submit "// save & verify →",
+        class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+    <% end %>
+  </div>
+</div>
