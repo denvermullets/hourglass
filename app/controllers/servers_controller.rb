@@ -5,11 +5,13 @@ class ServersController < ApplicationController
 
   before_action :set_server,
                 only: %i[show edit update destroy settings settings_general settings_invite settings_danger
-                         settings_channels settings_permissions update_permissions members]
+                         settings_channels settings_permissions update_permissions
+                         settings_integrations update_jait_integration members]
   before_action :require_membership!, only: %i[show members]
   before_action :require_admin!,
                 only: %i[settings settings_general settings_invite settings_danger settings_channels
-                         settings_permissions update_permissions edit update]
+                         settings_permissions update_permissions
+                         settings_integrations update_jait_integration edit update]
   before_action :require_owner!, only: [:destroy]
 
   def index
@@ -84,6 +86,26 @@ class ServersController < ApplicationController
       server: @server, tab: 'permissions',
       panel_partial: 'servers/settings/permissions_content',
       panel_locals: { server: @server }
+    }
+  end
+
+  def settings_integrations
+    integration = @server.server_integrations.find_or_initialize_by(kind: ServerIntegration::KIND_JAIT)
+    render partial: 'servers/settings/tabs_and_panel', locals: {
+      server: @server, tab: 'integrations',
+      panel_partial: 'servers/settings/integrations_content',
+      panel_locals: { server: @server, integration: integration }
+    }
+  end
+
+  def update_jait_integration
+    integration = @server.server_integrations.find_or_initialize_by(kind: ServerIntegration::KIND_JAIT)
+    result = ServerIntegrations::SaveJaitService.call(integration: integration, params: params[:integration] || {})
+    flash.now[result.flash_key] = result.flash_message
+    render partial: 'servers/settings/tabs_and_panel', locals: {
+      server: @server, tab: 'integrations',
+      panel_partial: 'servers/settings/integrations_content',
+      panel_locals: { server: @server, integration: integration }
     }
   end
 

@@ -53,6 +53,8 @@ Rails.application.routes.draw do
       get 'settings/channels', to: 'servers#settings_channels', as: :settings_channels
       get 'settings/permissions', to: 'servers#settings_permissions', as: :settings_permissions
       patch 'settings/permissions', to: 'servers#update_permissions', as: :update_permissions
+      get 'settings/integrations', to: 'servers#settings_integrations', as: :settings_integrations
+      patch 'settings/integrations/jait', to: 'servers#update_jait_integration', as: :update_jait_integration
     end
     resource :membership, only: [:destroy]
     resources :categories, only: %i[create update destroy] do
@@ -79,6 +81,9 @@ Rails.application.routes.draw do
     end
   end
   post 'servers/join', to: 'memberships#create', as: :join_server
+
+  get '/jait_cards/:server_id/teams/:team_id/by_identifier/:identifier', to: 'jait_cards#show_by_identifier', as: :jait_card_by_identifier, constraints: { identifier: %r{[^/]+} }
+  get '/jait_cards/:server_id/teams/:team_id/:kind(/:id)', to: 'jait_cards#show', as: :jait_card
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

@@ -5,8 +5,13 @@ class Server < ApplicationRecord
   has_many :categories, -> { active.order(position: :asc) }, dependent: :destroy
   has_many :all_categories, -> { order(position: :asc) }, class_name: 'Category', dependent: false
   has_many :channels, dependent: :destroy
+  has_many :server_integrations, dependent: :destroy
 
   has_one_attached :icon
+
+  def jait_integration
+    server_integrations.enabled.for_kind(ServerIntegration::KIND_JAIT).first
+  end
 
   validates :name, presence: true, length: { maximum: 100 }
   validates :description, length: { maximum: 1000 }, allow_blank: true

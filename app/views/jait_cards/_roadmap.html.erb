@@ -1,0 +1,24 @@
+<%# locals: data, integration, team_id %>
+<% url = "#{integration.base_url}/teams/#{team_id}/roadmap" %>
+<% projects = data['projects'] || [] %>
+<% by_commitment = projects.group_by { |p| p['roadmap_commitment'].to_s } %>
+<% now_count = by_commitment['now']&.size.to_i %>
+<% next_count = by_commitment['next']&.size.to_i %>
+<% later_count = by_commitment['later']&.size.to_i %>
+<% team_meta = integration.team_for(team_id) %>
+<% team_name = team_meta&.dig('name') || team_meta&.dig('identifier') %>
+<%= turbo_frame_tag "jait-roadmap-#{team_id}" do %>
+  <%= link_to url, target: "_blank", rel: "noopener noreferrer",
+        class: "jait-card not-prose block max-w-md rounded-lg border border-granny-smith-apple-600 bg-bunker-875 hover:bg-bunker-825 transition px-3 py-2.5 my-1 no-underline" do %>
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs tracking-[0.16em] text-bunker-600 font-dm-mono">ROADMAP</span>
+      <span class="text-[10px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded border border-bunker-775 text-bunker-300"><%= projects.size %> project<%= 's' if projects.size != 1 %></span>
+    </div>
+    <div class="text-bunker-50 text-sm font-semibold leading-snug"><%= team_name %> roadmap</div>
+    <div class="mt-2 flex items-center gap-1.5 text-[11px] text-bunker-300">
+      <span class="px-1.5 py-0.5 rounded border border-bunker-775">now <span class="text-bunker-50"><%= now_count %></span></span>
+      <span class="px-1.5 py-0.5 rounded border border-bunker-775">next <span class="text-bunker-50"><%= next_count %></span></span>
+      <span class="px-1.5 py-0.5 rounded border border-bunker-775">later <span class="text-bunker-50"><%= later_count %></span></span>
+    </div>
+  <% end %>
+<% end %>

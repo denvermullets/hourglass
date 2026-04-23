@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_13_114303) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -154,6 +154,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_114303) do
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
+  create_table "server_integrations", force: :cascade do |t|
+    t.string "api_token"
+    t.string "base_url", default: "https://justanotherissuetracker.com", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "discovered_teams", default: [], null: false
+    t.boolean "enabled", default: false, null: false
+    t.string "kind", null: false
+    t.datetime "last_verified_at"
+    t.bigint "server_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["server_id", "kind"], name: "index_server_integrations_on_server_id_and_kind", unique: true
+    t.index ["server_id"], name: "index_server_integrations_on_server_id"
+  end
+
   create_table "servers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -207,6 +221,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_114303) do
   add_foreign_key "messages", "users"
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "actor_id"
+  add_foreign_key "server_integrations", "servers"
   add_foreign_key "servers", "users", column: "owner_id"
   add_foreign_key "sessions", "users"
 end

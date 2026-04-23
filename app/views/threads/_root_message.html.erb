@@ -17,7 +17,7 @@
     <%# Body %>
     <% if message.body.present? %>
       <div class="text-xs text-bunker-300 leading-[1.8] font-light message-content">
-        <%= sanitize_message(message.body) %>
+        <%= sanitize_message(message) %>
       </div>
     <% end %>
 
