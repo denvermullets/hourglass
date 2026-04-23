@@ -331,6 +331,13 @@
   font-family: Georgia, serif;
 }
 
+/* JAIT unfurl card — opt out of the default .message-content a styling */
+.message-content a.jait-card,
+.message-content a.jait-card:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* Rouge syntax highlighting tokens */
 .highlight .c,
 .highlight .cm,
