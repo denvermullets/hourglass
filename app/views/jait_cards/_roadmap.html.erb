@@ -1,4 +1,5 @@
-<%# locals: data, integration, team_id %>
+<%# locals: data, integration, team_id, frame_id %>
+<% frame_id ||= "jait-roadmap-#{team_id}" %>
 <% url = "#{integration.base_url}/teams/#{team_id}/roadmap" %>
 <% projects = data['projects'] || [] %>
 <% by_commitment = projects.group_by { |p| p['roadmap_commitment'].to_s } %>
@@ -7,7 +8,7 @@
 <% later_count = by_commitment['later']&.size.to_i %>
 <% team_meta = integration.team_for(team_id) %>
 <% team_name = team_meta&.dig('name') || team_meta&.dig('identifier') %>
-<%= turbo_frame_tag "jait-roadmap-#{team_id}" do %>
+<%= turbo_frame_tag frame_id do %>
   <%= link_to url, target: "_blank", rel: "noopener noreferrer",
         class: "jait-card not-prose block max-w-md rounded-lg border border-granny-smith-apple-600 bg-bunker-875 hover:bg-bunker-825 transition px-3 py-2.5 my-1 no-underline" do %>
     <div class="flex items-center justify-between mb-1">
