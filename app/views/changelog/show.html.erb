@@ -14,11 +14,11 @@
 
   <%# Body %>
   <div class="flex-1 overflow-y-auto">
-    <div class="px-4 lg:px-6 py-6 max-w-3xl">
+    <div class="px-4 lg:px-12 xl:px-20 py-6 max-w-3xl">
       <% if @html.blank? %>
         <div class="text-sm text-bunker-500">no changes shipped yet.</div>
       <% else %>
-        <article class="message-content text-sm text-bunker-300 leading-relaxed">
+        <article class="message-content changelog-content text-sm text-bunker-300 leading-relaxed">
           <%= sanitize @html, tags: %w[h1 h2 h3 h4 h5 h6 p ul ol li strong em a code pre blockquote br hr img], attributes: %w[href title alt src id class aria-hidden] %>
         </article>
       <% end %>
