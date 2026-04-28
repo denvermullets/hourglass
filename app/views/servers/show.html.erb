@@ -40,6 +40,15 @@
           <%= render "categories/form", server: @server %>
         </div>
       <% end %>
+
+      <%= link_to changelog_path,
+        class: "flex items-center gap-2 px-4 py-3 border-t border-bunker-825 text-xs text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 no-underline" do %>
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 22h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+          <path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>
+        </svg>
+        <span class="tracking-[0.16em]"><span class="text-granny-smith-apple-600">//</span> what's new</span>
+      <% end %>
     </div>
   </div>
 
