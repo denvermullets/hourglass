@@ -76,8 +76,7 @@ export function extractChannels(html) {
   return map
 }
 
-export function appendLineWithMentions(para, line, mentions, channels, $createTextNode) {
-  // Build a regex that matches @username for known mentions and #channel for known channels
+export function restoreEntitiesInTree(root, mentions, channels, lexical, CodeNode) {
   const patterns = []
   for (const username of mentions) {
     patterns.push(`@${username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)
@@ -85,33 +84,53 @@ export function appendLineWithMentions(para, line, mentions, channels, $createTe
   for (const channelName of channels.keys()) {
     patterns.push(`#${channelName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)
   }
-
-  if (patterns.length === 0) {
-    para.append($createTextNode(line))
-    return
-  }
+  if (patterns.length === 0) return
 
   const regex = new RegExp(`(${patterns.join("|")})`, "g")
-  let lastIndex = 0
-  let match
-
-  while ((match = regex.exec(line)) !== null) {
-    if (match.index > lastIndex) {
-      para.append($createTextNode(line.slice(lastIndex, match.index)))
+  const textNodes = []
+  const collect = (node) => {
+    if (CodeNode && node instanceof CodeNode) return
+    if (lexical.$isTextNode(node)) {
+      textNodes.push(node)
+      return
     }
-    const token = match[1]
-    if (token.startsWith("@")) {
-      const username = token.slice(1)
-      para.append($createMentionNode(username))
-    } else {
-      const channelName = token.slice(1)
-      const info = channels.get(channelName)
-      para.append($createChannelNode(info.channelId, info.channelName, info.serverId))
+    if (node.getChildren) {
+      for (const child of node.getChildren()) collect(child)
     }
-    lastIndex = regex.lastIndex
   }
+  collect(root)
 
-  if (lastIndex < line.length) {
-    para.append($createTextNode(line.slice(lastIndex)))
+  for (const textNode of textNodes) {
+    const text = textNode.getTextContent()
+    regex.lastIndex = 0
+    if (!regex.test(text)) continue
+    regex.lastIndex = 0
+
+    const newNodes = []
+    let lastIndex = 0
+    let match
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        newNodes.push(lexical.$createTextNode(text.slice(lastIndex, match.index)))
+      }
+      const token = match[1]
+      if (token.startsWith("@")) {
+        newNodes.push($createMentionNode(token.slice(1)))
+      } else {
+        const name = token.slice(1)
+        const info = channels.get(name)
+        newNodes.push($createChannelNode(info.channelId, info.channelName, info.serverId))
+      }
+      lastIndex = regex.lastIndex
+    }
+    if (lastIndex < text.length) {
+      newNodes.push(lexical.$createTextNode(text.slice(lastIndex)))
+    }
+
+    for (const newNode of newNodes) {
+      textNode.insertBefore(newNode)
+    }
+    textNode.remove()
   }
 }
+

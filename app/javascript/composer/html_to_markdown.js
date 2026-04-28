@@ -121,5 +121,8 @@ function convertTable(table) {
     const cells = tr.querySelectorAll("td")
     rows.push("| " + Array.from(cells).map(td => td.textContent.trim()).join(" | ") + " |")
   })
-  return rows.join("\n")
+  // Join with blank lines so Lexical's markdown parser treats each row as
+  // its own paragraph. The pipe-row detector in cleanHtml will recollect
+  // them into a real <table> on next save.
+  return rows.join("\n\n")
 }

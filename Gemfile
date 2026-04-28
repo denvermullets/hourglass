@@ -5,6 +5,7 @@ gem "rails", "~> 8.1.3"
 gem "aws-sdk-s3", require: false
 gem "bcrypt", "~> 3.1.22"
 gem "bootsnap", require: false
+gem "commonmarker"
 gem "image_processing", "~> 1.14.0"
 gem "importmap-rails"
 gem "pagy"
