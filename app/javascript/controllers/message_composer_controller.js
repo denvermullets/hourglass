@@ -195,35 +195,23 @@ export default class extends Controller {
       })
     )
 
-    // Detect markdown on paste and wrap in a ```md code block
+    // Always paste as plain text — ignore rich HTML from other apps so pasted
+    // content doesn't bring inconsistent formatting into the editor.
     this._cleanups.push(
       this.editor.registerCommand(
         PASTE_COMMAND,
         (event) => {
-          const clipboardData = event instanceof ClipboardEvent
-            ? event.clipboardData
-            : event instanceof InputEvent ? null : null
+          const clipboardData = event instanceof ClipboardEvent ? event.clipboardData : null
           if (!clipboardData) return false
 
-          // Only intercept plain text pastes (no rich HTML from other apps)
-          const htmlData = clipboardData.getData("text/html")
-          if (htmlData) return false
-
           const text = clipboardData.getData("text/plain")
-          if (!text || !this._serializer.looksLikeMarkdown(text)) return false
+          if (!text) return false
 
           event.preventDefault()
           this.editor.update(() => {
-            const codeNode = this._createCodeNode()
-            codeNode.setLanguage("md")
-            const textNode = this.lexical.$createTextNode(text)
-            codeNode.append(textNode)
-
             const selection = $getSelection()
             if ($isRangeSelection(selection)) {
-              selection.insertNodes([codeNode])
-            } else {
-              this.lexical.$getRoot().append(codeNode)
+              selection.insertRawText(text)
             }
           })
           return true
