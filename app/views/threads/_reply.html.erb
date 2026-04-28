@@ -45,13 +45,15 @@
       <%# Actions — below reply content %>
       <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
            data-long-press-target="actions">
-        <% quote_body = strip_tags(reply.body).truncate(500) %>
-        <button type="button"
-                onclick="document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))"
-                data-quote-body="<%= quote_body %>"
-                class="text-xs text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
-          quote
-        </button>
+        <%# strip_tags returns html_safe; wrap in String.new so the tag helper
+            HTML-escapes `"` in the attribute value (otherwise the body breaks
+            out of data-quote-body and clobbers `class`). %>
+        <% quote_body = String.new(strip_tags(reply.body).to_s).truncate(500) %>
+        <%= tag.button "quote",
+              type: "button",
+              onclick: "document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))",
+              data: { quote_body: quote_body },
+              class: "text-xs font-normal text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
 
         <% if reply_context == :conversation %>
           <% edit_url = edit_conversation_message_path(conversation, reply) %>

@@ -61,13 +61,16 @@
         <% end %>
 
         <%# Quote — visible to all users %>
-        <% quote_body = strip_tags(message.body).truncate(500) %>
-        <button type="button"
-                onclick="document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))"
-                data-quote-body="<%= quote_body %>"
-                class="text-xs leading-none font-normal text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer">
-          quote
-        </button>
+        <%# strip_tags returns an html_safe SafeBuffer; Rails' tag helper skips
+            HTML-escaping html_safe attribute values, which would let `"` in the
+            message body break out of the data attribute and clobber `class=""`.
+            Re-wrap as a plain String so the tag helper escapes properly. %>
+        <% quote_body = String.new(strip_tags(message.body).to_s).truncate(500) %>
+        <%= tag.button "quote",
+              type: "button",
+              onclick: "document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))",
+              data: { quote_body: quote_body },
+              class: "text-xs leading-none font-normal text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
 
         <%# Edit/Delete — author only %>
         <% if context == :conversation %>

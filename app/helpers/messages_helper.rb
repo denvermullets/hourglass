@@ -5,11 +5,7 @@ module MessagesHelper
     html, server = extract_html_and_server(message_or_html)
     return '' if html.blank?
 
-    sanitized = sanitize(
-      html,
-      tags: Messages::SanitizeService::ALLOWED_TAGS,
-      attributes: Messages::SanitizeService::ALLOWED_ATTRIBUTES
-    )
+    sanitized = Messages::SanitizeService.call(html: html)
 
     highlighted = Messages::HighlightService.call(html: sanitized)
     with_mentions = Mentions::HighlightService.call(html: highlighted, current_user: Current.user)
