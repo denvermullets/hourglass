@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     end
   end
 
+  get '/changelog', to: 'changelog#show', as: :changelog
+
   resources :notifications, only: [:index] do
     member do
       patch :mark_read

@@ -68,11 +68,24 @@
     </svg>
   <% end %>
 
-  <%# User avatar — pushed to bottom %>
-  <div class="mt-auto relative">
-    <div class="w-7 h-7 rounded-md bg-bunker-875 border border-bunker-775 flex items-center justify-center text-xs text-bunker-500 cursor-pointer">
-      <%= Current.user.username[0, 2].upcase %>
+  <%# Bottom group — changelog + user avatar %>
+  <div class="mt-auto flex flex-col items-center gap-2">
+    <%# What's new %>
+    <%= link_to changelog_path,
+      class: "w-8.5 h-8.5 rounded-lg flex items-center justify-center transition-all duration-100 border #{controller_name == 'changelog' ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300 border-transparent'}",
+      title: "What's new" do %>
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 22h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+        <path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>
+      </svg>
+    <% end %>
+
+    <%# User avatar %>
+    <div class="relative">
+      <div class="w-7 h-7 rounded-md bg-bunker-875 border border-bunker-775 flex items-center justify-center text-xs text-bunker-500 cursor-pointer">
+        <%= Current.user.username[0, 2].upcase %>
+      </div>
+      <div class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-granny-smith-apple-600 border-2 border-bunker-950"></div>
     </div>
-    <div class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-granny-smith-apple-600 border-2 border-bunker-950"></div>
   </div>
 </nav>

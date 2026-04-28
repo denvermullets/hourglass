@@ -1,0 +1,27 @@
+<div class="flex-1 flex flex-col min-h-0">
+  <%# Header %>
+  <div class="px-4 lg:px-6 py-4 border-b border-bunker-825 flex items-center gap-3">
+    <%= link_to servers_path, class: "text-xs text-granny-smith-apple-600 no-underline" do %>
+      &larr; back
+    <% end %>
+    <div>
+      <h1 class="font-syne text-lg lg:text-xl font-bold text-bunker-50 tracking-tight">what's new</h1>
+      <div class="text-xs tracking-[0.16em] mt-1 text-bunker-500">
+        <span class="text-granny-smith-apple-600">//</span> recent updates
+      </div>
+    </div>
+  </div>
+
+  <%# Body %>
+  <div class="flex-1 overflow-y-auto">
+    <div class="px-4 lg:px-6 py-6 max-w-3xl">
+      <% if @html.blank? %>
+        <div class="text-sm text-bunker-500">no changes shipped yet.</div>
+      <% else %>
+        <article class="message-content text-sm text-bunker-300 leading-relaxed">
+          <%= sanitize @html, tags: %w[h1 h2 h3 h4 h5 h6 p ul ol li strong em a code pre blockquote br hr img], attributes: %w[href title alt src id class aria-hidden] %>
+        </article>
+      <% end %>
+    </div>
+  </div>
+</div>
