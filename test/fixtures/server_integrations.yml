@@ -1,0 +1,8 @@
+jait_one:
+  server: one
+  kind: jait
+  enabled: true
+  api_token: test-token-1
+  base_url: https://justanotherissuetracker.com
+  discovered_teams: '[{"id":21,"identifier":"HOUR","name":"Hourglass"}]'
+  webhook_secret: test-webhook-secret

@@ -1,0 +1,14 @@
+issue_created:
+  source: mtasks
+  delivery_id: dlv_abc123
+  event_type: issue.created
+  received_at: <%= 1.minute.ago %>
+  payload: '{"event":"issue.created"}'
+
+issue_updated_processed:
+  source: mtasks
+  delivery_id: dlv_xyz789
+  event_type: issue.updated
+  received_at: <%= 5.minutes.ago %>
+  processed_at: <%= 4.minutes.ago %>
+  payload: '{"event":"issue.updated"}'
