@@ -1,0 +1,7 @@
+mtasks_integration:
+  mtasks_project_id: 1001
+  name: mtasks Integration
+  description: Hourglass-side integration project
+  status: active
+  url: https://justanotherissuetracker.com/projects/1001
+  payload: '{}'

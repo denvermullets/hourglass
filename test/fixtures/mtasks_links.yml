@@ -1,0 +1,4 @@
+# MtasksLink fixtures intentionally empty — partial unique indexes on
+# (channel_id, link_type) and (mtasks_project_id, link_type) make pre-seeded
+# rows fight with tests that create links in fixture channels. Tests build
+# their own MtasksLink records.
