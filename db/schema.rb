@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_29_120500) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_30_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_29_120500) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "api_tokens", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "last_used_at"
+    t.string "name", null: false
+    t.datetime "revoked_at"
+    t.jsonb "scopes", default: ["read", "write"], null: false
+    t.bigint "server_id"
+    t.string "token_digest", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["server_id"], name: "index_api_tokens_on_server_id"
+    t.index ["token_digest"], name: "index_api_tokens_on_token_digest", unique: true
+    t.index ["user_id", "revoked_at"], name: "index_api_tokens_on_user_id_and_revoked_at"
+    t.index ["user_id"], name: "index_api_tokens_on_user_id"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -281,6 +297,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_29_120500) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "api_tokens", "servers"
+  add_foreign_key "api_tokens", "users"
   add_foreign_key "categories", "servers"
   add_foreign_key "channel_memberships", "channels"
   add_foreign_key "channel_memberships", "users"

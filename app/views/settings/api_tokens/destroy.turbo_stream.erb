@@ -1,0 +1,9 @@
+<%= turbo_stream.remove "api_token_#{params[:id]}" %>
+
+<% if @tokens.empty? %>
+  <%= turbo_stream.append "api_tokens_list" do %>
+    <div id="api_tokens_empty" class="text-xs text-bunker-500 italic">
+      no active tokens yet.
+    </div>
+  <% end %>
+<% end %>

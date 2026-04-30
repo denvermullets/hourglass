@@ -1,0 +1,26 @@
+<% input_classes = "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300 placeholder:text-bunker-600 focus:border-granny-smith-apple-600" %>
+<% submit_classes = "w-full rounded px-3.5 py-2.5 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+<% scope_badge_classes = "inline-flex items-center gap-1 rounded border border-bunker-775 bg-bunker-875 px-2 py-1 font-dm-mono text-[10px] tracking-[0.1em] uppercase text-bunker-300" %>
+
+<%= form_with model: ApiToken.new, url: settings_api_tokens_path, scope: :api_token, class: "space-y-3", data: { turbo_frame: "user_settings_panel" } do |f| %>
+  <div>
+    <label class="text-xs tracking-[0.14em] text-bunker-500 block mb-1.5">name</label>
+    <%= f.text_field :name,
+      placeholder: "e.g. mtasks integration",
+      autocomplete: "off",
+      class: input_classes %>
+  </div>
+
+  <div>
+    <label class="text-xs tracking-[0.14em] text-bunker-500 block mb-1.5">permissions</label>
+    <div class="flex flex-wrap gap-2">
+      <span class="<%= scope_badge_classes %>">read</span>
+      <span class="<%= scope_badge_classes %>">write</span>
+    </div>
+    <p class="text-[11px] text-bunker-500 mt-1.5">
+      all tokens currently grant read + write access. scoped tokens coming later.
+    </p>
+  </div>
+
+  <%= f.submit "// create token →", class: submit_classes %>
+<% end %>
