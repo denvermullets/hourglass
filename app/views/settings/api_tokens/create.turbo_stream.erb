@@ -1,0 +1,23 @@
+<% if @token %>
+  <%= turbo_stream.update "raw_token_reveal" do %>
+    <%= render 'settings/api_tokens/raw_reveal', token: @token, plaintext: @plaintext %>
+  <% end %>
+
+  <%= turbo_stream.remove "api_tokens_empty" %>
+
+  <%= turbo_stream.prepend "api_tokens_list" do %>
+    <%= render 'settings/api_tokens/token_row', token: @token %>
+  <% end %>
+
+  <%= turbo_stream.replace "new_api_token_form" do %>
+    <div id="new_api_token_form">
+      <%= render 'settings/api_tokens/new_form' %>
+    </div>
+  <% end %>
+<% else %>
+  <%= turbo_stream.update "raw_token_reveal" do %>
+    <div class="rounded border border-red-700 bg-red-950 px-3 py-2 text-xs text-red-300">
+      <%= @error %>
+    </div>
+  <% end %>
+<% end %>

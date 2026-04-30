@@ -1,0 +1,24 @@
+active_one:
+  user: one
+  name: existing token
+  token_digest: <%= Digest::SHA256.hexdigest('fixture-active-one') %>
+  scopes:
+    - read
+    - write
+
+revoked_one:
+  user: one
+  name: revoked token
+  token_digest: <%= Digest::SHA256.hexdigest('fixture-revoked-one') %>
+  scopes:
+    - read
+    - write
+  revoked_at: <%= 1.day.ago.iso8601 %>
+
+active_two:
+  user: two
+  name: other user token
+  token_digest: <%= Digest::SHA256.hexdigest('fixture-active-two') %>
+  scopes:
+    - read
+    - write

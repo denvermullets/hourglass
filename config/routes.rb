@@ -23,6 +23,10 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :settings do
+    resources :api_tokens, only: %i[index create destroy]
+  end
+
   get '/changelog', to: 'changelog#show', as: :changelog
 
   resources :notifications, only: [:index] do
