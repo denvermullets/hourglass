@@ -1,5 +1,6 @@
 class ServerIntegration < ApplicationRecord
   KIND_JAIT = 'jait'.freeze
+  WEBHOOK_SECRET_BYTE_LENGTH = 32
 
   belongs_to :server
 
@@ -8,6 +9,19 @@ class ServerIntegration < ApplicationRecord
 
   scope :enabled, -> { where(enabled: true) }
   scope :for_kind, ->(kind) { where(kind: kind) }
+
+  before_create :ensure_webhook_secret
+
+  def ensure_webhook_secret!
+    return webhook_secret if webhook_secret.present?
+
+    update!(webhook_secret: SecureRandom.hex(WEBHOOK_SECRET_BYTE_LENGTH))
+    webhook_secret
+  end
+
+  def webhook_url(host:)
+    Rails.application.routes.url_helpers.webhooks_mtasks_url(integration_id: id, host: host)
+  end
 
   def jait?
     kind == KIND_JAIT
@@ -35,5 +49,11 @@ class ServerIntegration < ApplicationRecord
 
   def client
     @client ||= Jait::ApiClient.new(self)
+  end
+
+  private
+
+  def ensure_webhook_secret
+    self.webhook_secret ||= SecureRandom.hex(WEBHOOK_SECRET_BYTE_LENGTH)
   end
 end
