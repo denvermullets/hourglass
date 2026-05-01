@@ -30,7 +30,14 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get '/me', to: 'users#me'
-      resources :servers, only: %i[index show]
+      resources :servers, only: %i[index show] do
+        resources :channels, only: %i[index]
+      end
+      resources :channels, only: %i[show] do
+        resources :messages, only: %i[index create]
+      end
+      get  '/messages/:id/replies', to: 'messages#replies', as: :message_replies
+      post '/messages/:id/replies', to: 'messages#create_reply'
     end
   end
 
