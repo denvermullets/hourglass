@@ -1,0 +1,9 @@
+<% pinned_count = channel.messages.not_deleted.pinned.count %>
+<%= tag.span id: "channel_#{channel.id}_pinned_count", class: "inline-flex items-center" do %>
+  <% if pinned_count.positive? %>
+    <%= link_to "#{pinned_count} pinned", server_channel_pinned_messages_path(server, channel),
+          class: "text-bunker-500 hover:text-bunker-300 no-underline" %>
+  <% else %>
+    <span class="text-bunker-700">0 pinned</span>
+  <% end %>
+<% end %>

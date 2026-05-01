@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_30_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_30_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -142,6 +142,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_30_120000) do
     t.datetime "edited_at"
     t.integer "message_type", default: 0, null: false
     t.bigint "parent_message_id"
+    t.datetime "pinned_at"
+    t.bigint "pinned_by_id"
     t.integer "replies_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
@@ -149,6 +151,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_30_120000) do
     t.index ["channel_id"], name: "index_messages_on_channel_id"
     t.index ["conversation_id"], name: "index_messages_on_conversation_id"
     t.index ["parent_message_id"], name: "index_messages_on_parent_message_id"
+    t.index ["pinned_at"], name: "index_messages_on_pinned_at_partial", where: "(pinned_at IS NOT NULL)"
+    t.index ["pinned_by_id"], name: "index_messages_on_pinned_by_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
@@ -312,6 +316,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_30_120000) do
   add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "messages", column: "parent_message_id"
   add_foreign_key "messages", "users"
+  add_foreign_key "messages", "users", column: "pinned_by_id"
   add_foreign_key "mtasks_links", "channels"
   add_foreign_key "mtasks_links", "messages", column: "thread_id"
   add_foreign_key "mtasks_links", "server_integrations"

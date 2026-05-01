@@ -97,7 +97,12 @@ Rails.application.routes.draw do
       end
       resources :messages, only: %i[index show create edit update destroy] do
         resource :thread, only: [:show], controller: 'threads'
+        member do
+          post   :pin
+          delete :pin, action: :unpin
+        end
       end
+      resource :pinned_messages, only: [:show], controller: 'pinned_messages'
     end
   end
   post 'servers/join', to: 'memberships#create', as: :join_server

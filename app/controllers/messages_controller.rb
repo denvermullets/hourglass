@@ -6,7 +6,7 @@ class MessagesController < ApplicationController
   before_action :set_server
   before_action :set_channel
   before_action :require_membership!
-  before_action :set_message, only: %i[show edit update destroy]
+  before_action :set_message, only: %i[show edit update destroy pin unpin]
   before_action :require_author!, only: %i[edit update destroy]
 
   def index
@@ -59,6 +59,18 @@ class MessagesController < ApplicationController
 
   def destroy
     Messages::DeleteService.call(message: @message)
+    head :ok
+  end
+
+  def pin
+    Messages::PinService.call(message: @message, user: Current.user) unless @message.pinned?
+    head :ok
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
+  end
+
+  def unpin
+    Messages::UnpinService.call(message: @message) if @message.pinned?
     head :ok
   end
 
