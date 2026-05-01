@@ -47,6 +47,8 @@
         <% end %>
         <span>msgs: <%= @message_count %></span>
         <span class="text-bunker-825">&bull;</span>
+        <%= render "channels/pinned_count", server: @server, channel: @channel %>
+        <span class="text-bunker-825">&bull;</span>
         <%= render "shared/presence_indicator", server_id: @server.id, online_count: PresenceChannel.online_count(@server.id) %>
       </div>
     </div>
