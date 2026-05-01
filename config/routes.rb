@@ -27,6 +27,10 @@ Rails.application.routes.draw do
     resources :api_tokens, only: %i[index create destroy]
   end
 
+  namespace :webhooks do
+    post 'mtasks/:integration_id', to: 'mtasks#create', as: :mtasks
+  end
+
   namespace :api do
     namespace :v1 do
       get '/me', to: 'users#me'
@@ -75,6 +79,7 @@ Rails.application.routes.draw do
       patch 'settings/permissions', to: 'servers#update_permissions', as: :update_permissions
       get 'settings/integrations', to: 'servers#settings_integrations', as: :settings_integrations
       patch 'settings/integrations/jait', to: 'servers#update_jait_integration', as: :update_jait_integration
+      post 'settings/integrations/jait/test_webhook', to: 'jait_webhook_tests#create', as: :test_jait_webhook
     end
     resource :membership, only: [:destroy]
     resources :categories, only: %i[create update destroy] do

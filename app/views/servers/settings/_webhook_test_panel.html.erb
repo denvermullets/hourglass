@@ -1,0 +1,57 @@
+<%# locals: server, integration %>
+<% input_classes = "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300" %>
+<% submit_classes = "w-full rounded px-3.5 py-2.5 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+<% copy_btn_classes = "rounded px-2 py-1 font-dm-mono text-[10px] uppercase tracking-[0.1em] cursor-pointer bg-transparent border border-bunker-775 text-bunker-400 hover:border-granny-smith-apple-600 hover:text-granny-smith-apple-300" %>
+<% read_value_classes = "block w-full font-dm-mono text-[11px] text-bunker-300 break-all select-all bg-bunker-875 border border-bunker-775 rounded px-2 py-1.5" %>
+
+<div class="rounded-lg border border-bunker-825 bg-bunker-925 p-4 mt-4">
+  <div class="text-xs tracking-[0.16em] text-granny-smith-apple-300 font-dm-mono mb-1">// inbound webhook</div>
+  <div class="text-[11px] text-bunker-500 mb-3">
+    point mtasks at this URL with the secret below; use this panel to verify hourglass is receiving + verifying signatures.
+  </div>
+
+  <div class="flex flex-col gap-2 mb-4" data-controller="clipboard">
+    <div>
+      <label class="text-xs tracking-[0.16em] text-bunker-500 mb-1 block">webhook url</label>
+      <div class="flex items-center gap-2">
+        <code data-clipboard-target="source" class="<%= read_value_classes %>"><%= integration.webhook_url(host: request.host_with_port) %></code>
+        <button type="button" data-action="clipboard#copy" class="<%= copy_btn_classes %>">copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-2 mb-4" data-controller="clipboard">
+    <div>
+      <label class="text-xs tracking-[0.16em] text-bunker-500 mb-1 block">webhook secret</label>
+      <div class="flex items-center gap-2">
+        <code data-clipboard-target="source" class="<%= read_value_classes %>"><%= integration.webhook_secret %></code>
+        <button type="button" data-action="clipboard#copy" class="<%= copy_btn_classes %>">copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-px bg-bunker-825 my-4"></div>
+
+  <div class="text-[11px] text-bunker-500 mb-3">// test panel</div>
+
+  <%= form_with url: test_jait_webhook_server_path(server), method: :post, class: "flex flex-col gap-3" do |f| %>
+    <div>
+      <label class="text-xs tracking-[0.16em] text-bunker-500 mb-1 block">event type</label>
+      <%= f.select :event_type,
+            MtasksWebhookProcessorJob::HANDLERS.keys,
+            { selected: 'link.created' },
+            class: input_classes %>
+    </div>
+
+    <div>
+      <label class="text-xs tracking-[0.16em] text-bunker-500 mb-1 block">payload (data)</label>
+      <%= f.text_area :payload_data,
+            rows: 5,
+            value: '{ "link_type": "project_channel", "mtasks_project_id": "1", "hourglass_channel_id": "<your channel>" }',
+            class: input_classes %>
+      <span class="text-[11px] text-bunker-500 mt-1 block">JSON object — sent inside <code class="text-bunker-300">{ version, event, delivery_id, data }</code></span>
+    </div>
+
+    <%= f.submit "// send test webhook →", class: submit_classes %>
+  <% end %>
+</div>
