@@ -27,6 +27,13 @@ Rails.application.routes.draw do
     resources :api_tokens, only: %i[index create destroy]
   end
 
+  namespace :api do
+    namespace :v1 do
+      get '/me', to: 'users#me'
+      resources :servers, only: %i[index show]
+    end
+  end
+
   get '/changelog', to: 'changelog#show', as: :changelog
 
   resources :notifications, only: [:index] do
