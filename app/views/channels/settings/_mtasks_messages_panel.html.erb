@@ -1,0 +1,37 @@
+<%# locals: server, channel %>
+<% can_manage = current_membership&.can_manage_channels? %>
+<% current_pref = channel.mtasks_system_messages_pref %>
+<% btn_classes = "rounded px-3 py-2 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+
+<div class="rounded-lg border border-bunker-825 bg-bunker-925 p-4 relative overflow-hidden">
+  <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
+  <div class="text-xs tracking-[0.16em] text-granny-smith-apple-300 font-dm-mono mb-1">// mtasks system messages</div>
+  <div class="text-[11px] text-bunker-500 mb-4">
+    when issues change in mtasks, what should appear here as a system message?
+  </div>
+
+  <%= form_with url: server_channel_settings_path(server, channel), method: :patch, scope: :channel, class: "flex flex-col gap-2" do |f| %>
+    <% [
+      ['all',         'all activity', 'created · status · assigned'],
+      ['status_only', 'status changes only', 'only when an issue moves between lanes'],
+      ['off',         'off',          'never post system messages here']
+    ].each do |value, label, blurb| %>
+      <label class="flex items-start gap-2.5 cursor-pointer rounded px-2 py-1.5 hover:bg-bunker-875">
+        <%= f.radio_button :mtasks_system_messages, value,
+              checked: current_pref == value,
+              disabled: !can_manage,
+              class: "accent-granny-smith-apple-400 mt-0.5" %>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs text-bunker-200"><%= label %></div>
+          <div class="text-[11px] text-bunker-500"><%= blurb %></div>
+        </div>
+      </label>
+    <% end %>
+
+    <% if can_manage %>
+      <%= f.submit "// save preference →", class: btn_classes + " mt-2" %>
+    <% else %>
+      <div class="text-[11px] text-bunker-600 mt-1">only moderators can change this.</div>
+    <% end %>
+  <% end %>
+</div>

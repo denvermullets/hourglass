@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_01_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_120100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -92,6 +92,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_01_120000) do
     t.string "name", null: false
     t.integer "position", default: 0, null: false
     t.bigint "server_id", null: false
+    t.jsonb "settings", default: {}, null: false
     t.string "topic"
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_channels_on_category_id"
@@ -138,6 +139,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_01_120000) do
     t.bigint "channel_id"
     t.bigint "conversation_id"
     t.datetime "created_at", null: false
+    t.jsonb "data", default: {}, null: false
     t.datetime "deleted_at"
     t.datetime "edited_at"
     t.integer "message_type", default: 0, null: false
@@ -147,6 +149,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_01_120000) do
     t.integer "replies_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index "((data ->> 'source'::text))", name: "index_messages_on_data_source"
     t.index ["channel_id", "created_at"], name: "index_messages_on_channel_id_and_created_at"
     t.index ["channel_id"], name: "index_messages_on_channel_id"
     t.index ["conversation_id"], name: "index_messages_on_conversation_id"
