@@ -4,6 +4,7 @@ class Channel < ApplicationRecord
   has_many :channel_memberships, dependent: :destroy
   has_many :members, through: :channel_memberships, source: :user
   has_many :messages, dependent: :destroy
+  has_one :mtasks_project_link, -> { project_channels }, class_name: 'MtasksLink', dependent: :destroy
 
   enum :channel_type, { text: 0, voice: 1, announcement: 2 }
 

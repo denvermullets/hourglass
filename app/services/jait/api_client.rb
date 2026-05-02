@@ -27,6 +27,11 @@ class Jait::ApiClient
     get("/api/v1/teams/#{team_id}/projects/#{id}")
   end
 
+  def fetch_projects(team_id)
+    res = get("/api/v1/teams/#{team_id}/projects")
+    res.is_a?(Hash) && res['projects'] ? res['projects'] : Array(res)
+  end
+
   def fetch_roadmap(team_id)
     # JAIT has no dedicated roadmap API; synthesize it from the projects list
     # using each project's `roadmap_commitment` (now/next/later).

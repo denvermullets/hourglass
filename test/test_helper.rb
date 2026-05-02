@@ -2,6 +2,7 @@ ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 require 'rails/test_help'
 require_relative 'test_helpers/session_test_helper'
+require_relative 'test_helpers/stubbing_helper'
 
 module ActiveSupport
   class TestCase
@@ -14,6 +15,6 @@ module ActiveSupport
     set_fixture_class mtasks_issue_caches: MtasksIssueCache,
                       mtasks_project_caches: MtasksProjectCache
 
-    # Add more helper methods to be used by all tests here...
+    include StubbingHelper
   end
 end

@@ -1,0 +1,50 @@
+<% picker_data = if current_membership&.can_manage_channels? && @integration
+  { controller: "project-picker", project_picker_url_value: mtasks_projects_server_channel_settings_path(@server, @channel) }
+else
+  {}
+end %>
+<%= tag.div class: "contents", data: picker_data do %>
+  <div class="flex-1 flex flex-col lg:flex-row min-h-0">
+    <%# Collapsed channel sidebar (reuses thread layout) %>
+    <div class="hidden lg:flex">
+      <% categories = @server.categories.ordered.includes(:channels) %>
+      <%= render "threads/collapsed_sidebar", server: @server, categories: categories, current_channel: @channel %>
+    </div>
+
+    <%# Settings content %>
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 relative">
+      <%# Header %>
+      <div class="px-4 lg:px-7 py-3.5 border-b border-bunker-825 flex-shrink-0 flex items-center gap-3">
+        <%= link_to server_channel_path(@server, @channel),
+          class: "text-xs text-granny-smith-apple-600 no-underline flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 border border-bunker-825 rounded hover:border-granny-smith-apple-600 transition-colors duration-100" do %>
+          &larr; back
+        <% end %>
+
+        <div class="w-px h-4.5 bg-bunker-825 flex-shrink-0"></div>
+
+        <div class="flex-1 min-w-0">
+          <div class="text-xs text-bunker-500 tracking-[0.12em] flex items-center gap-1.5">
+            <span># <%= @channel.name %></span>
+            <span class="text-bunker-775">/</span>
+            <span class="text-granny-smith-apple-600">settings</span>
+          </div>
+          <div class="font-syne text-base font-bold text-bunker-50 mt-0.5 tracking-tight">channel settings</div>
+        </div>
+      </div>
+
+      <%# Body %>
+      <div class="flex-1 overflow-y-auto px-4 lg:px-7 py-5">
+        <div class="max-w-2xl space-y-5">
+          <%= render "shared/auth_flash" %>
+          <%= render "channels/settings/jait_link_panel",
+                server: @server, channel: @channel, integration: @integration,
+                link: @link, link_state: @link_state, linked_project: @linked_project %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if current_membership&.can_manage_channels? && @integration %>
+    <%= render "channels/settings/jait_link_picker", server: @server, channel: @channel, integration: @integration %>
+  <% end %>
+<% end %>
