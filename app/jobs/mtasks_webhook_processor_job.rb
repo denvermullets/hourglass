@@ -2,8 +2,8 @@ class MtasksWebhookProcessorJob < ApplicationJob
   queue_as :default
 
   HANDLERS = {
-    'link.created' => :handle_link_created,
-    'link.removed' => :handle_link_removed,
+    'link.created' => :handle_link,
+    'link.removed' => :handle_link,
     'issue.created' => :handle_issue_created,
     'issue.updated' => :handle_issue_updated,
     'issue.status_changed' => :handle_issue_status_changed,
@@ -26,7 +26,15 @@ class MtasksWebhookProcessorJob < ApplicationJob
 
   private
 
-  HANDLERS.each_value do |method_name|
+  def handle_link(delivery)
+    result = Webhooks::Mtasks::ProcessLink.call(delivery: delivery)
+    return if result.ok
+
+    Rails.logger.warn("[mtasks-webhook] link processing rejected: #{result.error}")
+  end
+
+  # Auto-define stubs for the still-stubbed events only (skip :handle_link, which is real).
+  HANDLERS.each_value.uniq.reject { |m| m == :handle_link }.each do |method_name|
     define_method(method_name) do |delivery|
       Rails.logger.info("[mtasks-webhook] TODO #{method_name}: #{delivery.payload['data'].inspect}")
     end

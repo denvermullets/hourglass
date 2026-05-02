@@ -34,4 +34,33 @@ class MtasksWebhookProcessorJobTest < ActiveJob::TestCase
       assert MtasksWebhookProcessorJob::HANDLERS.key?(event), "expected handler for #{event}"
     end
   end
+
+  test 'link.created routes through Webhooks::Mtasks::ProcessLink' do
+    captured = []
+    fake_result = Struct.new(:ok, :error, keyword_init: true).new(ok: true)
+    Webhooks::Mtasks::ProcessLink.singleton_class.alias_method(:_orig_call, :call)
+    Webhooks::Mtasks::ProcessLink.define_singleton_method(:call) do |**kwargs|
+      captured << kwargs[:delivery]
+      fake_result
+    end
+
+    MtasksWebhookProcessorJob.perform_now(@delivery.id)
+    assert_equal [@delivery.id], captured.map(&:id)
+    assert @delivery.reload.processed?
+  ensure
+    Webhooks::Mtasks::ProcessLink.singleton_class.alias_method(:call, :_orig_call)
+    Webhooks::Mtasks::ProcessLink.singleton_class.send(:remove_method, :_orig_call)
+  end
+
+  test 'delivery is still marked processed when ProcessLink returns an error result' do
+    fake_result = Struct.new(:ok, :error, keyword_init: true).new(ok: false, error: 'something blew up')
+    Webhooks::Mtasks::ProcessLink.singleton_class.alias_method(:_orig_call, :call)
+    Webhooks::Mtasks::ProcessLink.define_singleton_method(:call) { |**| fake_result }
+
+    MtasksWebhookProcessorJob.perform_now(@delivery.id)
+    assert @delivery.reload.processed?
+  ensure
+    Webhooks::Mtasks::ProcessLink.singleton_class.alias_method(:call, :_orig_call)
+    Webhooks::Mtasks::ProcessLink.singleton_class.send(:remove_method, :_orig_call)
+  end
 end

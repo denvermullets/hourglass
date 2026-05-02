@@ -50,10 +50,7 @@
         <%= render "channels/pinned_count", server: @server, channel: @channel %>
         <span class="text-bunker-825">&bull;</span>
         <%= render "shared/presence_indicator", server_id: @server.id, online_count: PresenceChannel.online_count(@server.id) %>
-        <% if @channel.mtasks_project_link %>
-          <span class="text-bunker-825">&bull;</span>
-          <%= render "channels/jait_linked_badge", channel: @channel %>
-        <% end %>
+        <%= render "channels/jait_linked_badge", channel: @channel %>
       </div>
     </div>
 
