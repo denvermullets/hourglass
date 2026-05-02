@@ -1,6 +1,8 @@
 <% context = local_assigns.fetch(:context, :channel) %>
 <% if message.user_join? %>
   <%= render "messages/user_join", message: message %>
+<% elsif message.system? %>
+  <%= render "messages/system", message: message %>
 <% else %>
 <% pinned = message.pinned? %>
 <% grouped = local_assigns.fetch(:grouped, false) && !pinned %>

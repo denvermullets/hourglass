@@ -6,7 +6,7 @@ module Channels
 
     before_action :set_server, :set_channel
     before_action :require_membership!
-    before_action :require_moderator!, only: %i[link_project unlink_project]
+    before_action :require_moderator!, only: %i[link_project unlink_project update]
     before_action :load_integration
 
     def show
@@ -42,6 +42,16 @@ module Channels
     def unlink_project
       ChannelIntegrations::UnlinkProjectService.call(channel: @channel, user: Current.user)
       redirect_to server_channel_settings_path(@server, @channel), notice: 'Channel unlinked.'
+    end
+
+    def update
+      pref = params.dig(:channel, :mtasks_system_messages)
+      if Channel::MTASKS_SYSTEM_MESSAGE_PREFS.include?(pref)
+        @channel.update!(settings: (@channel.settings || {}).merge('mtasks_system_messages' => pref))
+        redirect_to server_channel_settings_path(@server, @channel), notice: 'Preference saved.'
+      else
+        redirect_to server_channel_settings_path(@server, @channel), alert: 'Invalid preference.'
+      end
     end
 
     private

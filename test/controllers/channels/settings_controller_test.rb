@@ -1,7 +1,7 @@
 require 'test_helper'
 
 module Channels
-  class SettingsControllerTest < ActionDispatch::IntegrationTest
+  class SettingsControllerTest < ActionDispatch::IntegrationTest # rubocop:disable Metrics/ClassLength
     setup do
       @server = servers(:one)
       @channel = channels(:general)
@@ -183,6 +183,32 @@ module Channels
       end
       assert_redirected_to server_channel_settings_path(@server, @channel)
       assert_equal 'Channel unlinked.', flash[:notice]
+    end
+
+    # ---- update (mtasks_system_messages preference) ----
+
+    test 'update writes a valid mtasks_system_messages preference' do
+      patch server_channel_settings_path(@server, @channel),
+            params: { channel: { mtasks_system_messages: 'status_only' } }
+      assert_redirected_to server_channel_settings_path(@server, @channel)
+      assert_equal 'Preference saved.', flash[:notice]
+      assert_equal 'status_only', @channel.reload.settings['mtasks_system_messages']
+    end
+
+    test 'update rejects an invalid value' do
+      patch server_channel_settings_path(@server, @channel),
+            params: { channel: { mtasks_system_messages: 'bogus' } }
+      assert_redirected_to server_channel_settings_path(@server, @channel)
+      assert_equal 'Invalid preference.', flash[:alert]
+      assert_nil @channel.reload.settings['mtasks_system_messages']
+    end
+
+    test 'update rejected for non-moderator' do
+      sign_out
+      sign_in_as(users(:two)) # member but not moderator on servers(:one)
+      patch server_channel_settings_path(@server, @channel),
+            params: { channel: { mtasks_system_messages: 'off' } }
+      assert_nil @channel.reload.settings['mtasks_system_messages']
     end
   end
 end

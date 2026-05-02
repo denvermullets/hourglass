@@ -63,4 +63,24 @@ class MtasksWebhookProcessorJobTest < ActiveJob::TestCase
     Webhooks::Mtasks::ProcessLink.singleton_class.alias_method(:call, :_orig_call)
     Webhooks::Mtasks::ProcessLink.singleton_class.send(:remove_method, :_orig_call)
   end
+
+  test 'issue.created routes through Webhooks::Mtasks::ProcessIssue' do
+    @delivery.update!(event_type: 'issue.created',
+                      payload: { 'event' => 'issue.created', 'data' => { 'issue_id' => 91 } })
+
+    captured = []
+    fake_result = Struct.new(:ok, :error, keyword_init: true).new(ok: true)
+    Webhooks::Mtasks::ProcessIssue.singleton_class.alias_method(:_orig_call, :call)
+    Webhooks::Mtasks::ProcessIssue.define_singleton_method(:call) do |**kwargs|
+      captured << kwargs[:delivery]
+      fake_result
+    end
+
+    MtasksWebhookProcessorJob.perform_now(@delivery.id)
+    assert_equal [@delivery.id], captured.map(&:id)
+    assert @delivery.reload.processed?
+  ensure
+    Webhooks::Mtasks::ProcessIssue.singleton_class.alias_method(:call, :_orig_call)
+    Webhooks::Mtasks::ProcessIssue.singleton_class.send(:remove_method, :_orig_call)
+  end
 end

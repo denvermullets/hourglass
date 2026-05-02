@@ -84,7 +84,7 @@ class Message < ApplicationRecord
   private
 
   def body_or_files_present
-    return if user_join? || user_leave?
+    return if user_join? || user_leave? || system?
     return if body.present? || files.attached?
 
     errors.add(:base, 'must have a message body or attachments')

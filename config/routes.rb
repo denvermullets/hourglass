@@ -108,7 +108,7 @@ Rails.application.routes.draw do
         end
       end
       resource :pinned_messages, only: [:show], controller: 'pinned_messages'
-      resource :settings, only: %i[show], controller: 'channels/settings' do
+      resource :settings, only: %i[show update], controller: 'channels/settings' do
         get :mtasks_projects
         post :link_project
         delete :link_project, action: :unlink_project

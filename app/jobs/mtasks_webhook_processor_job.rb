@@ -4,10 +4,10 @@ class MtasksWebhookProcessorJob < ApplicationJob
   HANDLERS = {
     'link.created' => :handle_link,
     'link.removed' => :handle_link,
-    'issue.created' => :handle_issue_created,
-    'issue.updated' => :handle_issue_updated,
-    'issue.status_changed' => :handle_issue_status_changed,
-    'issue.assigned' => :handle_issue_assigned
+    'issue.created' => :handle_issue,
+    'issue.updated' => :handle_issue,
+    'issue.status_changed' => :handle_issue,
+    'issue.assigned' => :handle_issue
   }.freeze
 
   def perform(delivery_id)
@@ -33,8 +33,15 @@ class MtasksWebhookProcessorJob < ApplicationJob
     Rails.logger.warn("[mtasks-webhook] link processing rejected: #{result.error}")
   end
 
-  # Auto-define stubs for the still-stubbed events only (skip :handle_link, which is real).
-  HANDLERS.each_value.uniq.reject { |m| m == :handle_link }.each do |method_name|
+  def handle_issue(delivery)
+    result = Webhooks::Mtasks::ProcessIssue.call(delivery: delivery)
+    return if result.ok
+
+    Rails.logger.warn("[mtasks-webhook] issue processing rejected: #{result.error}")
+  end
+
+  # Auto-define stubs for any remaining stubbed events (skips real handlers).
+  HANDLERS.each_value.uniq.reject { |m| %i[handle_link handle_issue].include?(m) }.each do |method_name|
     define_method(method_name) do |delivery|
       Rails.logger.info("[mtasks-webhook] TODO #{method_name}: #{delivery.payload['data'].inspect}")
     end
