@@ -3,6 +3,8 @@
   <%= render "messages/user_join", message: message %>
 <% elsif message.system? %>
   <%= render "messages/system", message: message %>
+<% elsif message.data['kind'] == 'issue_card' %>
+  <%= render "messages/issue_card", message: message, context: context %>
 <% else %>
 <% pinned = message.pinned? %>
 <% grouped = local_assigns.fetch(:grouped, false) && !pinned %>

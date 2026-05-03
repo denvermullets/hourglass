@@ -29,6 +29,17 @@ module Jait
       assert_raises(Jait::ApiClient::NotFound) { @client.fetch_projects(21) }
     end
 
+    test 'create_issue posts to the project issues path with title and creator_email' do
+      captured = stub_request_capture(value: { 'id' => 9001, 'identifier' => 'HOUR-9001' })
+      result = @client.create_issue(team_id: 21, project_id: 7, title: 'Add billing fields',
+                                    creator: 'one@example.com')
+
+      assert_equal 9001, result['id']
+      assert_equal :post, captured[:method]
+      assert_equal '/api/v1/teams/21/projects/7/issues', captured[:path]
+      assert_equal({ title: 'Add billing fields', creator_email: 'one@example.com' }, captured[:body])
+    end
+
     test 'post_issue_comment hits the issue comments path with idempotency key' do
       captured = stub_request_capture(value: { 'id' => 42 })
       result = @client.post_issue_comment(team_id: 21, issue_id: 91, body: 'hi', idempotency_key: 1234)
