@@ -1,11 +1,22 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+cache: &cache
+  <<: *default
+  migrations_paths: db/cache_migrate
+queue: &queue
+  <<: *default
+  migrations_paths: db/queue_migrate
 
 development:
-  <<: *default
-  database: hourglass_development
+  primary:
+    <<: *default
+    database: hourglass_development
+  queue:
+    <<: *queue
+    database: hourglass_dev_queue
 test:
   <<: *default
   database: hourglass_test

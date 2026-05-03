@@ -18,12 +18,19 @@ class Messages::PinService < Service
 
   def emit_outbound
     return unless emittable?(@message)
-    return if @message.parent_message_id.blank?
 
-    link = MtasksLink.issue_threads.find_by(thread_id: @message.parent_message_id)
+    link = pin_target_link
     return unless link
 
-    enqueue_create(@message, link)
+    enqueue_pinned(@message, link)
+  end
+
+  def pin_target_link
+    if @message.parent_message_id.present?
+      MtasksLink.issue_threads.find_by(thread_id: @message.parent_message_id)
+    else
+      @message.channel&.mtasks_project_link
+    end
   end
 
   def stream_target

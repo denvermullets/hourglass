@@ -15,7 +15,7 @@ module Messages
       )
     end
 
-    test 'pinning a thread reply with an issue_thread link enqueues message.created' do
+    test 'pinning a thread reply with an issue_thread link enqueues message.pinned' do
       issue_link = MtasksLink.create!(
         link_type: MtasksLink::ISSUE_THREAD,
         server_integration: @integration, thread: @parent,
@@ -28,7 +28,7 @@ module Messages
       end
 
       args = enqueued_jobs.last[:args].first
-      assert_equal 'message.created', args['event_type']
+      assert_equal 'message.pinned', args['event_type']
       assert_equal @reply.id, args['message_id']
       assert_equal issue_link.id, args['link_id']
     end
@@ -39,13 +39,23 @@ module Messages
       end
     end
 
-    test 'pinning a root message does not enqueue (root msgs auto-emit on create only)' do
-      MtasksLink.create!(
+    test 'pinning a root message in a project-linked channel enqueues message.pinned' do
+      project_link = MtasksLink.create!(
         link_type: MtasksLink::PROJECT_CHANNEL,
         server_integration: @integration, channel: @channel,
         mtasks_team_id: 21, mtasks_project_id: 7, created_by_user: @user
       )
 
+      assert_enqueued_jobs(1, only: MtasksOutboundEmitterJob) do
+        Messages::PinService.call(message: messages(:two), user: @user)
+      end
+
+      args = enqueued_jobs.last[:args].first
+      assert_equal 'message.pinned', args['event_type']
+      assert_equal project_link.id, args['link_id']
+    end
+
+    test 'pinning a root message in an unlinked channel does not enqueue' do
       assert_no_enqueued_jobs(only: MtasksOutboundEmitterJob) do
         Messages::PinService.call(message: messages(:two), user: @user)
       end

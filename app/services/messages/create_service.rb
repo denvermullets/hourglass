@@ -1,4 +1,4 @@
-class Messages::CreateService < Service
+class Messages::CreateService < Service # rubocop:disable Metrics/ClassLength
   include Messages::MtasksEmittable
 
   def initialize(channel:, user:, params:)
@@ -43,12 +43,19 @@ class Messages::CreateService < Service
 
   def emit_outbound(message)
     return unless emittable?(message)
-    return if message.parent_message_id.present?
 
-    link = @channel.mtasks_project_link
+    link = outbound_link_for(message)
     return unless link
 
     enqueue_create(message, link)
+  end
+
+  def outbound_link_for(message)
+    if message.parent_message_id.present?
+      MtasksLink.issue_threads.find_by(thread_id: message.parent_message_id)
+    else
+      @channel.mtasks_project_link
+    end
   end
 
   def broadcast_append(message)

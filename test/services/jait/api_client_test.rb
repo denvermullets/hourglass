@@ -67,6 +67,50 @@ module Jait
       assert_equal '/api/v1/teams/21/comments/555', captured[:path]
     end
 
+    test 'post_issue_decision hits the issue decisions path' do
+      captured = stub_request_capture(value: { 'id' => 42 })
+      decision = {
+        hourglass_message_id: 5, body_snapshot: 'do it',
+        pinned_at: '2026-05-03T10:00:00Z', pinned_by_email: 'a@b.com'
+      }
+      @client.post_issue_decision(
+        team_id: 21, issue_id: 91, decision: decision, idempotency_key: 'm-1-decision'
+      )
+
+      assert_equal :post, captured[:method]
+      assert_equal '/api/v1/teams/21/issues/91/decisions', captured[:path]
+      assert_equal decision, captured[:body]
+      assert_equal 'm-1-decision', captured[:headers]['Idempotency-Key']
+    end
+
+    test 'post_project_decision hits the project decisions path' do
+      captured = stub_request_capture(value: { 'id' => 7 })
+      @client.post_project_decision(
+        team_id: 21, project_id: 7,
+        decision: { hourglass_message_id: 5, body_snapshot: 'do it' },
+        idempotency_key: 'm-1-decision'
+      )
+
+      assert_equal :post, captured[:method]
+      assert_equal '/api/v1/teams/21/projects/7/decisions', captured[:path]
+    end
+
+    test 'delete_issue_decision issues a DELETE on the nested path' do
+      captured = stub_request_capture(value: nil)
+      @client.delete_issue_decision(team_id: 21, issue_id: 91, decision_id: 555)
+
+      assert_equal :delete, captured[:method]
+      assert_equal '/api/v1/teams/21/issues/91/decisions/555', captured[:path]
+    end
+
+    test 'delete_project_decision issues a DELETE on the nested path' do
+      captured = stub_request_capture(value: nil)
+      @client.delete_project_decision(team_id: 21, project_id: 7, decision_id: 555)
+
+      assert_equal :delete, captured[:method]
+      assert_equal '/api/v1/teams/21/projects/7/decisions/555', captured[:path]
+    end
+
     private
 
     def stub_request_capture(value:)
