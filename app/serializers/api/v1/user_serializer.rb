@@ -9,8 +9,18 @@ module Api
         {
           id: @user.id,
           email: @user.email_address,
-          display_name: @user.display_name
+          display_name: @user.display_name,
+          server: serialized_server
         }
+      end
+
+      private
+
+      def serialized_server
+        server = @user.servers.order(:id).first
+        return nil unless server
+
+        { id: server.id, name: server.name }
       end
     end
   end

@@ -52,6 +52,21 @@ module Api
         assert_equal @user.id, body['id']
         assert_equal @user.email_address, body['email']
         assert_equal 'User One', body['display_name']
+        server = servers(:one)
+        assert_equal server.id, body.dig('server', 'id')
+        assert_equal server.name, body.dig('server', 'name')
+      end
+
+      test 'returns server: nil when user has no memberships' do
+        loner = User.create!(username: 'loner', email_address: 'loner@example.com',
+                             password: 'password')
+        _token, raw = ApiToken.generate_for(loner, name: 'lonely')
+
+        get api_v1_me_path, headers: auth_headers(raw)
+        assert_response :success
+
+        body = JSON.parse(response.body)
+        assert_nil body['server']
       end
 
       test 'updates last_used_at on successful auth' do
