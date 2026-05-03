@@ -12,10 +12,15 @@ import {
 } from "composer/entity_utils";
 import { MentionAutocomplete } from "composer/mention_autocomplete";
 import { ChannelAutocomplete } from "composer/channel_autocomplete";
+import { SlashMenu } from "composer/slash_menu";
+
+const SLASH_COMMANDS = [
+  { name: "issue", usage: "/issue [title]", description: "spawn a new issue from this thread" },
+];
 
 export default class extends Controller {
   static targets = ["editor", "hiddenInput", "placeholder", "resizeBtn"];
-  static values = { placeholder: String, content: String, serverId: String };
+  static values = { placeholder: String, content: String, serverId: String, channelLinked: Boolean };
 
   async connect() {
     this._ready = false;
@@ -155,6 +160,13 @@ export default class extends Controller {
       serverId: this.serverIdValue,
     });
 
+    this._slashAC = new SlashMenu({
+      editor: this.editor,
+      lexical: this.lexical,
+      linked: this.hasChannelLinkedValue ? this.channelLinkedValue : false,
+      commands: SLASH_COMMANDS,
+    });
+
     this._cleanups = [];
 
     // Enter to send, Shift+Enter for newline
@@ -170,6 +182,11 @@ export default class extends Controller {
           if (this._channelAC.isOpen) {
             event?.preventDefault();
             this._channelAC.selectActive();
+            return true;
+          }
+          if (this._slashAC.isOpen) {
+            event?.preventDefault();
+            this._slashAC.selectActive();
             return true;
           }
           // On touch devices, Enter inserts a newline — software keyboards
@@ -238,6 +255,7 @@ export default class extends Controller {
             this._updateLanguagePicker(selection);
             this._mentionAC.checkTrigger(selection);
             this._channelAC.checkTrigger(selection);
+            this._slashAC.checkTrigger(selection);
           }
           this._updatePlaceholder();
         });
@@ -249,14 +267,19 @@ export default class extends Controller {
       this.editor.registerCommand(
         lexical.KEY_ARROW_DOWN_COMMAND,
         (event) =>
-          this._mentionAC.handleNav(event, "down") || this._channelAC.handleNav(event, "down"),
+          this._mentionAC.handleNav(event, "down") ||
+          this._channelAC.handleNav(event, "down") ||
+          this._slashAC.handleNav(event, "down"),
         lexical.COMMAND_PRIORITY_HIGH
       )
     );
     this._cleanups.push(
       this.editor.registerCommand(
         lexical.KEY_ARROW_UP_COMMAND,
-        (event) => this._mentionAC.handleNav(event, "up") || this._channelAC.handleNav(event, "up"),
+        (event) =>
+          this._mentionAC.handleNav(event, "up") ||
+          this._channelAC.handleNav(event, "up") ||
+          this._slashAC.handleNav(event, "up"),
         lexical.COMMAND_PRIORITY_HIGH
       )
     );
@@ -274,6 +297,11 @@ export default class extends Controller {
             this._channelAC.selectActive();
             return true;
           }
+          if (this._slashAC.isOpen) {
+            event.preventDefault();
+            this._slashAC.selectActive();
+            return true;
+          }
           return false;
         },
         lexical.COMMAND_PRIORITY_HIGH
@@ -289,6 +317,10 @@ export default class extends Controller {
           }
           if (this._channelAC.isOpen) {
             this._channelAC.hideDropdown();
+            return true;
+          }
+          if (this._slashAC.isOpen) {
+            this._slashAC.hideDropdown();
             return true;
           }
           return false;
@@ -312,6 +344,7 @@ export default class extends Controller {
     this._removeLanguagePicker();
     this._mentionAC?.destroy();
     this._channelAC?.destroy();
+    this._slashAC?.destroy();
 
     if (this._handleQuote) {
       document.removeEventListener("message:quote", this._handleQuote);

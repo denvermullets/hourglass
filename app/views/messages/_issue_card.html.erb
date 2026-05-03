@@ -1,0 +1,41 @@
+<% context = local_assigns.fetch(:context, :channel) %>
+<% data = message.data || {} %>
+<% issue = data['issue'] || {} %>
+<% team_id = data['team_id'].to_i %>
+<% integration = ServerIntegration.find_by(id: data['integration_id']) %>
+<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5 rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
+  <%# Avatar %>
+  <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
+    <% if message.user.avatar.attached? %>
+      <%= image_tag polymorphic_path(message.user.avatar), alt: "", class: "w-full h-full object-cover" %>
+    <% else %>
+      <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
+    <% end %>
+  </div>
+
+  <div class="flex-1 min-w-0">
+    <div class="flex items-baseline gap-2">
+      <span class="font-syne text-xs font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
+      <span class="text-xs text-bunker-600"><%= format_timestamp(message.created_at, style: :message) %></span>
+      <span class="text-[10px] tracking-[0.1em] text-bunker-700 uppercase">via /issue</span>
+    </div>
+
+    <%# Issue card body %>
+    <% if integration %>
+      <%= render "jait_cards/issue", data: issue, integration: integration, team_id: team_id %>
+    <% else %>
+      <div class="text-xs text-bunker-500 italic mt-1">// integration unavailable</div>
+    <% end %>
+
+    <%# Reply indicator %>
+    <%= render "messages/reply_indicator", message: message %>
+
+    <%# Actions %>
+    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
+         data-long-press-target="actions">
+      <% thread_path = context == :conversation ? conversation_message_thread_path(message.conversation, message) : server_channel_message_thread_path(message.channel.server, message.channel, message) %>
+      <%= link_to "reply", thread_path,
+            class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
+    </div>
+  </div>
+<% end %>

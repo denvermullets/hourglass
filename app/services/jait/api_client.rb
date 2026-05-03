@@ -50,6 +50,11 @@ class Jait::ApiClient
     end
   end
 
+  def create_issue(team_id:, project_id:, title:, creator:)
+    post("/api/v1/teams/#{team_id}/projects/#{project_id}/issues",
+         body: { title: title, creator_email: creator })
+  end
+
   def post_issue_comment(team_id:, issue_id:, body:, idempotency_key:)
     post("/api/v1/teams/#{team_id}/issues/#{issue_id}/comments",
          body: { body: body },
