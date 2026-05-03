@@ -1,4 +1,6 @@
 class Messages::UnpinService < Service
+  include Messages::MtasksEmittable
+
   def initialize(message:)
     @message = message
   end
@@ -7,10 +9,19 @@ class Messages::UnpinService < Service
     @message.unpin!
     broadcast_message_replace
     broadcast_pinned_count
+    emit_outbound
     @message
   end
 
   private
+
+  def emit_outbound
+    return unless emittable?(@message)
+    return if @message.parent_message_id.blank?
+    return if @message.data['mtasks_comment_id'].blank?
+
+    enqueue_delete(@message)
+  end
 
   def stream_target
     @message.in_conversation? ? @message.conversation : @message.channel

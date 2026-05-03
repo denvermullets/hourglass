@@ -1,4 +1,6 @@
 class Messages::CreateService < Service
+  include Messages::MtasksEmittable
+
   def initialize(channel:, user:, params:)
     @channel = channel
     @user = user
@@ -17,6 +19,18 @@ class Messages::CreateService < Service
     # Eager load attachments before broadcasting to avoid N+1
     message.files.load if message.files.attached?
 
+    broadcast_creation(message)
+    detect_mentions(message)
+    broadcast_unread_indicators(message)
+    mark_author_read(message)
+    emit_outbound(message)
+
+    message
+  end
+
+  private
+
+  def broadcast_creation(message)
     if message.parent_message_id.present?
       broadcast_thread_reply(message)
       broadcast_reply_indicator_update(message.parent_message)
@@ -25,15 +39,17 @@ class Messages::CreateService < Service
       broadcast_date_separator(message)
       broadcast_append(message)
     end
-
-    detect_mentions(message)
-    broadcast_unread_indicators(message)
-    mark_author_read(message)
-
-    message
   end
 
-  private
+  def emit_outbound(message)
+    return unless emittable?(message)
+    return if message.parent_message_id.present?
+
+    link = @channel.mtasks_project_link
+    return unless link
+
+    enqueue_create(message, link)
+  end
 
   def broadcast_append(message)
     fresh_message = Message.includes(user: { avatar_attachment: :blob }).find(message.id)

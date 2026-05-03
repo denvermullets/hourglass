@@ -1,4 +1,6 @@
 class Messages::PinService < Service
+  include Messages::MtasksEmittable
+
   def initialize(message:, user:)
     @message = message
     @user = user
@@ -8,10 +10,21 @@ class Messages::PinService < Service
     @message.pin!(@user)
     broadcast_message_replace
     broadcast_pinned_count
+    emit_outbound
     @message
   end
 
   private
+
+  def emit_outbound
+    return unless emittable?(@message)
+    return if @message.parent_message_id.blank?
+
+    link = MtasksLink.issue_threads.find_by(thread_id: @message.parent_message_id)
+    return unless link
+
+    enqueue_create(@message, link)
+  end
 
   def stream_target
     @message.in_conversation? ? @message.conversation : @message.channel
