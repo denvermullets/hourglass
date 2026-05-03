@@ -70,6 +70,26 @@ class Jait::ApiClient
     delete("/api/v1/teams/#{team_id}/comments/#{comment_id}")
   end
 
+  def post_issue_decision(team_id:, issue_id:, decision:, idempotency_key:)
+    post("/api/v1/teams/#{team_id}/issues/#{issue_id}/decisions",
+         body: decision,
+         headers: { 'Idempotency-Key' => idempotency_key.to_s })
+  end
+
+  def post_project_decision(team_id:, project_id:, decision:, idempotency_key:)
+    post("/api/v1/teams/#{team_id}/projects/#{project_id}/decisions",
+         body: decision,
+         headers: { 'Idempotency-Key' => idempotency_key.to_s })
+  end
+
+  def delete_issue_decision(team_id:, issue_id:, decision_id:)
+    delete("/api/v1/teams/#{team_id}/issues/#{issue_id}/decisions/#{decision_id}")
+  end
+
+  def delete_project_decision(team_id:, project_id:, decision_id:)
+    delete("/api/v1/teams/#{team_id}/projects/#{project_id}/decisions/#{decision_id}")
+  end
+
   private
 
   attr_reader :integration

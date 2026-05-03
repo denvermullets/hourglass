@@ -113,7 +113,31 @@ module Messages
       end
     end
 
-    test 'thread reply in linked channel does not enqueue (waits for pin)' do
+    test 'thread reply with issue_thread link enqueues message.created' do
+      channel = channels(:general)
+      user = users(:one)
+      parent = messages(:one)
+      issue_link = MtasksLink.create!(
+        link_type: MtasksLink::ISSUE_THREAD,
+        server_integration: server_integrations(:jait_one), thread: parent,
+        mtasks_team_id: 21, mtasks_issue_id: 91, created_by_user: user
+      )
+
+      reply = nil
+      assert_enqueued_jobs(1, only: MtasksOutboundEmitterJob) do
+        reply = Messages::CreateService.call(
+          channel: channel, user: user,
+          params: { body: 'reply', parent_message_id: parent.id }
+        )
+      end
+
+      args = enqueued_jobs.last[:args].first
+      assert_equal 'message.created', args['event_type']
+      assert_equal reply.id, args['message_id']
+      assert_equal issue_link.id, args['link_id']
+    end
+
+    test 'thread reply without an issue_thread link does not enqueue' do
       channel = channels(:general)
       user = users(:one)
       MtasksLink.create!(

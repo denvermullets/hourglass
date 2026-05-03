@@ -2,7 +2,7 @@ class MtasksOutboundEmitterJob < ApplicationJob
   queue_as :default
 
   LINK_EVENTS = %w[link.created link.removed].freeze
-  MESSAGE_EVENTS = %w[message.created message.updated message.deleted].freeze
+  MESSAGE_EVENTS = %w[message.created message.updated message.deleted message.pinned message.unpinned].freeze
   SUPPORTED_EVENTS = (LINK_EVENTS + MESSAGE_EVENTS).freeze
 
   discard_on ActiveJob::DeserializationError
@@ -39,6 +39,8 @@ class MtasksOutboundEmitterJob < ApplicationJob
     when 'message.created' then emit_create(message, payload[:link_id])
     when 'message.updated' then emit_update(message)
     when 'message.deleted' then emit_delete(message)
+    when 'message.pinned' then emit_pinned(message, payload[:link_id])
+    when 'message.unpinned' then emit_unpinned(message)
     end
   end
 
@@ -75,6 +77,75 @@ class MtasksOutboundEmitterJob < ApplicationJob
       team_id: link.mtasks_team_id, comment_id: comment_id
     )
     message.update_columns(data: message.data.except('mtasks_comment_id', 'mtasks_link_id'))
+  end
+
+  def emit_pinned(message, link_id)
+    link = MtasksLink.find_by(id: link_id)
+    return Rails.logger.warn("[mtasks-outbound] message.pinned missing link #{link_id}") unless link
+
+    client = Jait::ApiClient.new(link.server_integration)
+    resp = post_decision(client, link, message)
+    return unless resp.is_a?(Hash)
+
+    decision_id = resp['id'] || resp.dig('decision', 'id')
+    return unless decision_id
+
+    message.update_columns(
+      data: message.data.merge('mtasks_decision_id' => decision_id, 'mtasks_decision_link_id' => link.id)
+    )
+  end
+
+  def emit_unpinned(message)
+    decision_id = message.data['mtasks_decision_id']
+    link_id = message.data['mtasks_decision_link_id']
+    unless decision_id && link_id
+      Rails.logger.warn("[mtasks-outbound] message.unpinned missing decision/link metadata on message #{message.id}")
+      return
+    end
+
+    link = MtasksLink.find_by(id: link_id)
+    return Rails.logger.warn("[mtasks-outbound] message.unpinned missing link #{link_id}") unless link
+
+    delete_decision(link, decision_id)
+    message.update_columns(data: message.data.except('mtasks_decision_id', 'mtasks_decision_link_id'))
+  end
+
+  def delete_decision(link, decision_id)
+    client = Jait::ApiClient.new(link.server_integration)
+    if link.issue_thread?
+      client.delete_issue_decision(
+        team_id: link.mtasks_team_id, issue_id: link.mtasks_issue_id, decision_id: decision_id
+      )
+    else
+      client.delete_project_decision(
+        team_id: link.mtasks_team_id, project_id: link.mtasks_project_id, decision_id: decision_id
+      )
+    end
+  end
+
+  def post_decision(client, link, message)
+    decision = decision_payload(message)
+    idempotency_key = "#{message.id}-decision"
+    if link.issue_thread?
+      client.post_issue_decision(
+        team_id: link.mtasks_team_id, issue_id: link.mtasks_issue_id,
+        decision: decision, idempotency_key: idempotency_key
+      )
+    else
+      client.post_project_decision(
+        team_id: link.mtasks_team_id, project_id: link.mtasks_project_id,
+        decision: decision, idempotency_key: idempotency_key
+      )
+    end
+  end
+
+  def decision_payload(message)
+    {
+      hourglass_message_id: message.id,
+      body_snapshot: message.body,
+      pinned_at: message.pinned_at&.iso8601,
+      pinned_by_email: message.pinned_by&.email_address
+    }
   end
 
   def post_comment(client, link, message)

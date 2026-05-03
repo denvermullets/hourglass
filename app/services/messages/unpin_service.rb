@@ -17,10 +17,9 @@ class Messages::UnpinService < Service
 
   def emit_outbound
     return unless emittable?(@message)
-    return if @message.parent_message_id.blank?
-    return if @message.data['mtasks_comment_id'].blank?
+    return if @message.data['mtasks_decision_id'].blank?
 
-    enqueue_delete(@message)
+    enqueue_unpinned(@message)
   end
 
   def stream_target

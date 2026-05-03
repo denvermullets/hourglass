@@ -23,5 +23,17 @@ module Messages
         event_type: 'message.deleted', message_id: message.id
       )
     end
+
+    def enqueue_pinned(message, link)
+      MtasksOutboundEmitterJob.perform_later(
+        event_type: 'message.pinned', message_id: message.id, link_id: link.id
+      )
+    end
+
+    def enqueue_unpinned(message)
+      MtasksOutboundEmitterJob.perform_later(
+        event_type: 'message.unpinned', message_id: message.id
+      )
+    end
   end
 end
