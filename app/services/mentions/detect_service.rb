@@ -7,7 +7,10 @@ class Mentions::DetectService < Service
     return if @message.body.blank?
     return if @message.channel.blank? && @message.conversation.blank?
 
-    usernames = extract_usernames
+    parsed = parse_body
+    persist_cross_app_mentions(parsed[:external])
+
+    usernames = parsed[:usernames]
     return if usernames.empty?
 
     mentioned_users = resolve_mentioned_users(usernames)
@@ -25,21 +28,44 @@ class Mentions::DetectService < Service
 
   private
 
-  def extract_usernames
+  def parse_body
     usernames = Set.new
+    external = []
+    seen_mtasks_ids = Set.new
 
-    # Parse structured mentions from Lexical editor
-    @message.body.scan(/data-mention-username="([^"]*)"/).flatten.each do |username|
-      usernames << username if username.present?
+    Nokogiri::HTML5.fragment(@message.body).css('span.editor-mention').each do |span|
+      classify_mention(span, usernames, external, seen_mtasks_ids)
     end
 
-    # Fallback: regex for manually typed @mentions
     plain_text = ActionController::Base.helpers.strip_tags(@message.body)
-    plain_text.scan(/@(\w{3,20})/).flatten.each do |username|
+    plain_text.scan(/@(\w{3,20})/).flatten.each { |u| usernames << u }
+
+    { usernames: usernames, external: external }
+  end
+
+  def classify_mention(span, usernames, external, seen_mtasks_ids)
+    username = span['data-mention-username'].to_s
+    return if username.blank?
+
+    if span['data-external'] == 'true'
+      mtasks_user_id = span['data-mtasks-user-id'].to_s
+      return if mtasks_user_id.blank? || seen_mtasks_ids.include?(mtasks_user_id)
+
+      seen_mtasks_ids << mtasks_user_id
+      external << {
+        'mtasks_user_id' => mtasks_user_id.to_i,
+        'email' => username,
+        'display_name' => username
+      }
+    else
       usernames << username
     end
+  end
 
-    usernames
+  def persist_cross_app_mentions(external)
+    return if external.empty?
+
+    @message.update_column(:data, @message.data.merge('cross_app_mentions' => external))
   end
 
   def resolve_mentioned_users(usernames)

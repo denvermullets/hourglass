@@ -22,7 +22,7 @@ const SLASH_COMMANDS = [
 
 export default class extends Controller {
   static targets = ["editor", "hiddenInput", "placeholder", "resizeBtn"];
-  static values = { placeholder: String, content: String, serverId: String, channelLinked: Boolean };
+  static values = { placeholder: String, content: String, serverId: String, channelId: String, channelLinked: Boolean };
 
   async connect() {
     this._ready = false;
@@ -153,7 +153,7 @@ export default class extends Controller {
     this._mentionAC = new MentionAutocomplete({
       editor: this.editor,
       lexical: this.lexical,
-      serverId: this.serverIdValue,
+      channelId: this.hasChannelIdValue ? this.channelIdValue : null,
     });
 
     this._channelAC = new ChannelAutocomplete({

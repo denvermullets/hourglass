@@ -1,10 +1,10 @@
 import { $createMentionNode } from "lexical/mention_node"
 
 export class MentionAutocomplete {
-  constructor({ editor, lexical, serverId }) {
+  constructor({ editor, lexical, channelId }) {
     this._editor = editor
     this._lexical = lexical
-    this._serverId = serverId
+    this._channelId = channelId
     this._dropdown = null
     this._members = null
     this._activeIndex = 0
@@ -27,7 +27,7 @@ export class MentionAutocomplete {
     const offset = anchor.offset
 
     const textBeforeCursor = textContent.substring(0, offset)
-    const match = textBeforeCursor.match(/@(\w{0,20})$/)
+    const match = textBeforeCursor.match(/@([\w.+\-@]{0,64})$/)
 
     if (!match) {
       this.hideDropdown()
@@ -85,10 +85,17 @@ export class MentionAutocomplete {
         item.appendChild(displaySpan)
       }
 
+      if (member.external) {
+        const badge = document.createElement("span")
+        badge.className = "mention-external-badge"
+        badge.textContent = "external"
+        item.appendChild(badge)
+      }
+
       item.addEventListener("mousedown", (e) => {
         e.preventDefault()
         e.stopPropagation()
-        this._insertMention(member.username)
+        this._insertMention(member)
       })
 
       item.addEventListener("mouseenter", () => {
@@ -137,11 +144,11 @@ export class MentionAutocomplete {
     if (!this._members || this._activeIndex == null) return
     const member = this._members[this._activeIndex]
     if (member) {
-      this._insertMention(member.username)
+      this._insertMention(member)
     }
   }
 
-  _insertMention(username) {
+  _insertMention(member) {
     this.hideDropdown()
 
     const nodeKey = this._nodeKey
@@ -156,7 +163,10 @@ export class MentionAutocomplete {
       const textContent = node.getTextContent()
       const triggerStart = offset - query.length - 1
 
-      const mentionNode = $createMentionNode(username)
+      const mentionNode = $createMentionNode(member.username, {
+        external: !!member.external,
+        mtasksUserId: member.mtasks_user_id ?? null
+      })
       const spaceNode = lexical.$createTextNode(" ")
 
       if (triggerStart === 0 && offset === textContent.length) {
@@ -184,10 +194,10 @@ export class MentionAutocomplete {
   }
 
   async fetchMembers(query) {
-    if (!this._serverId) return []
+    if (!this._channelId) return []
 
     try {
-      const url = `/servers/${this._serverId}/members?q=${encodeURIComponent(query)}`
+      const url = `/mentions/search?q=${encodeURIComponent(query)}&channel_id=${encodeURIComponent(this._channelId)}`
       const response = await fetch(url, {
         headers: { "Accept": "application/json" }
       })

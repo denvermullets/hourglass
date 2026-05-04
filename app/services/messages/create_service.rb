@@ -26,6 +26,7 @@ class Messages::CreateService < Service
 
     Messages::PostCreateBroadcaster.call(channel: @channel, user: @user, message: message)
     emit_outbound(message)
+    emit_cross_app_mentions(message)
 
     message
   end
@@ -39,6 +40,28 @@ class Messages::CreateService < Service
     return unless link
 
     enqueue_create(message, link)
+  end
+
+  def emit_cross_app_mentions(message)
+    return unless emittable?(message)
+    return unless @channel.mtasks_project_link.present?
+
+    mentions = Array(message.data['cross_app_mentions'])
+    return if mentions.empty?
+
+    integration = @channel.server.jait_integration
+    return unless integration
+
+    mentions.each do |mention|
+      mtasks_user_id = mention['mtasks_user_id']
+      next if mtasks_user_id.blank?
+
+      enqueue_user_mentioned(
+        message: message,
+        integration_id: integration.id,
+        mtasks_user_id: mtasks_user_id
+      )
+    end
   end
 
   def outbound_link_for(message)

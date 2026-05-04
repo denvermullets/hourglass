@@ -9,10 +9,15 @@ export function getTextWithPlaceholders(root, entities) {
   const walkInline = (node) => {
     if (node instanceof MentionNode) {
       const username = node.__username
+      const external = node.__external
+      const mtasksUserId = node.__mtasksUserId
       const placeholder = `\x00M${entities.length}\x00`
+      const attrs = [`class="editor-mention"`, `data-mention-username="${username}"`]
+      if (external) attrs.push(`data-external="true"`)
+      if (mtasksUserId != null) attrs.push(`data-mtasks-user-id="${mtasksUserId}"`)
       entities.push({
         placeholder,
-        html: `<span class="editor-mention" data-mention-username="${username}">@${username}</span>`
+        html: `<span ${attrs.join(" ")}>@${username}</span>`
       })
       return placeholder
     }
@@ -57,9 +62,15 @@ export function restoreEntityPlaceholders(html, entities) {
 export function extractMentions(html) {
   const doc = new DOMParser().parseFromString(html, "text/html")
   const spans = doc.querySelectorAll("span.editor-mention[data-mention-username]")
-  const set = new Set()
-  spans.forEach(s => set.add(s.dataset.mentionUsername))
-  return set
+  const map = new Map()
+  spans.forEach(s => {
+    const username = s.dataset.mentionUsername
+    const external = s.dataset.external === "true"
+    const rawId = s.dataset.mtasksUserId
+    const mtasksUserId = rawId ? Number(rawId) : null
+    map.set(username, { external, mtasksUserId })
+  })
+  return map
 }
 
 export function extractChannels(html) {
@@ -78,7 +89,7 @@ export function extractChannels(html) {
 
 export function restoreEntitiesInTree(root, mentions, channels, lexical, CodeNode) {
   const patterns = []
-  for (const username of mentions) {
+  for (const username of mentions.keys()) {
     patterns.push(`@${username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`)
   }
   for (const channelName of channels.keys()) {
@@ -115,7 +126,9 @@ export function restoreEntitiesInTree(root, mentions, channels, lexical, CodeNod
       }
       const token = match[1]
       if (token.startsWith("@")) {
-        newNodes.push($createMentionNode(token.slice(1)))
+        const username = token.slice(1)
+        const meta = mentions.get(username) || {}
+        newNodes.push($createMentionNode(username, meta))
       } else {
         const name = token.slice(1)
         const info = channels.get(name)
@@ -133,4 +146,3 @@ export function restoreEntitiesInTree(root, mentions, channels, lexical, CodeNod
     textNode.remove()
   }
 }
-

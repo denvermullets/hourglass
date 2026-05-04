@@ -1,9 +1,10 @@
-class MtasksOutboundEmitterJob < ApplicationJob
+class MtasksOutboundEmitterJob < ApplicationJob # rubocop:disable Metrics/ClassLength
   queue_as :default
 
   LINK_EVENTS = %w[link.created link.removed].freeze
   MESSAGE_EVENTS = %w[message.created message.updated message.deleted message.pinned message.unpinned].freeze
-  SUPPORTED_EVENTS = (LINK_EVENTS + MESSAGE_EVENTS).freeze
+  USER_EVENTS = %w[user.mentioned].freeze
+  SUPPORTED_EVENTS = (LINK_EVENTS + MESSAGE_EVENTS + USER_EVENTS).freeze
 
   discard_on ActiveJob::DeserializationError
   discard_on Jait::ApiClient::NotFound
@@ -18,6 +19,8 @@ class MtasksOutboundEmitterJob < ApplicationJob
 
     if LINK_EVENTS.include?(event_type)
       handle_link_event(event_type, payload)
+    elsif USER_EVENTS.include?(event_type)
+      handle_user_event(event_type, payload)
     else
       handle_message_event(event_type, payload)
     end
@@ -28,6 +31,28 @@ class MtasksOutboundEmitterJob < ApplicationJob
   def handle_link_event(event_type, payload)
     Rails.logger.info(
       "[mtasks-outbound] TODO emit #{event_type} for integration=#{payload[:integration_id]}: #{payload[:data].inspect}"
+    )
+  end
+
+  def handle_user_event(event_type, payload)
+    return unless event_type == 'user.mentioned'
+
+    integration = ServerIntegration.find_by(id: payload[:integration_id])
+    message = Message.find_by(id: payload[:message_id])
+    mtasks_user_id = payload[:mtasks_user_id]
+    unless integration
+      return Rails.logger.warn(
+        "[mtasks-outbound] user.mentioned missing integration #{payload[:integration_id]}"
+      )
+    end
+    return Rails.logger.warn("[mtasks-outbound] user.mentioned missing message #{payload[:message_id]}") unless message
+    return Rails.logger.warn('[mtasks-outbound] user.mentioned missing mtasks_user_id') unless mtasks_user_id
+
+    Jait::ApiClient.new(integration).notify_user(
+      mtasks_user_id: mtasks_user_id,
+      body: message.body,
+      source_message_id: message.id,
+      idempotency_key: "mention-#{message.id}-#{mtasks_user_id}"
     )
   end
 
