@@ -3,11 +3,12 @@ module Messages
     class IssueHandler < Service
       Result = Struct.new(:ok, :message, :error, keyword_init: true)
 
-      def initialize(channel:, user:, args:, raw_body: nil)
+      def initialize(channel:, user:, args:, raw_body: nil, parent_message_id: nil)
         @channel = channel
         @user = user
         @args = args.to_s.strip
         @raw_body = raw_body
+        @parent_message_id = parent_message_id
       end
 
       def call

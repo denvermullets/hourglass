@@ -16,6 +16,8 @@ import { SlashMenu } from "composer/slash_menu";
 
 const SLASH_COMMANDS = [
   { name: "issue", usage: "/issue [title]", description: "spawn a new issue from this thread" },
+  { name: "link", usage: "/link [JAIT-id]", description: "link this thread to an existing issue" },
+  { name: "status", usage: "/status [done|progress|backlog]", description: "change linked issue status" },
 ];
 
 export default class extends Controller {
