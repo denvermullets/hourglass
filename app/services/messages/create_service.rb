@@ -10,7 +10,8 @@ class Messages::CreateService < Service
   def call
     if (cmd = Messages::SlashCommandParser.detect(@params[:body]))
       result = cmd[:command].handler.call(
-        channel: @channel, user: @user, args: cmd[:args], raw_body: @params[:body]
+        channel: @channel, user: @user, args: cmd[:args],
+        raw_body: @params[:body], parent_message_id: @params[:parent_message_id]
       )
       return result.message
     end

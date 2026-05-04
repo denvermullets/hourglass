@@ -55,6 +55,10 @@ class Jait::ApiClient
          body: { title: title, creator_email: creator })
   end
 
+  def update_issue_status(team_id:, issue_id:, status:)
+    patch("/api/v1/teams/#{team_id}/issues/#{issue_id}", body: { status: status })
+  end
+
   def post_issue_comment(team_id:, issue_id:, body:, idempotency_key:)
     post("/api/v1/teams/#{team_id}/issues/#{issue_id}/comments",
          body: { body: body },
@@ -111,6 +115,10 @@ class Jait::ApiClient
     request(:put, path, body: body)
   end
 
+  def patch(path, body:)
+    request(:patch, path, body: body)
+  end
+
   def delete(path)
     request(:delete, path)
   end
@@ -133,7 +141,8 @@ class Jait::ApiClient
   def build_request(method, uri, body:, headers:)
     klass = {
       get: Net::HTTP::Get, post: Net::HTTP::Post,
-      put: Net::HTTP::Put, delete: Net::HTTP::Delete
+      put: Net::HTTP::Put, patch: Net::HTTP::Patch,
+      delete: Net::HTTP::Delete
     }.fetch(method)
     req = klass.new(uri)
     req['Authorization'] = "Bearer #{integration.api_token}"

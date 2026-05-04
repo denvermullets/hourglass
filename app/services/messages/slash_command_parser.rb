@@ -39,4 +39,19 @@ class Messages::SlashCommandParser
            handler_class_name: 'Messages::SlashCommands::IssueHandler',
            description: 'spawn a new issue from this thread',
            usage: '/issue [title]')
+
+  register('link',
+           handler_class_name: 'Messages::SlashCommands::LinkHandler',
+           description: 'link this thread to an existing issue',
+           usage: '/link [JAIT-id]')
+
+  register('status',
+           handler_class_name: 'Messages::SlashCommands::StatusHandler',
+           description: 'change linked issue status',
+           usage: '/status [done|progress|backlog]')
+
+  register('unlink',
+           handler_class_name: 'Messages::SlashCommands::UnlinkHandler',
+           description: 'remove the link from this thread',
+           usage: '/unlink')
 end

@@ -40,6 +40,16 @@ module Jait
       assert_equal({ title: 'Add billing fields', creator_email: 'one@example.com' }, captured[:body])
     end
 
+    test 'update_issue_status PATCHes the issue path with status' do
+      captured = stub_request_capture(value: { 'id' => 9001, 'status' => 'done' })
+      result = @client.update_issue_status(team_id: 21, issue_id: 9001, status: 'done')
+
+      assert_equal 'done', result['status']
+      assert_equal :patch, captured[:method]
+      assert_equal '/api/v1/teams/21/issues/9001', captured[:path]
+      assert_equal({ status: 'done' }, captured[:body])
+    end
+
     test 'post_issue_comment hits the issue comments path with idempotency key' do
       captured = stub_request_capture(value: { 'id' => 42 })
       result = @client.post_issue_comment(team_id: 21, issue_id: 91, body: 'hi', idempotency_key: 1234)
