@@ -35,5 +35,14 @@ module Messages
         event_type: 'message.unpinned', message_id: message.id
       )
     end
+
+    def enqueue_user_mentioned(message:, integration_id:, mtasks_user_id:)
+      MtasksOutboundEmitterJob.perform_later(
+        event_type: 'user.mentioned',
+        message_id: message.id,
+        integration_id: integration_id,
+        mtasks_user_id: mtasks_user_id
+      )
+    end
   end
 end

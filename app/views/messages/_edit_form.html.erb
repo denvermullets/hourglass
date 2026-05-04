@@ -13,6 +13,7 @@
     <% edit_url = edit_context == :conversation ? conversation_message_path(conversation, message) : server_channel_message_path(server, channel, message) %>
     <% show_url = edit_context == :conversation ? conversation_message_path(conversation, message) : server_channel_message_path(server, channel, message) %>
     <% server_id_val = edit_context == :conversation ? "" : server.id %>
+    <% channel_id_val = edit_context == :conversation ? "" : channel.id %>
     <%= form_with model: message,
                   url: edit_url,
                   method: :patch,
@@ -20,7 +21,8 @@
                     controller: "message-composer attachment-upload",
                     action: "submit->message-composer#handleSubmit",
                     message_composer_content_value: message.body,
-                    message_composer_server_id_value: server_id_val
+                    message_composer_server_id_value: server_id_val,
+                    message_composer_channel_id_value: channel_id_val
                   } do |f| %>
       <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
       <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">

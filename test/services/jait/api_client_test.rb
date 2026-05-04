@@ -40,6 +40,26 @@ module Jait
       assert_equal({ title: 'Add billing fields', creator_email: 'one@example.com' }, captured[:body])
     end
 
+    test 'notify_user logs and does not make an HTTP request' do
+      io = StringIO.new
+      original_logger = Rails.logger
+      Rails.logger = Logger.new(io)
+      request_called = false
+      @client.define_singleton_method(:request) { |*| request_called = true }
+
+      result = @client.notify_user(
+        mtasks_user_id: 42, body: 'hello @ext',
+        source_message_id: 7, idempotency_key: 'mention-7-42'
+      )
+
+      assert_nil result
+      assert_not request_called, 'notify_user should not make an HTTP request yet'
+      assert_match(/notify_user TODO mtasks_user_id=42/, io.string)
+      assert_match(/idempotency=mention-7-42/, io.string)
+    ensure
+      Rails.logger = original_logger
+    end
+
     test 'update_issue_status PATCHes the issue path with status' do
       captured = stub_request_capture(value: { 'id' => 9001, 'status' => 'done' })
       result = @client.update_issue_status(team_id: 21, issue_id: 9001, status: 'done')

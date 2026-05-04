@@ -232,6 +232,47 @@ class MtasksOutboundEmitterJobTest < ActiveJob::TestCase # rubocop:disable Metri
     assert_match(%r{missing decision/link metadata}, captured)
   end
 
+  test 'user.mentioned calls notify_user with a stable idempotency key' do
+    calls = []
+    with_stubbed_instance_method(Jait::ApiClient, :notify_user, lambda { |**kw|
+      calls << kw
+      nil
+    }) do
+      MtasksOutboundEmitterJob.perform_now(
+        event_type: 'user.mentioned',
+        message_id: @message.id,
+        integration_id: @integration.id,
+        mtasks_user_id: 5001
+      )
+    end
+
+    assert_equal 1, calls.size
+    assert_equal 5001, calls.first[:mtasks_user_id]
+    assert_equal @message.body, calls.first[:body]
+    assert_equal @message.id, calls.first[:source_message_id]
+    assert_equal "mention-#{@message.id}-5001", calls.first[:idempotency_key]
+  end
+
+  test 'user.mentioned warns when integration is missing' do
+    captured = capture_log do
+      MtasksOutboundEmitterJob.perform_now(
+        event_type: 'user.mentioned',
+        message_id: @message.id, integration_id: 0, mtasks_user_id: 5001
+      )
+    end
+    assert_match(/user\.mentioned missing integration/, captured)
+  end
+
+  test 'user.mentioned warns when message is missing' do
+    captured = capture_log do
+      MtasksOutboundEmitterJob.perform_now(
+        event_type: 'user.mentioned',
+        message_id: 0, integration_id: @integration.id, mtasks_user_id: 5001
+      )
+    end
+    assert_match(/user\.mentioned missing message/, captured)
+  end
+
   private
 
   def capture_log

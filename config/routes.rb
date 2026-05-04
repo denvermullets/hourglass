@@ -49,6 +49,8 @@ Rails.application.routes.draw do
 
   get '/changelog', to: 'changelog#show', as: :changelog
 
+  get '/mentions/search', to: 'mentions#search', as: :mentions_search
+
   resources :notifications, only: [:index] do
     member do
       patch :mark_read

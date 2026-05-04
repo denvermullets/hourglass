@@ -59,6 +59,16 @@ class Jait::ApiClient
     patch("/api/v1/teams/#{team_id}/issues/#{issue_id}", body: { status: status })
   end
 
+  # TODO: POST to a notifications endpoint once mtasks defines one. Stubbed
+  # so the outbound emitter has a stable surface to call.
+  def notify_user(mtasks_user_id:, body:, source_message_id:, idempotency_key:)
+    Rails.logger.info(
+      "[Jait] notify_user TODO mtasks_user_id=#{mtasks_user_id} " \
+      "message=#{source_message_id} idempotency=#{idempotency_key} body=#{body.to_s.truncate(80)}"
+    )
+    nil
+  end
+
   def post_issue_comment(team_id:, issue_id:, body:, idempotency_key:)
     post("/api/v1/teams/#{team_id}/issues/#{issue_id}/comments",
          body: { body: body },
