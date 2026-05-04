@@ -86,6 +86,18 @@ module Api
         assert_nil body['parent_message_id']
       end
 
+      test 'create accepts data: { source: "mtasks" } and stores it on the message' do
+        assert_difference 'Message.count', 1 do
+          post api_v1_channel_messages_path(@channel),
+               params: { body: 'tagged from jait', data: { source: 'mtasks' } }.to_json,
+               headers: json_headers
+        end
+        assert_response :created
+
+        message = Message.last
+        assert_equal 'mtasks', message.data['source']
+      end
+
       test 'create with empty body returns 422' do
         assert_no_difference 'Message.count' do
           post api_v1_channel_messages_path(@channel),

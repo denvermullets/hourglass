@@ -19,6 +19,11 @@ class ServerIntegration < ApplicationRecord
     webhook_secret
   end
 
+  def rotate_webhook_secret!
+    update!(webhook_secret: SecureRandom.hex(WEBHOOK_SECRET_BYTE_LENGTH))
+    webhook_secret
+  end
+
   def webhook_url(host:)
     Rails.application.routes.url_helpers.webhooks_mtasks_url(integration_id: id, host: host)
   end

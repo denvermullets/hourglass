@@ -55,6 +55,8 @@ module Api
         server = servers(:one)
         assert_equal server.id, body.dig('server', 'id')
         assert_equal server.name, body.dig('server', 'name')
+        assert_equal server_integrations(:jait_one).id, body.dig('integration', 'id')
+        assert_equal server_integrations(:jait_one).webhook_secret, body.dig('integration', 'webhook_secret')
       end
 
       test 'returns server: nil when user has no memberships' do
@@ -67,6 +69,18 @@ module Api
 
         body = JSON.parse(response.body)
         assert_nil body['server']
+        assert_nil body['integration']
+      end
+
+      test 'integration is nil when the server has no enabled jait integration' do
+        server_integrations(:jait_one).update!(enabled: false)
+        _token, raw = ApiToken.generate_for(@user, name: 'no-int')
+
+        get api_v1_me_path, headers: auth_headers(raw)
+        assert_response :success
+
+        body = JSON.parse(response.body)
+        assert_nil body['integration']
       end
 
       test 'updates last_used_at on successful auth' do
