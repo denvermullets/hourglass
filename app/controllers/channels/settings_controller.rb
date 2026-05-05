@@ -10,6 +10,7 @@ module Channels
     before_action :load_integration
 
     def show
+      refresh_discovered_teams
       @link = @channel.mtasks_project_link
       @link_state, @linked_project = resolve_link_state(@link)
     end
@@ -69,6 +70,15 @@ module Channels
                             .enabled
                             .for_kind(ServerIntegration::KIND_JAIT)
                             .first
+    end
+
+    def refresh_discovered_teams
+      return unless @integration&.api_token.present?
+
+      teams = Jait::ApiClient.new(@integration).discover_teams!
+      @integration.update!(discovered_teams: teams, last_verified_at: Time.current) if teams.present?
+    rescue Jait::ApiClient::Error => e
+      Rails.logger.warn("Channels::SettingsController#refresh_discovered_teams failed: #{e.class} #{e.message}")
     end
 
     def filter_projects(list, query)

@@ -37,7 +37,7 @@ module Webhooks
         return error('team not resolvable') unless team_id
 
         link = upsert_project_link(channel, integration, project_id, team_id)
-        broadcast_channel_header(channel)
+        ChannelIntegrations::BroadcastLinkStateService.call(channel: channel)
         Result.new(ok: true, link: link)
       end
 
@@ -80,7 +80,7 @@ module Webhooks
                                   channel_id: channel.id,
                                   mtasks_project_id: project_id)
         link&.destroy!
-        broadcast_channel_header(channel)
+        ChannelIntegrations::BroadcastLinkStateService.call(channel: channel)
         Result.new(ok: true)
       end
 
@@ -158,15 +158,6 @@ module Webhooks
           return mapped.hourglass_user if mapped
         end
         server.owner
-      end
-
-      def broadcast_channel_header(channel)
-        Turbo::StreamsChannel.broadcast_replace_to(
-          channel,
-          target: "channel_#{channel.id}_jait_linked_badge",
-          partial: 'channels/jait_linked_badge',
-          locals: { channel: channel }
-        )
       end
 
       def error(message)

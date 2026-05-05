@@ -17,6 +17,11 @@ development:
   queue:
     <<: *queue
     database: hourglass_dev_queue
+  cable:
+    <<: *default
+    database: hourglass_development
+    migrations_paths: db/cable_migrate
+    schema_dump: false
 test:
   <<: *default
   database: hourglass_test
