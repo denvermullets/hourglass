@@ -1,0 +1,64 @@
+<% data = message.data || {} %>
+<% event_type = data['event_type'].to_s %>
+<% identifier = data['identifier'].to_s %>
+<% project_name = data['project_name'].to_s %>
+<% channel_name = message.channel&.name.to_s %>
+<% timestamp = format_timestamp(message.created_at, style: :message) %>
+<% open_url = mtasks_open_in_jait_url(message, data) %>
+<% view_path = mtasks_view_issue_path(data) %>
+
+<%= tag.div id: dom_id(message),
+            class: "group flex gap-3 px-2 py-1.5",
+            data: { message_user_id: message.user_id, message_created_at: message.created_at.iso8601 } do %>
+  <%# Cube glyph (outside the card) %>
+  <div class="flex-shrink-0 w-7 h-7 mt-0.5 rounded-md border border-bunker-825 bg-bunker-925 flex items-center justify-center">
+    <svg class="w-3.5 h-3.5 text-bunker-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+      <line x1="12" y1="22.08" x2="12" y2="12"/>
+    </svg>
+  </div>
+
+  <div class="flex-1 min-w-0 border border-bunker-825 rounded-lg bg-bunker-925 overflow-hidden">
+    <%# Header %>
+    <div class="flex items-baseline gap-2 px-4 py-3 font-dm-mono text-[11px] tracking-[0.04em] bg-bunker-950 border-b border-bunker-825">
+      <span class="text-granny-smith-apple-400 font-bold">JAIT</span>
+      <span class="text-bunker-700">//</span>
+      <span class="text-bunker-300"><%= event_type %></span>
+      <% if project_name.present? %>
+        <span class="text-bunker-700">·</span>
+        <span class="text-bunker-400"><%= project_name %></span>
+      <% end %>
+      <% if channel_name.present? %>
+        <span class="text-bunker-700">→</span>
+        <span class="text-bunker-400">#<%= channel_name %></span>
+      <% end %>
+      <span class="ml-auto text-bunker-600"><%= timestamp %></span>
+    </div>
+
+    <%# Body %>
+    <div class="px-4 py-3">
+      <% body_partial = mtasks_event_partial(event_type) %>
+      <% if lookup_context.exists?(body_partial, [], true) %>
+        <%= render body_partial, message: message, data: data %>
+      <% else %>
+        <div class="text-xs text-bunker-400 break-words"><%= message.body %></div>
+      <% end %>
+    </div>
+
+    <%# Footer %>
+    <div class="flex items-center gap-3 px-4 py-2 bg-bunker-950 border-t border-bunker-825 font-dm-mono text-[11px] text-bunker-600">
+      <% if open_url.present? %>
+        <%= link_to "open in jait", open_url, target: "_blank", rel: "noopener",
+              class: "text-bunker-500 hover:text-granny-smith-apple-300 no-underline transition-colors duration-100" %>
+      <% end %>
+      <% if view_path.present? %>
+        <%= link_to "view issue", view_path,
+              class: "text-bunker-500 hover:text-bunker-300 no-underline transition-colors duration-100" %>
+      <% end %>
+      <% if identifier.present? %>
+        <span class="ml-auto text-bunker-700"><%= identifier %></span>
+      <% end %>
+    </div>
+  </div>
+<% end %>

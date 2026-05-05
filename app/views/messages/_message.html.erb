@@ -1,6 +1,8 @@
 <% context = local_assigns.fetch(:context, :channel) %>
 <% if message.user_join? %>
   <%= render "messages/user_join", message: message %>
+<% elsif message.data['source'] == 'mtasks' && message.data['event_type'].present? %>
+  <%= render "messages/mtasks_event", message: message %>
 <% elsif message.system? %>
   <%= render "messages/system", message: message %>
 <% elsif message.data['kind'] == 'issue_card' %>

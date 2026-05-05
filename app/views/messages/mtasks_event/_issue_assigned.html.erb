@@ -1,0 +1,14 @@
+<%# locals: (message:, data:) %>
+<div class="mb-2">
+  <%= render "messages/mtasks_event/identifier_title", data: data %>
+</div>
+
+<div class="flex items-center gap-2 flex-wrap text-xs text-bunker-500 font-dm-mono">
+  <span>assigned to</span>
+  <%= render "messages/mtasks_event/user_pill",
+        email: data['assignee_email'],
+        username: data['assignee_username'],
+        name: data['assignee_name'] %>
+  <span>by</span>
+  <%= render "messages/mtasks_event/actor", data: data %>
+</div>
