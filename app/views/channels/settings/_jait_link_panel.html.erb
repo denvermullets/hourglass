@@ -1,9 +1,10 @@
 <%# locals: server, channel, integration, link, link_state, linked_project %>
-<% can_manage = current_membership&.can_manage_channels? %>
+<% can_manage = defined?(current_membership) && current_membership&.can_manage_channels? %>
 <% btn_primary = "rounded px-3 py-2 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
 <% btn_danger  = "rounded px-3 py-2 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-bunker-775 text-bunker-400 hover:border-danger-400 hover:text-danger-400" %>
 
-<div class="rounded-lg border border-bunker-825 bg-bunker-925 p-4 relative overflow-hidden">
+<div id="channel_<%= channel.id %>_jait_link_panel"
+     class="rounded-lg border border-bunker-825 bg-bunker-925 p-4 relative overflow-hidden">
   <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
 
   <div class="text-xs tracking-[0.16em] text-granny-smith-apple-300 font-dm-mono mb-1">// linked mtasks project</div>

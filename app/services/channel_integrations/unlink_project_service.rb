@@ -18,12 +18,14 @@ module ChannelIntegrations
       }
       integration_id = link.server_integration_id
       link.destroy!
+      @channel.association(:mtasks_project_link).reset
 
       MtasksOutboundEmitterJob.perform_later(
         integration_id: integration_id,
         event_type: 'link.removed',
         data: data
       )
+      ChannelIntegrations::BroadcastLinkStateService.call(channel: @channel)
       Result.new(ok: true)
     end
   end

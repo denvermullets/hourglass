@@ -13,11 +13,20 @@ module Api
       end
 
       def create
-        message = Messages::CreateService.call(
-          channel: @channel,
-          user: current_user,
-          params: message_params
-        )
+        message = if mtasks_sourced?
+                    Messages::CreateSystemService.call(
+                      channel: @channel,
+                      body: message_params[:body],
+                      data: system_data,
+                      attributed_user: current_user
+                    )
+                  else
+                    Messages::CreateService.call(
+                      channel: @channel,
+                      user: current_user,
+                      params: message_params
+                    )
+                  end
         render json: MessageSerializer.new(message).as_json, status: :created
       rescue ActiveRecord::RecordInvalid => e
         render_validation_errors(e.record)
@@ -30,11 +39,21 @@ module Api
       end
 
       def create_reply
-        message = Messages::CreateService.call(
-          channel: @parent.channel,
-          user: current_user,
-          params: message_params.merge(parent_message_id: @parent.id)
-        )
+        message = if mtasks_sourced?
+                    Messages::CreateSystemService.call(
+                      channel: @parent.channel,
+                      body: message_params[:body],
+                      data: system_data,
+                      parent_message: @parent,
+                      attributed_user: current_user
+                    )
+                  else
+                    Messages::CreateService.call(
+                      channel: @parent.channel,
+                      user: current_user,
+                      params: message_params.merge(parent_message_id: @parent.id)
+                    )
+                  end
         render json: MessageSerializer.new(message).as_json, status: :created
       rescue ActiveRecord::RecordInvalid => e
         render_validation_errors(e.record)
@@ -61,7 +80,29 @@ module Api
       end
 
       def message_params
-        params.permit(:body)
+        params.permit(
+          :body,
+          data: [
+            :source, :event_type,
+            :actor_email, :actor_name, :actor_username,
+            :issue_id, :identifier, :title, :source_url,
+            :team_slug, :project_id, :project_name,
+            :priority, :status_lane_name,
+            :assignee_email, :assignee_name, :assignee_username,
+            :comment_id, :comment_body,
+            :from_lane_name, :to_lane_name,
+            :branch_name, :branch_url,
+            { labels: %i[name color] }
+          ]
+        )
+      end
+
+      def mtasks_sourced?
+        message_params.dig(:data, :source) == 'mtasks'
+      end
+
+      def system_data
+        message_params[:data].to_h
       end
     end
   end

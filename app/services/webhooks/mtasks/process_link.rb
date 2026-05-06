@@ -33,11 +33,11 @@ module Webhooks
         project_id = @data['mtasks_project_id'].presence
         return error('mtasks_project_id missing') unless project_id
 
-        team_id = resolve_team_id(integration, project_id: project_id)
+        team_id = resolve_with_refresh(integration, project_id: project_id)
         return error('team not resolvable') unless team_id
 
         link = upsert_project_link(channel, integration, project_id, team_id)
-        broadcast_channel_header(channel)
+        ChannelIntegrations::BroadcastLinkStateService.call(channel: channel)
         Result.new(ok: true, link: link)
       end
 
@@ -80,7 +80,7 @@ module Webhooks
                                   channel_id: channel.id,
                                   mtasks_project_id: project_id)
         link&.destroy!
-        broadcast_channel_header(channel)
+        ChannelIntegrations::BroadcastLinkStateService.call(channel: channel)
         Result.new(ok: true)
       end
 
@@ -141,11 +141,49 @@ module Webhooks
         channel.server.server_integrations.enabled.for_kind(ServerIntegration::KIND_JAIT).first
       end
 
-      def resolve_team_id(integration, project_id:)
-        teams = Array(integration.discovered_teams)
-        return teams.first['id'] if teams.size == 1
+      # Resolve the mtasks team for an inbound link.created event. Trusts the
+      # payload's mtasks_team_id when present and known to the integration;
+      # refreshes discovered_teams once if the team is unknown (mtasks may
+      # have added it since we last loaded). Falls back to iterative probing
+      # only when the payload omits team_id.
+      def resolve_with_refresh(integration, project_id:)
+        payload_id = resolve_payload_team_id(integration)
+        return payload_id if payload_id
 
-        teams.each do |t|
+        team_id = resolve_team_id(integration, project_id: project_id)
+        return team_id if team_id
+
+        return nil unless refresh_discovered_teams(integration)
+
+        resolve_team_id(integration, project_id: project_id)
+      end
+
+      def resolve_payload_team_id(integration)
+        payload_id = @data['mtasks_team_id'].presence&.to_i
+        return nil unless payload_id
+        return payload_id if integration.team_for(payload_id)
+        return payload_id if refresh_discovered_teams(integration) && integration.team_for(payload_id)
+
+        nil
+      end
+
+      def refresh_discovered_teams(integration)
+        teams = Jait::ApiClient.new(integration).discover_teams!
+        return false if teams.blank?
+
+        integration.update!(discovered_teams: teams, last_verified_at: Time.current)
+        true
+      rescue Jait::ApiClient::Error => e
+        Rails.logger.warn("Webhooks::Mtasks::ProcessLink refresh_discovered_teams failed: #{e.class} #{e.message}")
+        false
+      end
+
+      # Probe each discovered team for the project. Verifies even single-team
+      # integrations — a "lone" team is no guarantee the project actually
+      # lives there, and assigning the wrong mtasks_team_id leaves the link
+      # unrecoverably broken.
+      def resolve_team_id(integration, project_id:)
+        Array(integration.discovered_teams).each do |t|
           remote = Jait::Fetcher.call(integration: integration, kind: 'project', team_id: t['id'], id: project_id)
           return t['id'] if remote
         end
@@ -158,15 +196,6 @@ module Webhooks
           return mapped.hourglass_user if mapped
         end
         server.owner
-      end
-
-      def broadcast_channel_header(channel)
-        Turbo::StreamsChannel.broadcast_replace_to(
-          channel,
-          target: "channel_#{channel.id}_jait_linked_badge",
-          partial: 'channels/jait_linked_badge',
-          locals: { channel: channel }
-        )
       end
 
       def error(message)

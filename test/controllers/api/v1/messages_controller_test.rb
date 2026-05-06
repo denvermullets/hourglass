@@ -2,7 +2,7 @@ require 'test_helper'
 
 module Api
   module V1
-    class MessagesControllerTest < ActionDispatch::IntegrationTest
+    class MessagesControllerTest < ActionDispatch::IntegrationTest # rubocop:disable Metrics/ClassLength
       setup do
         @user = users(:one)
         _token, @raw = ApiToken.generate_for(@user, name: 'messages test')
@@ -84,6 +84,97 @@ module Api
         assert_equal @user.id, body['user_id']
         assert_equal @channel.id, body['channel_id']
         assert_nil body['parent_message_id']
+      end
+
+      test 'create with data: { source: "mtasks" } creates a system message and skips outbound echo' do
+        assert_no_enqueued_jobs(only: MtasksOutboundEmitterJob) do
+          assert_difference 'Message.count', 1 do
+            post api_v1_channel_messages_path(@channel),
+                 params: { body: 'tagged from jait', data: { source: 'mtasks' } }.to_json,
+                 headers: json_headers
+          end
+        end
+        assert_response :created
+
+        message = Message.last
+        assert_equal 'mtasks', message.data['source']
+        assert message.system?, 'expected message_type to be :system for mtasks-sourced messages'
+      end
+
+      def issue_created_payload
+        {
+          body: 'denvermullets opened BZL-204',
+          data: {
+            source: 'mtasks', event_type: 'issue.created',
+            actor_email: @user.email_address, actor_username: 'denvermullets', actor_name: 'Denver Mullets',
+            issue_id: 204, identifier: 'BZL-204', title: 'Pricing page hero copy',
+            team_slug: 'design', project_name: 'design-rebrand',
+            priority: 'med', status_lane_name: 'TODO',
+            assignee_email: 'matt@example.com', assignee_username: 'matt',
+            labels: [{ name: 'copy', color: '#666' }, { name: 'marketing-site', color: '#777' }],
+            secret_field: 'should-be-stripped'
+          }
+        }
+      end
+
+      test 'create persists full issue.created payload and renders the rich card' do
+        post api_v1_channel_messages_path(@channel),
+             params: issue_created_payload.to_json, headers: json_headers
+        assert_response :created
+
+        data = Message.last.data
+        assert Message.last.system?
+        assert_equal 'issue.created', data['event_type']
+        assert_equal 'BZL-204', data['identifier']
+        assert_equal 'Pricing page hero copy', data['title']
+        assert_equal 'design-rebrand', data['project_name']
+        assert_equal 'med', data['priority']
+        assert_equal 'TODO', data['status_lane_name']
+        assert_equal 2, Array(data['labels']).size
+        assert_equal 'copy', data['labels'].first['name']
+        assert_nil data['secret_field'], 'unknown data fields must be stripped by strong params'
+      end
+
+      test 'create accepts comment_body for issue.commented events' do
+        post api_v1_channel_messages_path(@channel),
+             params: {
+               body: 'fallback summary',
+               data: {
+                 source: 'mtasks',
+                 event_type: 'issue.commented',
+                 actor_email: @user.email_address,
+                 issue_id: 188,
+                 identifier: 'BZL-188',
+                 title: 'Onboarding flow image compression',
+                 comment_id: 42,
+                 comment_body: 'checked the artifacts on safari iOS'
+               }
+             }.to_json,
+             headers: json_headers
+        assert_response :created
+
+        data = Message.last.data
+        assert_equal 'issue.commented', data['event_type']
+        assert_equal 42, data['comment_id']
+        assert_equal 'checked the artifacts on safari iOS', data['comment_body']
+      end
+
+      test 'create_reply with data: { source: "mtasks" } creates a system reply' do
+        parent = messages(:one)
+
+        assert_no_enqueued_jobs(only: MtasksOutboundEmitterJob) do
+          assert_difference 'Message.count', 1 do
+            post api_v1_message_replies_path(parent),
+                 params: { body: 'jait reply', data: { source: 'mtasks' } }.to_json,
+                 headers: json_headers
+          end
+        end
+        assert_response :created
+
+        message = Message.last
+        assert_equal parent.id, message.parent_message_id
+        assert_equal 'mtasks', message.data['source']
+        assert message.system?
       end
 
       test 'create with empty body returns 422' do

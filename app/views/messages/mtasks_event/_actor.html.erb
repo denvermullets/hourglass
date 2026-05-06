@@ -1,0 +1,4 @@
+<%# locals: (data:) %>
+<% user = mtasks_actor_user(data) %>
+<% username = user&.username.presence || data['actor_username'].to_s.strip.presence || data['actor_name'].to_s.strip.presence || 'someone' %>
+<span class="font-syne text-xs font-bold text-jordy-blue-400"><%= username %></span>
