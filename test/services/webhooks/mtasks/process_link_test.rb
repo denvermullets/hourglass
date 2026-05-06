@@ -28,6 +28,7 @@ module Webhooks
         delivery = build_delivery(event: 'link.created', data: {
                                     'link_type' => 'project_channel',
                                     'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 21,
                                     'hourglass_channel_id' => @channel.id,
                                     'created_by_user_id' => 5001
                                   })
@@ -50,6 +51,7 @@ module Webhooks
         data = {
           'link_type' => 'project_channel',
           'mtasks_project_id' => 7,
+          'mtasks_team_id' => 21,
           'hourglass_channel_id' => @channel.id,
           'created_by_user_id' => 5001
         }
@@ -148,18 +150,28 @@ module Webhooks
         assert_equal 22, MtasksLink.last.mtasks_team_id
       end
 
-      test 'project_channel link.created ignores payload mtasks_team_id not in discovered_teams' do
+      test 'project_channel link.created refreshes discovered_teams when payload team is unknown' do
+        # discovered_teams starts with only team 21 — payload references team 22
+        # which mtasks added after the integration was last refreshed.
+        @integration.update!(discovered_teams: [{ 'id' => 21, 'identifier' => 'HOUR', 'name' => 'Hourglass' }])
+
         delivery = build_delivery(event: 'link.created', data: {
                                     'link_type' => 'project_channel',
                                     'mtasks_project_id' => 7,
-                                    'mtasks_team_id' => 999,
+                                    'mtasks_team_id' => 22,
                                     'hourglass_channel_id' => @channel.id
                                   })
 
-        result = ProcessLink.call(delivery: delivery)
-        assert result.ok, result.error
-        # Falls back to single discovered team.
-        assert_equal 21, MtasksLink.last.mtasks_team_id
+        with_stubbed_instance_method(Jait::ApiClient, :discover_teams!, [
+                                       { 'id' => 21, 'identifier' => 'HOUR', 'name' => 'Hourglass' },
+                                       { 'id' => 22, 'identifier' => 'OTHER', 'name' => 'Other' }
+                                     ]) do
+          result = ProcessLink.call(delivery: delivery)
+          assert result.ok, result.error
+        end
+
+        assert_equal 22, MtasksLink.last.mtasks_team_id
+        assert_includes @integration.reload.discovered_teams.map { |t| t['id'] }, 22
       end
 
       test 'rejects when team_id cannot be resolved' do
@@ -284,6 +296,7 @@ module Webhooks
         delivery = build_delivery(event: 'link.created', data: {
                                     'link_type' => 'project_channel',
                                     'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 21,
                                     'hourglass_channel_id' => @channel.id,
                                     'created_by_user_id' => 9999 # no map for this id
                                   })
@@ -298,6 +311,7 @@ module Webhooks
         delivery = build_delivery(event: 'link.created', data: {
                                     'link_type' => 'project_channel',
                                     'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 21,
                                     'hourglass_channel_id' => @channel.id
                                   })
 
@@ -323,6 +337,7 @@ module Webhooks
         delivery = build_delivery(event: 'link.created', data: {
                                     'link_type' => 'project_channel',
                                     'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 21,
                                     'hourglass_channel_id' => @channel.id
                                   })
 

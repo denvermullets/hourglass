@@ -15,4 +15,14 @@ module StubbingHelper
     sclass.alias_method(method_name, alias_target)
     sclass.send(:remove_method, alias_target)
   end
+
+  def with_stubbed_instance_method(klass, method_name, return_value)
+    alias_target = :"_stubbed_orig_#{method_name}"
+    klass.alias_method(alias_target, method_name)
+    klass.define_method(method_name) { |*_a, **_k| return_value }
+    yield
+  ensure
+    klass.alias_method(method_name, alias_target)
+    klass.send(:remove_method, alias_target)
+  end
 end
