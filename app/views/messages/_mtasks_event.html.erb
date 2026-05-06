@@ -4,15 +4,15 @@
 <% project_name = data['project_name'].to_s %>
 <% channel_name = message.channel&.name.to_s %>
 <% timestamp = format_timestamp(message.created_at, style: :message) %>
-<% open_url = mtasks_open_in_jait_url(message, data) %>
-<% view_path = mtasks_view_issue_path(data) %>
+<% open_url = mtasks_open_in_jait_url(data) %>
+<% view_link = mtasks_view_source(data) %>
 
 <%= tag.div id: dom_id(message),
             class: "group flex gap-3 px-2 py-1.5",
             data: { message_user_id: message.user_id, message_created_at: message.created_at.iso8601 } do %>
-  <%# Cube glyph (outside the card) %>
-  <div class="flex-shrink-0 w-7 h-7 mt-0.5 rounded-md border border-bunker-825 bg-bunker-925 flex items-center justify-center">
-    <svg class="w-3.5 h-3.5 text-bunker-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <%# Cube glyph (outside the card) — matches regular message avatar size %>
+  <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
+    <svg class="w-4 h-4 text-bunker-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
       <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
       <line x1="12" y1="22.08" x2="12" y2="12"/>
@@ -52,8 +52,8 @@
         <%= link_to "open in jait", open_url, target: "_blank", rel: "noopener",
               class: "text-bunker-500 hover:text-granny-smith-apple-300 no-underline transition-colors duration-100" %>
       <% end %>
-      <% if view_path.present? %>
-        <%= link_to "view issue", view_path,
+      <% if view_link %>
+        <%= link_to view_link[:label], view_link[:path],
               class: "text-bunker-500 hover:text-bunker-300 no-underline transition-colors duration-100" %>
       <% end %>
       <% if identifier.present? %>

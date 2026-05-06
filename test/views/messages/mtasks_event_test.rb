@@ -20,32 +20,27 @@ class MtasksEventViewTest < ActionView::TestCase
     )
   end
 
-  test 'renders issue.created card with all fields' do
-    message = build_message(
-      'source' => 'mtasks',
-      'event_type' => 'issue.created',
-      'actor_email' => @user.email_address,
-      'actor_username' => 'denvermullets',
-      'identifier' => 'BZL-204',
-      'title' => 'Pricing page hero copy',
+  def issue_created_data
+    {
+      'source' => 'mtasks', 'event_type' => 'issue.created',
+      'actor_email' => @user.email_address, 'actor_username' => 'denvermullets',
+      'identifier' => 'BZL-204', 'title' => 'Pricing page hero copy',
       'project_name' => 'design-rebrand',
-      'team_slug' => 'design',
-      'priority' => 'med',
-      'status_lane_name' => 'TODO',
+      'source_url' => 'https://jait.example.com/teams/21/issues/204',
+      'priority' => 'med', 'status_lane_name' => 'TODO',
       'assignee_username' => 'matt',
       'labels' => [{ 'name' => 'copy' }, { 'name' => 'marketing-site' }]
-    )
-    html = render(partial: 'messages/mtasks_event', locals: { message: message })
-    assert_match 'JAIT', html
-    assert_match 'issue.created', html
-    assert_match 'design-rebrand', html
-    assert_match '#general', html
-    assert_match 'BZL-204', html
-    assert_match 'Pricing page hero copy', html
-    assert_match 'TODO', html
-    assert_match 'med', html
-    assert_match 'copy, marketing-site', html
-    assert_match 'open in jait', html
+    }
+  end
+
+  test 'renders issue.created card with all fields' do
+    html = render(partial: 'messages/mtasks_event', locals: { message: build_message(issue_created_data) })
+    [
+      'JAIT', 'issue.created', 'design-rebrand', '#general',
+      'BZL-204', 'Pricing page hero copy',
+      'TODO', 'med', 'copy, marketing-site',
+      'open in jait', 'https://jait.example.com/teams/21/issues/204'
+    ].each { |fragment| assert_match fragment, html }
   end
 
   test 'renders issue.commented card with quoted body' do
@@ -123,6 +118,21 @@ class MtasksEventViewTest < ActionView::TestCase
     assert_match 'commented on', html
     assert_match 'design-rebrand', html
     assert_match 'kicking off discussion here', html
+  end
+
+  test 'project events link to JAIT via source_url, open in new tab' do
+    message = build_message(
+      'source' => 'mtasks',
+      'event_type' => 'project.commented',
+      'project_name' => 'design-rebrand',
+      'source_url' => 'https://jait.example.com/teams/21/projects/42',
+      'comment_body' => 'hi'
+    )
+    html = render(partial: 'messages/mtasks_event', locals: { message: message })
+    assert_match 'open in jait', html
+    assert_match 'https://jait.example.com/teams/21/projects/42', html
+    assert_match 'target="_blank"', html
+    assert_no_match(/view project/, html)
   end
 
   test 'falls back to message body when event_type partial does not exist' do

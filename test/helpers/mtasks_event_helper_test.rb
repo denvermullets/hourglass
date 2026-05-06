@@ -30,49 +30,41 @@ class MtasksEventHelperTest < ActionView::TestCase
 
   # -- mtasks_open_in_jait_url --
 
-  test 'mtasks_open_in_jait_url builds the issue URL' do
-    integration = server_integrations(:jait_one)
-    message = @channel.messages.create!(user: @user, body: 'x', message_type: :system)
-    url = mtasks_open_in_jait_url(message,
-                                  'team_slug' => 'design', 'identifier' => 'BZL-204')
-    assert_equal "#{integration.base_url}/teams/design/issues/BZL-204", url
+  test 'mtasks_open_in_jait_url returns the source_url that JAIT sent' do
+    url = mtasks_open_in_jait_url('source_url' => 'https://jait.example.com/teams/HOUR/issues/BZL-204')
+    assert_equal 'https://jait.example.com/teams/HOUR/issues/BZL-204', url
   end
 
-  test 'mtasks_open_in_jait_url is nil when integration missing' do
-    other_server = Server.create!(name: 'lonely', invite_code: SecureRandom.hex(8), owner: @user)
-    other_channel = other_server.channels.create!(name: 'g', channel_type: :text, position: 0)
-    message = other_channel.messages.create!(user: @user, body: 'x', message_type: :system)
-    assert_nil mtasks_open_in_jait_url(message,
-                                       'team_slug' => 'design', 'identifier' => 'BZL-204')
+  test 'mtasks_open_in_jait_url is nil when source_url missing' do
+    assert_nil mtasks_open_in_jait_url({})
+    assert_nil mtasks_open_in_jait_url('source_url' => '')
+    assert_nil mtasks_open_in_jait_url('source_url' => '   ')
   end
 
-  test 'mtasks_open_in_jait_url is nil when team_slug or identifier missing' do
-    message = @channel.messages.create!(user: @user, body: 'x', message_type: :system)
-    assert_nil mtasks_open_in_jait_url(message, 'identifier' => 'BZL-204')
-    assert_nil mtasks_open_in_jait_url(message, 'team_slug' => 'design')
-  end
+  # -- mtasks_view_source --
 
-  # -- mtasks_view_issue_path --
-
-  test 'mtasks_view_issue_path returns thread path when issue link exists' do
+  test 'mtasks_view_source returns view-issue link for issue events with a thread' do
     integration = server_integrations(:jait_one)
     parent = @channel.messages.create!(user: @user, body: 'parent', message_type: :regular)
     MtasksLink.create!(
       link_type: MtasksLink::ISSUE_THREAD,
-      server_integration: integration,
-      created_by_user: @user,
-      mtasks_team_id: 21,
-      mtasks_issue_id: 999,
-      thread: parent
+      server_integration: integration, created_by_user: @user,
+      mtasks_team_id: 21, mtasks_issue_id: 999, thread: parent
     )
 
-    path = mtasks_view_issue_path('issue_id' => 999)
-    assert_equal server_channel_message_thread_path(@server, @channel, parent), path
+    link = mtasks_view_source('event_type' => 'issue.commented', 'issue_id' => 999)
+    assert_equal 'view issue', link[:label]
+    assert_equal server_channel_message_thread_path(@server, @channel, parent), link[:path]
   end
 
-  test 'mtasks_view_issue_path is nil when no link exists' do
-    assert_nil mtasks_view_issue_path('issue_id' => 999_999)
-    assert_nil mtasks_view_issue_path({})
+  test 'mtasks_view_source is nil for project events (open-in-jait covers them)' do
+    assert_nil mtasks_view_source('event_type' => 'project.commented', 'project_id' => 42)
+  end
+
+  test 'mtasks_view_source is nil when no thread link exists' do
+    assert_nil mtasks_view_source('event_type' => 'issue.created', 'issue_id' => 999_999)
+    assert_nil mtasks_view_source('event_type' => 'unknown.event')
+    assert_nil mtasks_view_source({})
   end
 
   # -- mtasks_event_partial --

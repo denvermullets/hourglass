@@ -85,8 +85,8 @@ module Api
           data: [
             :source, :event_type,
             :actor_email, :actor_name, :actor_username,
-            :issue_id, :identifier, :title,
-            :team_slug, :project_name,
+            :issue_id, :identifier, :title, :source_url,
+            :team_slug, :project_id, :project_name,
             :priority, :status_lane_name,
             :assignee_email, :assignee_name, :assignee_username,
             :comment_id, :comment_body,
