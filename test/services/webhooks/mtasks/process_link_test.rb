@@ -125,6 +125,43 @@ module Webhooks
         assert_match(/no enabled integration/, result.error)
       end
 
+      test 'project_channel link.created uses mtasks_team_id from payload when present' do
+        @integration.update!(discovered_teams: [
+                               { 'id' => 21, 'identifier' => 'HOUR', 'name' => 'Hourglass' },
+                               { 'id' => 22, 'identifier' => 'OTHER', 'name' => 'Other' }
+                             ])
+
+        delivery = build_delivery(event: 'link.created', data: {
+                                    'link_type' => 'project_channel',
+                                    'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 22,
+                                    'hourglass_channel_id' => @channel.id
+                                  })
+
+        # Stub Fetcher.call to nil so any fallback discovery probe would fail —
+        # ensures the payload team is used directly without probing.
+        with_stubbed_class_method(Jait::Fetcher, :call, nil) do
+          result = ProcessLink.call(delivery: delivery)
+          assert result.ok, result.error
+        end
+
+        assert_equal 22, MtasksLink.last.mtasks_team_id
+      end
+
+      test 'project_channel link.created ignores payload mtasks_team_id not in discovered_teams' do
+        delivery = build_delivery(event: 'link.created', data: {
+                                    'link_type' => 'project_channel',
+                                    'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 999,
+                                    'hourglass_channel_id' => @channel.id
+                                  })
+
+        result = ProcessLink.call(delivery: delivery)
+        assert result.ok, result.error
+        # Falls back to single discovered team.
+        assert_equal 21, MtasksLink.last.mtasks_team_id
+      end
+
       test 'rejects when team_id cannot be resolved' do
         @integration.update!(discovered_teams: [
                                { 'id' => 21, 'identifier' => 'HOUR', 'name' => 'Hourglass' },

@@ -33,7 +33,8 @@ module Webhooks
         project_id = @data['mtasks_project_id'].presence
         return error('mtasks_project_id missing') unless project_id
 
-        team_id = resolve_team_id(integration, project_id: project_id)
+        team_id = team_id_from_payload(integration) ||
+                  resolve_team_id(integration, project_id: project_id)
         return error('team not resolvable') unless team_id
 
         link = upsert_project_link(channel, integration, project_id, team_id)
@@ -139,6 +140,13 @@ module Webhooks
 
       def integration_for(channel)
         channel.server.server_integrations.enabled.for_kind(ServerIntegration::KIND_JAIT).first
+      end
+
+      def team_id_from_payload(integration)
+        payload_team_id = @data['mtasks_team_id'].presence
+        return nil unless payload_team_id
+
+        integration.team_for(payload_team_id) ? payload_team_id.to_i : nil
       end
 
       def resolve_team_id(integration, project_id:)
