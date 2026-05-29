@@ -3,6 +3,7 @@ class Message < ApplicationRecord
   belongs_to :channel, optional: true
   belongs_to :conversation, optional: true
   belongs_to :parent_message, class_name: 'Message', optional: true, counter_cache: :replies_count
+  belongs_to :pinned_by, class_name: 'User', optional: true
   has_many :replies, class_name: 'Message', foreign_key: :parent_message_id, dependent: :nullify
   has_many :notifications, as: :notifiable, dependent: :destroy
 
@@ -19,6 +20,7 @@ class Message < ApplicationRecord
   scope :ordered, -> { order(created_at: :asc) }
   scope :not_deleted, -> { where(deleted_at: nil) }
   scope :root_messages, -> { where(parent_message_id: nil) }
+  scope :pinned, -> { where.not(pinned_at: nil).order(created_at: :asc) }
 
   ALLOWED_CONTENT_TYPES = %w[
     image/jpeg image/png image/gif image/webp
@@ -37,6 +39,18 @@ class Message < ApplicationRecord
 
   def edited?
     edited_at.present?
+  end
+
+  def pinned?
+    pinned_at.present?
+  end
+
+  def pin!(user)
+    update!(pinned_at: Time.current, pinned_by: user)
+  end
+
+  def unpin!
+    update!(pinned_at: nil, pinned_by: nil)
   end
 
   def owned_by?(user)
@@ -70,7 +84,7 @@ class Message < ApplicationRecord
   private
 
   def body_or_files_present
-    return if user_join? || user_leave?
+    return if user_join? || user_leave? || system?
     return if body.present? || files.attached?
 
     errors.add(:base, 'must have a message body or attachments')

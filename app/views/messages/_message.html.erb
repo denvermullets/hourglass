@@ -1,92 +1,122 @@
-<% grouped = local_assigns.fetch(:grouped, false) %>
 <% context = local_assigns.fetch(:context, :channel) %>
 <% if message.user_join? %>
   <%= render "messages/user_join", message: message %>
+<% elsif message.data['source'] == 'mtasks' && message.data['event_type'].present? %>
+  <%= render "messages/mtasks_event", message: message %>
+<% elsif message.system? %>
+  <%= render "messages/system", message: message %>
+<% elsif message.data['kind'] == 'issue_card' %>
+  <%= render "messages/issue_card", message: message, context: context %>
 <% else %>
-<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 #{ grouped ? '-mt-0.5' : 'py-1.5' } rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
+<% pinned = message.pinned? %>
+<% grouped = local_assigns.fetch(:grouped, false) && !pinned %>
+<% outer_classes = if pinned
+     "group relative border border-bunker-825 rounded-lg bg-bunker-925 px-3.5 py-3 my-1 overflow-hidden flex flex-col gap-2.5"
+   else
+     "group flex gap-3 px-2 #{ grouped ? '-mt-0.5' : 'py-1.5' } rounded hover:bg-bunker-875/50 transition-colors duration-100"
+   end %>
+<%= tag.div id: dom_id(message), class: outer_classes, data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
+  <% if pinned %>
+    <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
+    <div class="text-[11px] tracking-[0.08em] text-granny-smith-apple-400">
+      // pinned<% if message.pinned_by %> by <span class="text-bunker-300">@<%= message.pinned_by.username %></span><% end %>
+    </div>
+  <% end %>
+
   <% if message.deleted? %>
     <div class="flex-1 text-xs text-bunker-600 italic">
       [message deleted]
     </div>
   <% else %>
-    <% if grouped %>
-      <%# Spacer matching avatar width for text alignment %>
-      <div class="flex-shrink-0 w-8"></div>
-    <% else %>
-      <%# Avatar %>
-      <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
-        <% if message.user.avatar.attached? %>
-          <%= image_tag polymorphic_path(message.user.avatar), alt: "", class: "w-full h-full object-cover" %>
-        <% else %>
-          <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
-        <% end %>
-      </div>
-    <% end %>
-
-    <div class="flex-1 min-w-0">
-      <% unless grouped %>
-        <%# Header: username + timestamp %>
-        <div class="flex items-baseline gap-2">
-          <span class="font-syne text-xs font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
-          <span class="text-xs text-bunker-600"><%= format_timestamp(message.created_at, style: :message) %></span>
-          <% if message.edited? %>
-            <span class="text-xs text-bunker-600">(edited)</span>
+    <div class="<%= pinned ? 'flex gap-3' : 'contents' %>">
+      <% if grouped %>
+        <%# Spacer matching avatar width for text alignment %>
+        <div class="flex-shrink-0 w-8"></div>
+      <% else %>
+        <%# Avatar %>
+        <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
+          <% if message.user.avatar.attached? %>
+            <%= image_tag polymorphic_path(message.user.avatar), alt: "", class: "w-full h-full object-cover" %>
+          <% else %>
+            <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
           <% end %>
         </div>
       <% end %>
 
-      <%# Body %>
-      <% if message.body.present? %>
-        <div class="text-xs text-bunker-300 break-words message-content"><%= sanitize_message(message) %></div>
-      <% end %>
+      <div class="flex-1 min-w-0">
+        <% unless grouped %>
+          <%# Header: username + timestamp %>
+          <div class="flex items-baseline gap-2">
+            <span class="font-syne text-xs font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
+            <span class="text-xs text-bunker-600"><%= format_timestamp(message.created_at, style: :message) %></span>
+            <% if message.edited? %>
+              <span class="text-xs text-bunker-600">(edited)</span>
+            <% end %>
+          </div>
+        <% end %>
 
-      <%# Attachments %>
-      <% if message.files.attached? %>
-        <%= render "messages/attachments", message: message %>
-      <% end %>
+        <%# Body %>
+        <% if message.body.present? %>
+          <div class="text-xs text-bunker-300 break-words message-content"><%= sanitize_message(message) %></div>
+        <% end %>
 
-      <%# Reply indicator %>
-      <% if message.parent_message_id.nil? %>
-        <%= render "messages/reply_indicator", message: message %>
-      <% end %>
+        <%# Attachments %>
+        <% if message.files.attached? %>
+          <%= render "messages/attachments", message: message %>
+        <% end %>
 
-      <%# Actions (hover on desktop, tap on mobile) — below message content %>
-      <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
-           data-long-press-target="actions">
-        <%# Reply — visible to all users %>
+        <%# Reply indicator %>
         <% if message.parent_message_id.nil? %>
-          <% thread_path = context == :conversation ? conversation_message_thread_path(message.conversation, message) : server_channel_message_thread_path(message.channel.server, message.channel, message) %>
-          <%= link_to "reply", thread_path,
-                class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
+          <%= render "messages/reply_indicator", message: message %>
         <% end %>
 
-        <%# Quote — visible to all users %>
-        <%# strip_tags returns an html_safe SafeBuffer; Rails' tag helper skips
-            HTML-escaping html_safe attribute values, which would let `"` in the
-            message body break out of the data attribute and clobber `class=""`.
-            Re-wrap as a plain String so the tag helper escapes properly. %>
-        <% quote_body = String.new(strip_tags(message.body).to_s).truncate(500) %>
-        <%= tag.button "quote",
-              type: "button",
-              onclick: "document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))",
-              data: { quote_body: quote_body },
-              class: "text-xs leading-none font-normal text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
+        <%# Actions (hover on desktop, tap on mobile) — below message content %>
+        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
+             data-long-press-target="actions">
+          <%# Reply — visible to all users %>
+          <% if message.parent_message_id.nil? %>
+            <% thread_path = context == :conversation ? conversation_message_thread_path(message.conversation, message) : server_channel_message_thread_path(message.channel.server, message.channel, message) %>
+            <%= link_to "reply", thread_path,
+                  class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
+          <% end %>
 
-        <%# Edit/Delete — author only %>
-        <% if context == :conversation %>
-          <% edit_path = edit_conversation_message_path(message.conversation, message) %>
-          <% delete_path = conversation_message_path(message.conversation, message) %>
-        <% else %>
-          <% edit_path = edit_server_channel_message_path(message.channel.server, message.channel, message) %>
-          <% delete_path = server_channel_message_path(message.channel.server, message.channel, message) %>
-        <% end %>
-        <div class="hidden items-center gap-2" data-author-only>
-          <%= link_to "edit", edit_path,
-                class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline",
-                data: { turbo_method: :get, turbo_prefetch: false } %>
-          <%= link_to "delete", delete_path,
-                class: "text-xs leading-none text-bunker-600 hover:text-danger-400 transition-colors duration-100 no-underline",
-                data: { turbo_method: :delete, turbo_confirm: "Delete this message?" } %>
+          <%# Quote — visible to all users %>
+          <%# strip_tags returns an html_safe SafeBuffer; Rails' tag helper skips
+              HTML-escaping html_safe attribute values, which would let `"` in the
+              message body break out of the data attribute and clobber `class=""`.
+              Re-wrap as a plain String so the tag helper escapes properly. %>
+          <% quote_body = String.new(strip_tags(message.body).to_s).truncate(500) %>
+          <%= tag.button "quote",
+                type: "button",
+                onclick: "document.dispatchEvent(new CustomEvent('message:quote', { detail: { body: this.dataset.quoteBody } }))",
+                data: { quote_body: quote_body },
+                class: "text-xs leading-none font-normal text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
+
+          <%# Pin / Unpin — channel context only, visible to all members %>
+          <% if context == :channel %>
+            <% pin_path = pin_server_channel_message_path(message.channel.server, message.channel, message) %>
+            <%= link_to message.pinned? ? "unpin" : "pin",
+                  pin_path,
+                  data: { turbo_method: message.pinned? ? :delete : :post },
+                  class: "text-xs leading-none text-bunker-600 hover:text-granny-smith-apple-300 transition-colors duration-100 no-underline" %>
+          <% end %>
+
+          <%# Edit/Delete — author only %>
+          <% if context == :conversation %>
+            <% edit_path = edit_conversation_message_path(message.conversation, message) %>
+            <% delete_path = conversation_message_path(message.conversation, message) %>
+          <% else %>
+            <% edit_path = edit_server_channel_message_path(message.channel.server, message.channel, message) %>
+            <% delete_path = server_channel_message_path(message.channel.server, message.channel, message) %>
+          <% end %>
+          <div class="hidden items-center gap-2" data-author-only>
+            <%= link_to "edit", edit_path,
+                  class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline",
+                  data: { turbo_method: :get, turbo_prefetch: false } %>
+            <%= link_to "delete", delete_path,
+                  class: "text-xs leading-none text-bunker-600 hover:text-danger-400 transition-colors duration-100 no-underline",
+                  data: { turbo_method: :delete, turbo_confirm: "Delete this message?" } %>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount MissionControl::Jobs::Engine, at: '/jobs'
+
   resource :session
   resources :passwords, param: :token
   resource :registration, only: %i[new create]
@@ -23,7 +25,31 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :settings do
+    resources :api_tokens, only: %i[index create destroy]
+  end
+
+  namespace :webhooks do
+    post 'mtasks/:integration_id', to: 'mtasks#create', as: :mtasks
+  end
+
+  namespace :api do
+    namespace :v1 do
+      get '/me', to: 'users#me'
+      resources :servers, only: %i[index show] do
+        resources :channels, only: %i[index]
+      end
+      resources :channels, only: %i[show] do
+        resources :messages, only: %i[index create]
+      end
+      get  '/messages/:id/replies', to: 'messages#replies', as: :message_replies
+      post '/messages/:id/replies', to: 'messages#create_reply'
+    end
+  end
+
   get '/changelog', to: 'changelog#show', as: :changelog
+
+  get '/mentions/search', to: 'mentions#search', as: :mentions_search
 
   resources :notifications, only: [:index] do
     member do
@@ -57,6 +83,7 @@ Rails.application.routes.draw do
       patch 'settings/permissions', to: 'servers#update_permissions', as: :update_permissions
       get 'settings/integrations', to: 'servers#settings_integrations', as: :settings_integrations
       patch 'settings/integrations/jait', to: 'servers#update_jait_integration', as: :update_jait_integration
+      post 'settings/integrations/jait/test_webhook', to: 'jait_webhook_tests#create', as: :test_jait_webhook
     end
     resource :membership, only: [:destroy]
     resources :categories, only: %i[create update destroy] do
@@ -79,6 +106,16 @@ Rails.application.routes.draw do
       end
       resources :messages, only: %i[index show create edit update destroy] do
         resource :thread, only: [:show], controller: 'threads'
+        member do
+          post   :pin
+          delete :pin, action: :unpin
+        end
+      end
+      resource :pinned_messages, only: [:show], controller: 'pinned_messages'
+      resource :settings, only: %i[show update], controller: 'channels/settings' do
+        get :mtasks_projects
+        post :link_project
+        delete :link_project, action: :unlink_project
       end
     end
   end

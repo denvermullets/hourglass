@@ -1,9 +1,12 @@
 class Channel < ApplicationRecord
+  MTASKS_SYSTEM_MESSAGE_PREFS = %w[all status_only off].freeze
+
   belongs_to :server
   belongs_to :category, optional: true
   has_many :channel_memberships, dependent: :destroy
   has_many :members, through: :channel_memberships, source: :user
   has_many :messages, dependent: :destroy
+  has_one :mtasks_project_link, -> { project_channels }, class_name: 'MtasksLink', dependent: :destroy
 
   enum :channel_type, { text: 0, voice: 1, announcement: 2 }
 
@@ -22,6 +25,11 @@ class Channel < ApplicationRecord
     where(is_private: false)
       .or(where(id: ChannelMembership.where(user: user).select(:channel_id)))
   }
+
+  def mtasks_system_messages_pref
+    pref = (settings || {})['mtasks_system_messages']
+    MTASKS_SYSTEM_MESSAGE_PREFS.include?(pref) ? pref : 'all'
+  end
 
   def archived?
     archived_at.present?

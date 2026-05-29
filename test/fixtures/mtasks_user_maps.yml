@@ -1,0 +1,9 @@
+one:
+  hourglass_user: one
+  mtasks_user_id: 5001
+  email: one@example.com
+
+two:
+  hourglass_user: two
+  mtasks_user_id: 5002
+  email: two@example.com

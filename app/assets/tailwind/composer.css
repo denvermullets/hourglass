@@ -448,6 +448,32 @@
   font-size: 0.5625rem;
 }
 
+.mention-external-badge {
+  margin-left: auto;
+  padding: 0.0625rem 0.25rem;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 0.1875rem;
+  color: var(--color-jordy-blue-300);
+  background: color-mix(in srgb, var(--color-jordy-blue-400) 14%, transparent);
+}
+
+.slash-menu {
+  min-width: 18rem;
+}
+
+.slash-menu .slash-menu-usage {
+  color: var(--color-granny-smith-apple-400);
+  font-family: var(--font-dm-mono);
+  font-weight: 600;
+}
+
+.slash-menu .slash-menu-desc {
+  color: var(--color-bunker-500);
+  font-size: 0.625rem;
+}
+
 .changelog-content h2 {
   font-size: 1rem;
   margin-top: 1.75rem;

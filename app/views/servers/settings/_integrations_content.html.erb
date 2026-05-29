@@ -64,4 +64,8 @@
         class: "w-full rounded px-3.5 py-2.5 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
     <% end %>
   </div>
+
+  <% if integration.persisted? && integration.webhook_secret.present? %>
+    <%= render "servers/settings/webhook_test_panel", server: server, integration: integration %>
+  <% end %>
 </div>

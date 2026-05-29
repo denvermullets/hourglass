@@ -33,8 +33,8 @@
 
         <div class="ml-auto flex gap-1.5">
           <% if current_membership&.can_manage_channels? %>
-            <%= link_to "edit", server_channel_path(@server, @channel),
-              class: "hidden text-xs text-bunker-500 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
+            <%= link_to "settings", server_channel_settings_path(@server, @channel),
+              class: "text-xs text-bunker-500 hover:text-bunker-300 transition-colors duration-100 no-underline" %>
           <% end %>
         </div>
       </div>
@@ -47,7 +47,10 @@
         <% end %>
         <span>msgs: <%= @message_count %></span>
         <span class="text-bunker-825">&bull;</span>
+        <%= render "channels/pinned_count", server: @server, channel: @channel %>
+        <span class="text-bunker-825">&bull;</span>
         <%= render "shared/presence_indicator", server_id: @server.id, online_count: PresenceChannel.online_count(@server.id) %>
+        <%= render "channels/jait_linked_badge", channel: @channel %>
       </div>
     </div>
 

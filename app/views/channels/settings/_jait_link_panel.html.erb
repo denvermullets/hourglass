@@ -1,0 +1,74 @@
+<%# locals: server, channel, integration, link, link_state, linked_project %>
+<% can_manage = defined?(current_membership) && current_membership&.can_manage_channels? %>
+<% btn_primary = "rounded px-3 py-2 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-granny-smith-apple-600 text-granny-smith-apple-300 hover:bg-granny-smith-apple-600 hover:text-bunker-950" %>
+<% btn_danger  = "rounded px-3 py-2 font-dm-mono text-xs tracking-[0.06em] text-center cursor-pointer transition-colors duration-150 bg-transparent border border-bunker-775 text-bunker-400 hover:border-danger-400 hover:text-danger-400" %>
+
+<div id="channel_<%= channel.id %>_jait_link_panel"
+     class="rounded-lg border border-bunker-825 bg-bunker-925 p-4 relative overflow-hidden">
+  <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
+
+  <div class="text-xs tracking-[0.16em] text-granny-smith-apple-300 font-dm-mono mb-1">// linked mtasks project</div>
+  <div class="text-[11px] text-bunker-500 mb-4">
+    link this channel to a project so pinned messages roll up into the project's decisions log.
+  </div>
+
+  <% case link_state %>
+  <% when :unlinked %>
+    <div class="text-xs text-bunker-400 mb-3">no project linked yet.</div>
+    <% if can_manage %>
+      <button type="button" data-action="project-picker#open" class="<%= btn_primary %>">
+        // link mtasks project &rarr;
+      </button>
+    <% else %>
+      <div class="text-[11px] text-bunker-500">only moderators can link a project.</div>
+    <% end %>
+
+  <% when :linked %>
+    <div class="rounded border border-bunker-775 bg-bunker-875 p-3 mb-3 flex items-start gap-2.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-granny-smith-apple-400 mt-1.5 flex-shrink-0"></span>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-baseline gap-2">
+          <% if linked_project['identifier'].present? %>
+            <span class="font-dm-mono text-[11px] text-bunker-500"><%= linked_project['identifier'] %></span>
+          <% end %>
+          <span class="font-syne text-sm font-bold text-bunker-50 truncate"><%= linked_project['name'] %></span>
+        </div>
+        <% if linked_project['description'].present? %>
+          <div class="text-[11px] text-bunker-400 mt-1 line-clamp-2"><%= linked_project['description'] %></div>
+        <% end %>
+      </div>
+    </div>
+    <% if can_manage %>
+      <%= button_to "// unlink", link_project_server_channel_settings_path(server, channel),
+            method: :delete,
+            form: { data: { turbo_confirm: "Unlink #{channel.name} from #{linked_project['name']}?" } },
+            class: btn_danger %>
+    <% end %>
+
+  <% when :broken %>
+    <div class="rounded border border-bunker-775 bg-bunker-875 p-3 mb-3">
+      <div class="text-[11px] text-bunker-500 font-dm-mono mb-1">// project not found in mtasks anymore</div>
+      <div class="text-xs text-bunker-300">
+        the linked project (id <%= link.mtasks_project_id %>) was deleted or your token no longer has access.
+      </div>
+    </div>
+    <% if can_manage %>
+      <div class="flex gap-2">
+        <button type="button" data-action="project-picker#open" class="<%= btn_primary %>">
+          // re-link &rarr;
+        </button>
+        <%= button_to "// remove broken link", link_project_server_channel_settings_path(server, channel),
+              method: :delete,
+              form: { data: { turbo_confirm: 'Remove the broken link?' } },
+              class: btn_danger %>
+      </div>
+    <% end %>
+
+  <% when :no_integration %>
+    <div class="text-xs text-bunker-400 mb-2">no JAIT integration is enabled on this server.</div>
+    <%= link_to settings_integrations_server_path(server),
+          class: "text-xs text-granny-smith-apple-300 hover:text-granny-smith-apple-600 no-underline" do %>
+      // configure JAIT in server settings &rarr;
+    <% end %>
+  <% end %>
+</div>

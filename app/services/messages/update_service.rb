@@ -1,4 +1,6 @@
 class Messages::UpdateService < Service
+  include Messages::MtasksEmittable
+
   def initialize(message:, params:)
     @message = message
     @params = params
@@ -8,11 +10,19 @@ class Messages::UpdateService < Service
     purge_removed_files
     update_message
     broadcast_update
+    emit_outbound
 
     @message
   end
 
   private
+
+  def emit_outbound
+    return unless emittable?(@message)
+    return if @message.data['mtasks_comment_id'].blank?
+
+    enqueue_update(@message)
+  end
 
   def purge_removed_files
     purge_file_ids = @params.delete(:purge_file_ids)

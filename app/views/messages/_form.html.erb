@@ -4,7 +4,9 @@
                controller: "message-composer attachment-upload",
                action: "submit->message-composer#handleSubmit turbo:submit-end->message-composer#reset turbo:submit-end->attachment-upload#reset",
                message_composer_placeholder_value: "// message ##{channel.name}",
-               message_composer_server_id_value: server.id
+               message_composer_server_id_value: server.id,
+               message_composer_channel_id_value: channel.id,
+               message_composer_channel_linked_value: channel.mtasks_project_link.present?
              } do |f| %>
   <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
   <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">

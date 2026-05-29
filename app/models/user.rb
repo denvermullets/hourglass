@@ -30,6 +30,7 @@ class User < ApplicationRecord
   has_many :messages, dependent: :nullify
   has_many :notifications, dependent: :destroy
   has_many :triggered_notifications, class_name: 'Notification', foreign_key: :actor_id, dependent: :nullify
+  has_many :api_tokens, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :username, with: ->(u) { u.strip.downcase }

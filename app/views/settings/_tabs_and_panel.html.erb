@@ -1,11 +1,18 @@
+<% tabs = [
+  ['profile', profile_settings_path, 'profile'],
+  ['account', account_settings_path, 'account'],
+  ['notifications', notifications_settings_path, 'notifications'],
+  ['appearance', appearance_settings_path, 'appearance'],
+  ['api_tokens', settings_api_tokens_path, 'api tokens']
+] %>
 <%= turbo_frame_tag "user_settings_panel", class: "flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden" do %>
   <%# Mobile tab nav %>
   <div class="lg:hidden flex border-b border-bunker-825 overflow-x-auto scrollbar-none">
-    <% %w[profile account notifications appearance].each do |t| %>
-      <%= link_to send("#{t}_settings_path"),
+    <% tabs.each do |t, path, label| %>
+      <%= link_to path,
         data: { turbo_frame: "user_settings_panel" },
         class: "shrink-0 whitespace-nowrap px-4 py-2.5 text-xs no-underline transition-colors duration-100 #{tab == t ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
-        <%= t %>
+        <%= label %>
       <% end %>
     <% end %>
   </div>
@@ -15,11 +22,11 @@
     <div class="text-xs tracking-[0.2em] text-bunker-500 px-4 mb-2">
       <span class="text-bunker-600">//</span> settings
     </div>
-    <% %w[profile account notifications appearance].each do |t| %>
-      <%= link_to send("#{t}_settings_path"),
+    <% tabs.each do |t, path, label| %>
+      <%= link_to path,
         data: { turbo_frame: "user_settings_panel" },
         class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == t ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
-        <%= t %>
+        <%= label %>
       <% end %>
     <% end %>
   </div>

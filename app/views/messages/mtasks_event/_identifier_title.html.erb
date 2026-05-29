@@ -1,0 +1,9 @@
+<%# locals: (data:) %>
+<div class="flex items-baseline gap-2 flex-wrap">
+  <% if data['identifier'].present? %>
+    <span class="font-dm-mono text-[11px] text-bunker-500"><%= data['identifier'] %></span>
+  <% end %>
+  <% if data['title'].present? %>
+    <span class="text-xs text-bunker-200"><%= data['title'] %></span>
+  <% end %>
+</div>

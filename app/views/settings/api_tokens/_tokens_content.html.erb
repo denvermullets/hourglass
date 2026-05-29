@@ -1,0 +1,43 @@
+<div class="max-w-2xl space-y-8">
+  <div>
+    <h2 class="font-syne text-base font-bold text-bunker-50 tracking-tight mb-1">API tokens</h2>
+    <p class="text-xs text-bunker-500 mb-6">
+      Personal tokens for programmatic access to hourglass. Treat them like passwords &mdash;
+      copy them when created, because we don't store the raw value.
+    </p>
+  </div>
+
+  <% if local_assigns[:error].present? %>
+    <div class="rounded border border-red-700 bg-red-950 px-3 py-2 text-xs text-red-300">
+      <%= error %>
+    </div>
+  <% end %>
+
+  <%= turbo_frame_tag "raw_token_reveal" do %>
+    <% if local_assigns[:plaintext].present? %>
+      <%= render 'settings/api_tokens/raw_reveal', token: new_token, plaintext: plaintext %>
+    <% end %>
+  <% end %>
+
+  <div>
+    <h3 class="text-xs text-bunker-300 font-medium mb-3">create new token</h3>
+    <div id="new_api_token_form">
+      <%= render 'settings/api_tokens/new_form' %>
+    </div>
+  </div>
+
+  <div class="h-px bg-bunker-825"></div>
+
+  <div>
+    <h3 class="text-xs text-bunker-300 font-medium mb-3">your tokens</h3>
+    <div id="api_tokens_list" class="space-y-2">
+      <% if tokens.any? %>
+        <%= render partial: 'settings/api_tokens/token_row', collection: tokens, as: :token %>
+      <% else %>
+        <div id="api_tokens_empty" class="text-xs text-bunker-500 italic">
+          no active tokens yet.
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

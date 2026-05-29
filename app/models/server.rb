@@ -6,6 +6,7 @@ class Server < ApplicationRecord
   has_many :all_categories, -> { order(position: :asc) }, class_name: 'Category', dependent: false
   has_many :channels, dependent: :destroy
   has_many :server_integrations, dependent: :destroy
+  has_many :api_tokens, dependent: :nullify
 
   has_one_attached :icon
 

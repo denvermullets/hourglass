@@ -1,0 +1,11 @@
+<%# locals: (email: nil, username: nil, name: nil) %>
+<%
+  resolved = email.present? ? User.find_by(email_address: email.to_s.downcase) : nil
+  display = resolved&.username.presence || username.to_s.strip.presence || name.to_s.strip.presence || 'unassigned'
+%>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-dm-mono text-[11px] border border-bunker-775 bg-bunker-875 text-bunker-300">
+  <span class="w-3.5 h-3.5 rounded-sm bg-bunker-825 border border-bunker-775 flex items-center justify-center text-[9px] font-syne uppercase text-bunker-400">
+    <%= display[0] %>
+  </span>
+  @<%= display %>
+</span>

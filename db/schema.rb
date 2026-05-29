@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_120100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "api_tokens", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "last_used_at"
+    t.string "name", null: false
+    t.datetime "revoked_at"
+    t.jsonb "scopes", default: ["read", "write"], null: false
+    t.bigint "server_id"
+    t.string "token_digest", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["server_id"], name: "index_api_tokens_on_server_id"
+    t.index ["token_digest"], name: "index_api_tokens_on_token_digest", unique: true
+    t.index ["user_id", "revoked_at"], name: "index_api_tokens_on_user_id_and_revoked_at"
+    t.index ["user_id"], name: "index_api_tokens_on_user_id"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -76,6 +92,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
     t.string "name", null: false
     t.integer "position", default: 0, null: false
     t.bigint "server_id", null: false
+    t.jsonb "settings", default: {}, null: false
     t.string "topic"
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_channels_on_category_id"
@@ -122,18 +139,84 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
     t.bigint "channel_id"
     t.bigint "conversation_id"
     t.datetime "created_at", null: false
+    t.jsonb "data", default: {}, null: false
     t.datetime "deleted_at"
     t.datetime "edited_at"
     t.integer "message_type", default: 0, null: false
     t.bigint "parent_message_id"
+    t.datetime "pinned_at"
+    t.bigint "pinned_by_id"
     t.integer "replies_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index "((data ->> 'source'::text))", name: "index_messages_on_data_source"
     t.index ["channel_id", "created_at"], name: "index_messages_on_channel_id_and_created_at"
     t.index ["channel_id"], name: "index_messages_on_channel_id"
     t.index ["conversation_id"], name: "index_messages_on_conversation_id"
     t.index ["parent_message_id"], name: "index_messages_on_parent_message_id"
+    t.index ["pinned_at"], name: "index_messages_on_pinned_at_partial", where: "(pinned_at IS NOT NULL)"
+    t.index ["pinned_by_id"], name: "index_messages_on_pinned_by_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
+  create_table "mtasks_issue_caches", primary_key: "mtasks_issue_id", force: :cascade do |t|
+    t.string "assignee_email"
+    t.datetime "deleted_at"
+    t.string "identifier", null: false
+    t.jsonb "labels", default: [], null: false
+    t.bigint "lane_id"
+    t.datetime "last_synced_at"
+    t.jsonb "payload", default: {}, null: false
+    t.string "priority"
+    t.string "status_name"
+    t.string "title"
+    t.string "url"
+    t.index ["deleted_at"], name: "index_mtasks_issue_caches_on_deleted_at"
+    t.index ["identifier"], name: "index_mtasks_issue_caches_on_identifier"
+  end
+
+  create_table "mtasks_links", force: :cascade do |t|
+    t.bigint "channel_id"
+    t.datetime "created_at", null: false
+    t.bigint "created_by_user_id", null: false
+    t.string "link_type", null: false
+    t.bigint "mtasks_issue_id"
+    t.string "mtasks_issue_identifier"
+    t.bigint "mtasks_project_id"
+    t.bigint "mtasks_team_id", null: false
+    t.bigint "server_integration_id", null: false
+    t.bigint "thread_id"
+    t.datetime "updated_at", null: false
+    t.index ["channel_id"], name: "index_mtasks_links_on_channel_id"
+    t.index ["channel_id"], name: "index_mtasks_links_unique_channel_per_project_link", unique: true, where: "((link_type)::text = 'project_channel'::text)"
+    t.index ["created_by_user_id"], name: "index_mtasks_links_on_created_by_user_id"
+    t.index ["mtasks_issue_id"], name: "index_mtasks_links_unique_issue_per_thread_link", unique: true, where: "((link_type)::text = 'issue_thread'::text)"
+    t.index ["mtasks_project_id"], name: "index_mtasks_links_unique_project_per_channel_link", unique: true, where: "((link_type)::text = 'project_channel'::text)"
+    t.index ["server_integration_id"], name: "index_mtasks_links_on_server_integration_id"
+    t.index ["thread_id"], name: "index_mtasks_links_on_thread_id"
+    t.index ["thread_id"], name: "index_mtasks_links_unique_thread_per_issue_link", unique: true, where: "((link_type)::text = 'issue_thread'::text)"
+  end
+
+  create_table "mtasks_project_caches", primary_key: "mtasks_project_id", force: :cascade do |t|
+    t.text "description"
+    t.datetime "last_synced_at"
+    t.string "name", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.string "status"
+    t.string "url"
+  end
+
+  create_table "mtasks_user_maps", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.bigint "hourglass_user_id", null: false
+    t.datetime "last_synced_at"
+    t.bigint "mtasks_user_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_mtasks_user_maps_on_email", unique: true
+    t.index ["hourglass_user_id"], name: "index_mtasks_user_maps_on_hourglass_user_id"
+    t.index ["hourglass_user_id"], name: "index_mtasks_user_maps_on_hourglass_user_id_unique", unique: true
+    t.index ["mtasks_user_id"], name: "index_mtasks_user_maps_on_mtasks_user_id", unique: true
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -164,6 +247,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
     t.datetime "last_verified_at"
     t.bigint "server_id", null: false
     t.datetime "updated_at", null: false
+    t.boolean "verify_webhook_timestamp", default: true, null: false
+    t.string "webhook_secret"
     t.index ["server_id", "kind"], name: "index_server_integrations_on_server_id_and_kind", unique: true
     t.index ["server_id"], name: "index_server_integrations_on_server_id"
   end
@@ -204,8 +289,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "webhook_deliveries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "delivery_id", null: false
+    t.string "event_type", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "processed_at"
+    t.datetime "received_at", null: false
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_type"], name: "index_webhook_deliveries_on_event_type"
+    t.index ["processed_at"], name: "index_webhook_deliveries_on_processed_at"
+    t.index ["source", "delivery_id"], name: "index_webhook_deliveries_on_source_and_delivery_id", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "api_tokens", "servers"
+  add_foreign_key "api_tokens", "users"
   add_foreign_key "categories", "servers"
   add_foreign_key "channel_memberships", "channels"
   add_foreign_key "channel_memberships", "users"
@@ -219,6 +320,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_103709) do
   add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "messages", column: "parent_message_id"
   add_foreign_key "messages", "users"
+  add_foreign_key "messages", "users", column: "pinned_by_id"
+  add_foreign_key "mtasks_links", "channels"
+  add_foreign_key "mtasks_links", "messages", column: "thread_id"
+  add_foreign_key "mtasks_links", "server_integrations"
+  add_foreign_key "mtasks_links", "users", column: "created_by_user_id"
+  add_foreign_key "mtasks_user_maps", "users", column: "hourglass_user_id"
   add_foreign_key "notifications", "users"
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "server_integrations", "servers"

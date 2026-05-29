@@ -1,0 +1,16 @@
+hour51:
+  mtasks_issue_id: 958
+  identifier: HOUR-51
+  title: Schema foundation
+  status_name: Backlog
+  priority: high
+  url: https://justanotherissuetracker.com/issues/958
+  labels: '["integration","db","backend"]'
+  payload: '{}'
+
+deletedone:
+  mtasks_issue_id: 999
+  identifier: HOUR-999
+  title: Removed upstream
+  payload: '{}'
+  deleted_at: <%= 1.day.ago %>
