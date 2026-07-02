@@ -17,11 +17,6 @@ development:
   queue:
     <<: *queue
     database: hourglass_dev_queue
-  cable:
-    <<: *default
-    database: hourglass_development
-    migrations_paths: db/cable_migrate
-    schema_dump: false
 test:
   <<: *default
   database: hourglass_test
@@ -36,7 +31,3 @@ production:
     <<: *primary_production
     url: <%= ENV['DATABASE_QUEUE_URL'] %>
     migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    url: <%= ENV['CABLE_DATABASE_URL'] %>
-    migrations_paths: db/cable_migrate

@@ -1,11 +1,8 @@
 # Builds the direct turbo_stream response sent to the message author so their own
-# send/edit/delete renders instantly, without waiting on the ActionCable broadcast
-# round-trip. Mirrors the targets/partials/locals of Messages::PostCreateBroadcaster,
-# Conversations::CreateMessageService, Messages::UpdateService and Messages::DeleteService.
-#
-# Broadcasts remain live alongside this (removed in a later phase); the author would
-# otherwise receive their own message twice — the turbo:before-stream-render dedup guard
-# in application.js drops the duplicate append/prepend.
+# send/edit/delete renders instantly on their screen, without waiting for the poll+morph
+# refresh that other viewers get. Mirrors the targets/partials/locals used when the same
+# message renders on a full page load / morph (Messages::PostCreateBroadcaster,
+# Conversations::CreateMessageService, Messages::UpdateService and Messages::DeleteService).
 module Messages
   module EchoResponses
     extend ActiveSupport::Concern
