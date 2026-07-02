@@ -34,6 +34,19 @@ class PollMorphWiringTest < ActionDispatch::IntegrationTest
     assert_equal page_digest, JSON.parse(response.body)['digest']
   end
 
+  # Phase 4: presence is DB-derived; the cable presence/monitor markup is gone.
+  test 'presence pill renders from Server#online_count; no cable presence/monitor markup' do
+    get server_channel_path(@server, @channel)
+    assert_response :ok
+
+    pill = css_select("#server_#{@server.id}_presence").first
+    assert pill, 'expected presence indicator'
+    assert_match(/online/, pill.text)
+
+    assert_no_match(/data-presence-server-id-value/, response.body)
+    assert_no_match(/connection-monitor/, response.body)
+  end
+
   # Author styling is now server-rendered (survives morph) instead of toggled by JS.
   test 'author messages render green username + visible actions; others blue' do
     get server_channel_path(@server, @channel)

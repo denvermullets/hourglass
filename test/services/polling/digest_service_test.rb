@@ -66,6 +66,12 @@ module Polling
       refute_equal before, digest
     end
 
+    test 'digest changes when the server online count changes' do
+      before = digest
+      users(:two).update_column(:last_seen_at, Time.current)
+      refute_equal before, digest
+    end
+
     test 'digest changes when the channel jait link changes' do
       before = digest
       MtasksLink.create!(

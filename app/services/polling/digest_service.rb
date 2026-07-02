@@ -21,7 +21,8 @@ module Polling
     private
 
     def parts
-      [container_digest, thread_digest, unread_digest, sidebar_digest, channel_link_digest, notifications_digest]
+      [container_digest, thread_digest, unread_digest, sidebar_digest, channel_link_digest, presence_digest,
+       notifications_digest]
     end
 
     # Latest activity in the open channel/conversation. updated_at (not last_message_at)
@@ -81,6 +82,14 @@ module Polling
       return '-' unless @channel
 
       stamp(MtasksLink.where(channel_id: @channel.id).maximum(:updated_at))
+    end
+
+    # DB-backed presence ("N online"): morph the pill when a member crosses the 45s window.
+    # Only channel pages show the pill; the count is stable between polls for active users.
+    def presence_digest
+      return '-' unless @channel
+
+      @channel.server.online_count
     end
 
     def notifications_digest

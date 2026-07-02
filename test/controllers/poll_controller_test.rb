@@ -35,4 +35,10 @@ class PollControllerTest < ActionDispatch::IntegrationTest
     get poll_path(channel_id: @channel.id)
     assert_response :redirect
   end
+
+  test 'a request marks the current user seen (DB-backed presence)' do
+    assert_nil users(:one).last_seen_at
+    get poll_path(channel_id: @channel.id)
+    assert_not_nil users(:one).reload.last_seen_at
+  end
 end

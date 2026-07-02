@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_120100) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -280,12 +280,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_120100) do
     t.string "display_name"
     t.string "email_address", null: false
     t.jsonb "favorite_artists", default: []
+    t.datetime "last_seen_at"
     t.integer "onboarding_step", default: 0, null: false
     t.string "password_digest", null: false
     t.jsonb "settings", default: {}, null: false
     t.datetime "updated_at", null: false
     t.string "username", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["last_seen_at"], name: "index_users_on_last_seen_at"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
