@@ -1,6 +1,7 @@
 <%= form_with scope: :message, url: conversation_messages_path(conversation),
              id: "message_form",
              data: {
+               turbo_permanent: true,
                controller: "message-composer attachment-upload",
                action: "submit->message-composer#handleSubmit turbo:submit-end->message-composer#reset turbo:submit-end->attachment-upload#reset",
                message_composer_placeholder_value: "// message #{conversation.display_name(Current.user)}",

@@ -9,6 +9,11 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# Turbo 8 page-refresh strategy: morph in place, preserve scroll (Phase 2 polling migration) %>
+    <%= turbo_refresh_method_tag :morph %>
+    <%= turbo_refresh_scroll_tag :preserve %>
+    <meta name="poll-digest" content="<%= poll_digest %>">
+
     <%= yield :head %>
 
     <link rel="icon" href="/icons/<%= Current.user&.theme || 'cold-wave' %>.svg" type="image/svg+xml">
@@ -21,7 +26,12 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="font-dm-mono bg-bunker-950 text-bunker-300 h-dvh overflow-hidden" data-controller="notifications-channel notification-panel connection-monitor">
+  <body class="font-dm-mono bg-bunker-950 text-bunker-300 h-dvh overflow-hidden"
+        data-controller="notifications-channel notification-panel connection-monitor poller"
+        data-poller-url-value="<%= poll_path %>"
+        data-poller-channel-id-value="<%= @channel&.id %>"
+        data-poller-conversation-id-value="<%= @conversation&.id %>"
+        data-poller-thread-id-value="<%= @parent_message&.id %>">
     <%# Notification panel overlay %>
     <div data-notification-panel-target="overlay"
          data-action="click->notification-panel#close"

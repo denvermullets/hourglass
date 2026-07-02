@@ -158,6 +158,15 @@ export default class extends Controller {
     this._renderPreviewStrip();
   }
 
+  // Defer poll-driven morph refreshes while any upload is in flight.
+  _syncPollBlock() {
+    if (this.pendingFiles.some((pf) => pf.uploading)) {
+      this.element.setAttribute("data-poll-block", "");
+    } else {
+      this.element.removeAttribute("data-poll-block");
+    }
+  }
+
   // Direct upload with progress
   _uploadFile(entry) {
     const upload = new DirectUpload(entry.file, this.urlValue, {
@@ -196,10 +205,12 @@ export default class extends Controller {
       this.element.appendChild(input);
 
       this._updateProgress(entry);
+      this._syncPollBlock();
     });
   }
 
   _renderPreviewStrip() {
+    this._syncPollBlock();
     if (!this.hasPreviewStripTarget) return;
 
     const hasExisting = this.previewStripTarget.querySelector("[data-existing-file]");

@@ -68,7 +68,7 @@
       <%= turbo_frame_tag "mark_read", src: mark_read_server_channel_path(@server, @channel), loading: :lazy %>
 
       <%# Scrollable message container %>
-      <div class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
+      <div id="messages_scroll_container" class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
         <%# Load older messages %>
         <% if @has_older %>
           <div id="load_older" class="text-center py-3" data-messages-scroll-target="loadOlder">
