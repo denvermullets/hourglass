@@ -54,7 +54,6 @@
         <% if Current.user&.unread_channels? || Current.user&.unread_conversations? %><span data-unread="true"></span><% end %>
       </span>
     </span>
-    <%= turbo_stream_from "user_#{Current.user.id}_unread_title" %>
 
     <div class="hidden fixed top-0 inset-x-0 z-50 flex items-center justify-center gap-2 py-1.5 bg-danger-400/90 text-bunker-950 text-xs font-medium tracking-wide"
          data-connection-monitor-target="banner">

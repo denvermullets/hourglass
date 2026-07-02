@@ -21,7 +21,7 @@ module Polling
     private
 
     def parts
-      [container_digest, thread_digest, unread_digest, notifications_digest]
+      [container_digest, thread_digest, unread_digest, sidebar_digest, channel_link_digest, notifications_digest]
     end
 
     # Latest activity in the open channel/conversation. updated_at (not last_message_at)
@@ -41,15 +41,46 @@ module Polling
       [stamp(@thread.updated_at), stamp(@thread.replies.maximum(:updated_at)), @thread.replies_count].join(',')
     end
 
-    # Sidebar unread dots + read-state. The booleans flip when unread status changes;
-    # max(last_read_at) moves when the user reads something (in another tab/device).
+    # Sidebar unread dots + tab-title dot. Since broadcasts are gone (Phase 3), morph is the
+    # only mechanism keeping these fresh, so the digest must move whenever ANY visible
+    # channel/conversation gets a message (global last_message_at) or the user reads
+    # something (max last_read_at, incl. reads on another tab/device). Booleans alone would
+    # miss a second channel going unread while others already are.
     def unread_digest
       [
-        @user.unread_channels?,
-        @user.unread_conversations?,
+        stamp(visible_channels_last_activity),
+        stamp(Conversation.for_user(@user).maximum(:last_message_at)),
         stamp(ChannelMembership.where(user: @user).maximum(:last_read_at)),
         stamp(ConversationMembership.where(user: @user).maximum(:last_read_at))
       ].join(',')
+    end
+
+    # Mirrors User#unread_channels? scoping so the digest reflects activity in any channel
+    # the user can see across their servers.
+    def visible_channels_last_activity
+      Channel.visible_to(@user)
+             .joins(:server)
+             .where(servers: { id: @user.servers.select(:id) })
+             .maximum(:last_message_at)
+    end
+
+    # Sidebar structure (channel/category create, archive, rename, reorder). last_message_at
+    # bumps use update_column so they don't touch updated_at — this term only moves on
+    # structural edits, keeping other users' sidebars fresh via morph now that the sidebar
+    # broadcasts are gone.
+    def sidebar_digest
+      server_ids = @user.servers.select(:id)
+      [
+        stamp(Channel.where(server_id: server_ids).maximum(:updated_at)),
+        stamp(Category.where(server_id: server_ids).maximum(:updated_at))
+      ].join(',')
+    end
+
+    # jait link badge/panel are DB-derived; move the digest when a channel's link changes.
+    def channel_link_digest
+      return '-' unless @channel
+
+      stamp(MtasksLink.where(channel_id: @channel.id).maximum(:updated_at))
     end
 
     def notifications_digest

@@ -21,6 +21,13 @@ module MessagesHelper
     end
   end
 
+  # True when the current viewer authored this message/reply. Used to server-render
+  # author-only styling (username color, edit/delete visibility) so it survives a morph
+  # refresh — replacing the old runtime message_actions_controller.js toggle.
+  def message_author?(record)
+    Current.user && record.user_id == Current.user.id
+  end
+
   def grouped_with_previous?(message, previous_message)
     return false if previous_message.nil?
     return false if previous_message.deleted?

@@ -49,5 +49,34 @@ module Polling
     test 'works with no container context (sidebar/notification only)' do
       assert_kind_of String, DigestService.call(user: @user)
     end
+
+    # Phase 3 sensitivity: with broadcasts gone, morph must fire on activity in ANOTHER
+    # visible channel (booleans alone missed a second channel going unread).
+    test 'digest changes when a different visible channel gets activity' do
+      other = @channel.server.channels.create!(name: 'random', channel_type: :text, is_private: false)
+      before = digest
+      other.update_column(:last_message_at, Time.current)
+      refute_equal before, digest
+    end
+
+    # Sidebar structure (create/archive/rename) is now derived via morph.
+    test 'digest changes when a channel is created (sidebar structure)' do
+      before = digest
+      @channel.server.channels.create!(name: 'new-chan', channel_type: :text, is_private: false)
+      refute_equal before, digest
+    end
+
+    test 'digest changes when the channel jait link changes' do
+      before = digest
+      MtasksLink.create!(
+        link_type: MtasksLink::PROJECT_CHANNEL,
+        server_integration: server_integrations(:jait_one),
+        channel: @channel,
+        mtasks_team_id: 21,
+        mtasks_project_id: 7,
+        created_by_user: @user
+      )
+      refute_equal before, digest
+    end
   end
 end

@@ -20,7 +20,6 @@ module ChannelIntegrations
 
       link = create_link
       enqueue_outbound(link)
-      ChannelIntegrations::BroadcastLinkStateService.call(channel: @channel)
       Result.new(ok: true, link: link)
     rescue ActiveRecord::RecordInvalid => e
       error(e.record.errors.full_messages.to_sentence)

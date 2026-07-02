@@ -33,4 +33,20 @@ class PollMorphWiringTest < ActionDispatch::IntegrationTest
     get poll_path(channel_id: @channel.id)
     assert_equal page_digest, JSON.parse(response.body)['digest']
   end
+
+  # Author styling is now server-rendered (survives morph) instead of toggled by JS.
+  test 'author messages render green username + visible actions; others blue' do
+    get server_channel_path(@server, @channel)
+    assert_response :ok
+
+    # messages(:one) authored by users(:one) — the signed-in user.
+    own = css_select("#message_#{messages(:one).id}").first
+    assert_includes own.to_html, 'text-granny-smith-apple-300'
+    assert_select "#message_#{messages(:one).id} [data-author-only].flex"
+
+    # messages(:two) authored by users(:two).
+    other = css_select("#message_#{messages(:two).id}").first
+    assert_includes other.to_html, 'text-jordy-blue-400'
+    assert_select "#message_#{messages(:two).id} [data-author-only].hidden"
+  end
 end

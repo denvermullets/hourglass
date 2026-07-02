@@ -20,16 +20,13 @@ class Notifications::CreateService < Service
     return if channel_muted?
     return if recently_notified?
 
-    notification = Notification.create!(
+    Notification.create!(
       user: @user,
       actor: @actor,
       notification_type: @notification_type,
       notifiable: @notifiable,
       data: @data
     )
-
-    broadcast_to_user(notification)
-    notification
   end
 
   private
@@ -54,12 +51,5 @@ class Notifications::CreateService < Service
       notification_type: @notification_type,
       notifiable: @notifiable
     ).where('created_at > ?', 5.minutes.ago).exists?
-  end
-
-  def broadcast_to_user(notification)
-    count = @user.unread_notification_count
-    html = Notifications::StreamBuilder.badge_streams(count)
-    html += Notifications::StreamBuilder.notification_stream(notification)
-    NotificationsChannel.broadcast_to(@user, { html: html })
   end
 end
