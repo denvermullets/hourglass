@@ -7,13 +7,11 @@ class Mentions::DetectService < Service
     return if @message.body.blank?
     return if @message.channel.blank? && @message.conversation.blank?
 
-    parsed = parse_body
-    persist_cross_app_mentions(parsed[:external])
-
-    usernames = parsed[:usernames]
+    usernames = extract_usernames
     return if usernames.empty?
 
     mentioned_users = resolve_mentioned_users(usernames)
+    persist_cross_app_mentions(mentioned_users)
 
     mentioned_users.each do |user|
       Notifications::CreateService.call(
@@ -28,41 +26,23 @@ class Mentions::DetectService < Service
 
   private
 
-  def parse_body
-    usernames = Set.new
-    external = []
-    seen_mtasks_ids = Set.new
-
-    Nokogiri::HTML5.fragment(@message.body).css('span.editor-mention').each do |span|
-      classify_mention(span, usernames, external, seen_mtasks_ids)
-    end
-
-    plain_text = ActionController::Base.helpers.strip_tags(@message.body)
-    plain_text.scan(/@(\w{3,20})/).flatten.each { |u| usernames << u }
-
-    { usernames: usernames, external: external }
+  def extract_usernames
+    @message.body.scan(/@(\w{3,20})/).flatten.to_set(&:downcase)
   end
 
-  def classify_mention(span, usernames, external, seen_mtasks_ids)
-    username = span['data-mention-username'].to_s
-    return if username.blank?
+  # A mentioned user who is also linked to Jait (has an MtasksUserMap) is emitted as a
+  # cross-app mention; the same user still receives a local notification above.
+  def persist_cross_app_mentions(mentioned_users)
+    return if mentioned_users.empty?
 
-    if span['data-external'] == 'true'
-      mtasks_user_id = span['data-mtasks-user-id'].to_s
-      return if mtasks_user_id.blank? || seen_mtasks_ids.include?(mtasks_user_id)
-
-      seen_mtasks_ids << mtasks_user_id
-      external << {
-        'mtasks_user_id' => mtasks_user_id.to_i,
-        'email' => username,
-        'display_name' => username
+    users_by_id = mentioned_users.index_by(&:id)
+    external = MtasksUserMap.where(hourglass_user_id: users_by_id.keys).map do |map|
+      {
+        'mtasks_user_id' => map.mtasks_user_id,
+        'email' => map.email,
+        'display_name' => users_by_id[map.hourglass_user_id]&.username
       }
-    else
-      usernames << username
     end
-  end
-
-  def persist_cross_app_mentions(external)
     return if external.empty?
 
     @message.update_column(:data, @message.data.merge('cross_app_mentions' => external))

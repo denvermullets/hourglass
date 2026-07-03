@@ -6,12 +6,13 @@ class Conversations::CreateMessageService < Service
   end
 
   def call
-    sanitized_params = @params.merge(
-      body: Messages::SanitizeService.call(html: @params[:body])
+    attrs = @params.merge(
+      body: @params[:body].to_s.strip,
+      data: (@params[:data] || {}).merge('format' => 'markdown')
     )
 
     message = @conversation.messages.create!(
-      sanitized_params.merge(user: @user, message_type: :regular)
+      attrs.merge(user: @user, message_type: :regular)
     )
 
     message.files.load if message.files.attached?
