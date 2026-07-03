@@ -51,7 +51,10 @@
           <% end %>
         </div>
 
-        <%# Markdown textarea %>
+        <%# Markdown textarea. Prefills message.body verbatim for both formats:
+            markdown messages show raw markdown; legacy HTML messages show raw
+            HTML (intentional — no HTML->markdown conversion). Editing re-saves
+            as markdown via Messages::UpdateService. %>
         <%= f.text_area :body,
               rows: 1,
               data: {
