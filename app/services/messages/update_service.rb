@@ -29,11 +29,13 @@ class Messages::UpdateService < Service
   end
 
   def update_message
-    sanitized_params = @params.merge(
-      body: Messages::SanitizeService.call(html: @params[:body])
-    )
+    attrs = @params.dup
+    if attrs.key?(:body)
+      attrs[:body] = attrs[:body].to_s.strip
+      attrs[:data] = @message.data.merge('format' => 'markdown')
+    end
 
-    @message.update!(sanitized_params.merge(edited_at: Time.current))
+    @message.update!(attrs.merge(edited_at: Time.current))
     @message.files.load if @message.files.attached?
   end
 end

@@ -37,6 +37,13 @@ class MessageTest < ActiveSupport::TestCase
     assert message.edited?
   end
 
+  test 'markdown? reflects the data format flag' do
+    message = messages(:one)
+    assert_not message.markdown?
+    message.update!(data: { 'format' => 'markdown' })
+    assert message.markdown?
+  end
+
   test 'owned_by? checks user ownership' do
     message = messages(:one)
     assert message.owned_by?(users(:one))

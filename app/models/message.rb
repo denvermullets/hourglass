@@ -45,6 +45,10 @@ class Message < ApplicationRecord
     pinned_at.present?
   end
 
+  def markdown?
+    data['format'] == 'markdown'
+  end
+
   def pin!(user)
     update!(pinned_at: Time.current, pinned_by: user)
   end
