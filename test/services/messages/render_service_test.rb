@@ -42,5 +42,19 @@ module Messages
       assert_equal '', Messages::RenderService.call(markdown: '')
       assert_equal '', Messages::RenderService.call(markdown: nil)
     end
+
+    test 'resolves mentions and channels through the full pipeline' do
+      server = servers(:one)
+      general = channels(:general)
+
+      html = Messages::RenderService.call(
+        markdown: 'hi @usertwo in #general',
+        server: server, scope: server.users, current_user: users(:one)
+      )
+
+      assert_includes html, '<span class="mention" data-mention-username="usertwo">@usertwo</span>'
+      assert_includes html, %(href="/servers/#{server.id}/channels/#{general.id}")
+      assert_includes html, 'class="channel-mention"'
+    end
   end
 end

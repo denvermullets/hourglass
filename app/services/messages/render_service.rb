@@ -12,8 +12,11 @@ module Messages
     # Rouge's token classes survive the sanitizer.
     FENCE_LANG_RE = /<pre lang="([^"]+)">/
 
-    def initialize(markdown:)
+    def initialize(markdown:, server: nil, scope: nil, current_user: nil)
       @markdown = markdown.to_s
+      @server = server
+      @scope = scope
+      @current_user = current_user
     end
 
     def call
@@ -21,8 +24,11 @@ module Messages
 
       html = Commonmarker.to_html(@markdown, plugins: COMMONMARKER_PLUGINS)
       html = html.gsub(FENCE_LANG_RE) { %(<pre data-highlight-language="#{Regexp.last_match(1)}">) }
-      sanitized = Messages::SanitizeService.call(html: html)
-      Messages::HighlightService.call(html: sanitized)
+      html = Messages::SanitizeService.call(html: html)
+      html = Messages::HighlightService.call(html: html)
+      html = Mentions::HighlightService.call(html: html, current_user: @current_user, scope: @scope, markdown: true)
+      html = Channels::HighlightService.call(html: html, server: @server, markdown: true)
+      Jait::HighlightService.call(html: html, server: @server)
     end
   end
 end
