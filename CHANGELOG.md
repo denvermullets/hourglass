@@ -1,5 +1,17 @@
-<!-- last-sha: b490ba132456d568791f52deb785ce0a46f8b04d -->
+<!-- last-sha: 76992d1d698d9d4ab6c3021c80f33583df80aa5a -->
 # What's new
+
+## 2026-07-03
+- **New message composer.** The rich-text editor has been replaced with a simpler, faster composer that writes in Markdown, so what you type renders cleanly every time.
+- **Typeahead as you type.** Start an @mention, a #channel, or a /slash-command and a suggestion menu pops up to help you finish it.
+- **See who's around.** Presence now shows which teammates are currently online.
+- **Snappier live updates.** Messages, unread counts, and the sidebar refresh on their own without a page reload.
+
+## 2026-05-06
+- **Connect channels to projects.** Link a channel to a project so chat and work stay tied together.
+- **Turn messages into issues.** Slash commands let you create an issue straight from a message, with links back to the project and issue.
+- **Cross-app mentions.** @mentions and message links now carry across between chat and your project tool.
+- **Pin important messages.** Pin and unpin messages to keep key updates easy to find.
 
 ## 2026-04-28
 - **Changelog page.** A new in-app changelog view shows what's shipped recently.
