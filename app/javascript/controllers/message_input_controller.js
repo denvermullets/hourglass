@@ -1,9 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
+import { TextareaTypeahead } from "composer/textarea_typeahead"
 
 // Plain-textarea message composer. Replaces the Lexical-based
 // message_composer_controller with lightweight textarea behaviors:
 // enter-to-send, auto-grow, resize presets, markdown toolbar wrappers,
-// and quote-reply. No Lexical/prism imports.
+// quote-reply, and @mention / #channel / /slash typeahead. No Lexical/prism
+// imports.
 export default class extends Controller {
   static targets = ["textarea", "resizeBtn"]
   // serverId / channelId / channelLinked are consumed by the typeahead
@@ -15,12 +17,21 @@ export default class extends Controller {
   }
 
   connect() {
+    this.typeahead = new TextareaTypeahead({
+      textarea: this.textareaTarget,
+      serverId: this.serverIdValue,
+      channelId: this.channelIdValue,
+      channelLinked: this.channelLinkedValue,
+    })
+
     this._onKeydown = this._handleKeydown.bind(this)
-    this._onInput = this._autoGrow.bind(this)
+    this._onInput = this._handleInput.bind(this)
+    this._onBlur = () => this.typeahead.hide()
     this._onQuote = (e) => this._insertQuote(e.detail || {})
 
     this.textareaTarget.addEventListener("keydown", this._onKeydown)
     this.textareaTarget.addEventListener("input", this._onInput)
+    this.textareaTarget.addEventListener("blur", this._onBlur)
     document.addEventListener("message:quote", this._onQuote)
 
     // Fit any pre-filled content (e.g. the edit form) on load.
@@ -30,7 +41,9 @@ export default class extends Controller {
   disconnect() {
     this.textareaTarget.removeEventListener("keydown", this._onKeydown)
     this.textareaTarget.removeEventListener("input", this._onInput)
+    this.textareaTarget.removeEventListener("blur", this._onBlur)
     document.removeEventListener("message:quote", this._onQuote)
+    this.typeahead?.destroy()
   }
 
   // Actions
@@ -92,6 +105,9 @@ export default class extends Controller {
   // Private
 
   _handleKeydown(event) {
+    // An open typeahead dropdown claims Enter/Tab/Arrows/Escape first.
+    if (this.typeahead.handleKeydown(event)) return
+
     if (event.key !== "Enter" || event.shiftKey) return
     // On touch devices Enter inserts a newline; sending is done via the
     // send button, so leave the default behavior alone.
@@ -99,6 +115,11 @@ export default class extends Controller {
 
     event.preventDefault()
     this.element.requestSubmit()
+  }
+
+  _handleInput() {
+    this._autoGrow()
+    this.typeahead.onInput()
   }
 
   _autoGrow() {
