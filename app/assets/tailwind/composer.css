@@ -23,23 +23,7 @@
   background: var(--color-granny-smith-apple-925);
 }
 
-/* Lexical editor theme classes */
-.editor-bold { font-weight: bold; }
-.editor-italic { font-style: italic; }
-.editor-strikethrough { text-decoration: line-through; }
-.editor-underline { text-decoration: underline; }
-.editor-code {
-  background: var(--color-bunker-875);
-  color: var(--color-granny-smith-apple-300);
-  padding: 0 0.25rem;
-  border-radius: 0.125rem;
-  font-size: 0.625rem;
-  font-family: var(--font-dm-mono);
-}
-.editor-link {
-  color: var(--color-jordy-blue-400);
-  text-decoration: underline;
-}
+/* Rendered code block — emitted by Messages::HighlightService */
 .editor-code-block {
   display: block;
   width: 100%;
@@ -56,102 +40,6 @@
   tab-size: 2;
   min-height: 2em;
   box-sizing: border-box;
-}
-
-/* Code block language picker */
-.code-lang-picker {
-  position: absolute;
-  top: 0.25rem;
-  right: 0.25rem;
-  background: var(--color-bunker-875);
-  border: 1px solid var(--color-bunker-825);
-  border-radius: 0.1875rem;
-  color: var(--color-bunker-600);
-  font-family: var(--font-dm-mono);
-  font-size: 0.5625rem;
-  padding: 0.0625rem 0.125rem;
-  cursor: pointer;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-}
-.code-lang-picker:hover {
-  color: var(--color-bunker-300);
-  border-color: var(--color-bunker-700);
-}
-.code-lang-picker:focus {
-  border-color: var(--color-granny-smith-apple-600);
-  color: var(--color-bunker-200);
-}
-.code-lang-picker option {
-  background: var(--color-bunker-925);
-  color: var(--color-bunker-200);
-}
-
-/* Lexical editor headings */
-.editor-heading-h1 {
-  font-size: 1rem;
-  font-weight: bold;
-  color: var(--color-bunker-100);
-  margin: 0.25rem 0 0.125rem 0;
-  line-height: 1.3;
-}
-.editor-heading-h2 {
-  font-size: 0.875rem;
-  font-weight: bold;
-  color: var(--color-bunker-100);
-  margin: 0.1875rem 0 0.125rem 0;
-  line-height: 1.3;
-}
-.editor-heading-h3 {
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: var(--color-bunker-100);
-  margin: 0.125rem 0 0.0625rem 0;
-  line-height: 1.4;
-}
-/* Lexical editor lists — 3 nesting levels */
-[data-message-composer-target="editor"] ul {
-  list-style: disc;
-  padding-left: 1.25rem;
-  margin: 0.125rem 0;
-}
-[data-message-composer-target="editor"] ul ul {
-  list-style: circle;
-}
-[data-message-composer-target="editor"] ul ul ul {
-  list-style: square;
-}
-[data-message-composer-target="editor"] ol {
-  list-style: decimal;
-  padding-left: 1.25rem;
-  margin: 0.125rem 0;
-}
-[data-message-composer-target="editor"] ol ol {
-  list-style: lower-alpha;
-}
-[data-message-composer-target="editor"] ol ol ol {
-  list-style: lower-roman;
-}
-[data-message-composer-target="editor"] li {
-  margin: 0.0625rem 0;
-}
-[data-message-composer-target="editor"] li:has(> ul:only-child),
-[data-message-composer-target="editor"] li:has(> ol:only-child) {
-  list-style: none;
-}
-
-/* Lexical editor content area */
-[data-message-composer-target="editor"] {
-  min-width: 0;
-}
-[data-message-composer-target="editor"] p {
-  margin: 0;
-  font-size: inherit;
-  font-weight: normal;
-}
-[data-message-composer-target="editor"] p + p {
-  margin-top: 0.25rem;
 }
 
 /* Message display content styles */
@@ -300,15 +188,6 @@
   color: var(--color-jordy-blue-300);
 }
 
-/* Blockquote / quote reply — editor */
-[data-message-composer-target="editor"] blockquote {
-  border-left: 3px solid var(--color-bunker-700);
-  padding: 0.25rem 0 0.25rem 0.75rem;
-  margin: 0.25rem 0;
-  color: var(--color-bunker-400);
-  font-style: italic;
-}
-
 /* Blockquote / quote reply — rendered message */
 .message-content blockquote {
   position: relative;
@@ -390,18 +269,6 @@
 .mention-self {
   color: var(--color-granny-smith-apple-300);
   background: color-mix(in srgb, var(--color-granny-smith-apple-300) 12%, transparent);
-}
-
-/* @mention in editor */
-.editor-mention {
-  color: var(--color-jordy-blue-400);
-  font-weight: 500;
-}
-
-/* #channel in editor */
-.editor-channel {
-  color: var(--color-jordy-blue-400);
-  font-weight: 500;
 }
 
 /* #channel rendered in messages */
