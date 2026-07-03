@@ -18,13 +18,10 @@
                   url: edit_url,
                   method: :patch,
                   data: {
-                    controller: "message-composer attachment-upload",
-                    action: "submit->message-composer#handleSubmit",
-                    message_composer_content_value: message.body,
-                    message_composer_server_id_value: server_id_val,
-                    message_composer_channel_id_value: channel_id_val
+                    controller: "message-input attachment-upload",
+                    message_input_server_id_value: server_id_val,
+                    message_input_channel_id_value: channel_id_val
                   } do |f| %>
-      <%= f.hidden_field :body, data: { message_composer_target: "hiddenInput" } %>
       <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
 
       <div class="bg-bunker-875 border border-bunker-825 rounded-lg overflow-clip focus-within:border-granny-smith-apple-600 transition-colors duration-150">
@@ -54,29 +51,29 @@
           <% end %>
         </div>
 
-        <%# Lexical editor area %>
-        <div class="relative">
-          <div data-message-composer-target="editor"
-               contenteditable="true"
-               data-action="paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
-               class="min-h-15 max-h-100 overflow-y-auto px-3 py-2.5 text-xs text-bunker-50 font-dm-mono focus:outline-none">
-          </div>
-        </div>
+        <%# Markdown textarea %>
+        <%= f.text_area :body,
+              rows: 1,
+              data: {
+                message_input_target: "textarea",
+                action: "paste->attachment-upload#handlePaste drop->attachment-upload#handleDrop dragover->attachment-upload#handleDragOver"
+              },
+              class: "block w-full resize-none min-h-15 max-h-100 overflow-y-auto px-3 py-2.5 text-xs text-bunker-50 placeholder:text-bunker-600 font-dm-mono bg-transparent border-0 focus:outline-none focus:ring-0" %>
 
         <%# Toolbar footer %>
         <div class="flex items-center gap-1 px-2 py-1.5 border-t border-bunker-825">
-          <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#bold" data-format="bold"
+          <button type="button" data-action="mousedown->message-input#preventFocusLoss click->message-input#bold" data-format="bold"
                   class="toolbar-btn" title="Bold"><strong>B</strong></button>
-          <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#italic" data-format="italic"
+          <button type="button" data-action="mousedown->message-input#preventFocusLoss click->message-input#italic" data-format="italic"
                   class="toolbar-btn" title="Italic"><em>I</em></button>
-          <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#strikethrough" data-format="strikethrough"
+          <button type="button" data-action="mousedown->message-input#preventFocusLoss click->message-input#strikethrough" data-format="strikethrough"
                   class="toolbar-btn" title="Strikethrough"><s>S</s></button>
-          <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#code" data-format="code"
+          <button type="button" data-action="mousedown->message-input#preventFocusLoss click->message-input#code" data-format="code"
                   class="toolbar-btn" title="Inline Code">&lt;/&gt;</button>
-          <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->message-composer#codeBlock"
+          <button type="button" data-action="mousedown->message-input#preventFocusLoss click->message-input#codeBlock"
                   class="toolbar-btn" title="Code Block">{}</button>
 
-          <button type="button" data-action="mousedown->message-composer#preventFocusLoss click->attachment-upload#openFilePicker"
+          <button type="button" data-action="mousedown->message-input#preventFocusLoss click->attachment-upload#openFilePicker"
                   class="toolbar-btn" title="Attach file">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
