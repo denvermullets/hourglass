@@ -6,8 +6,8 @@ import * as ActiveStorage from "@rails/activestorage"
 ActiveStorage.start()
 import "controllers"
 
-// When the browser restores a page from bfcache (e.g. mobile swipe-back),
-// Turbo Stream subscriptions will have missed updates. Refresh via Turbo.
+// When the browser restores a page from bfcache (e.g. mobile swipe-back), the page may
+// be stale (the poller was paused). Refresh via Turbo so the next poll starts fresh.
 window.addEventListener("pageshow", (event) => {
   if (event.persisted) {
     Turbo.visit(window.location.href, { action: "replace" })

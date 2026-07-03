@@ -137,7 +137,19 @@ module Messages
       assert_equal issue_link.id, args['link_id']
     end
 
-    test 'fans out user.mentioned per cross-app mention on linked channels' do
+    test 'stores the raw markdown body and stamps the format flag' do
+      channel = channels(:general)
+      user = users(:one)
+      body = '**bold** and _italic_ with `code`'
+
+      message = Messages::CreateService.call(channel: channel, user: user, params: { body: body })
+
+      assert_equal body, message.body
+      assert message.markdown?
+      assert_equal 'markdown', message.data['format']
+    end
+
+    test 'fans out user.mentioned for a Jait-linked mentioned user on linked channels' do
       channel = channels(:general)
       user = users(:one)
       MtasksLink.create!(
@@ -145,38 +157,27 @@ module Messages
         server_integration: server_integrations(:jait_one), channel: channel,
         mtasks_team_id: 21, mtasks_project_id: 7, created_by_user: user
       )
-      body = <<~HTML.squish
-        <p><span class="editor-mention" data-mention-username="ext@example.com"
-        data-external="true" data-mtasks-user-id="42">@ext@example.com</span>
-        <span class="editor-mention" data-mention-username="ext2@example.com"
-        data-external="true" data-mtasks-user-id="43">@ext2@example.com</span></p>
-      HTML
 
       msg = nil
-      assert_enqueued_jobs(3, only: MtasksOutboundEmitterJob) do
-        msg = Messages::CreateService.call(channel: channel, user: user, params: { body: body })
+      assert_enqueued_jobs(2, only: MtasksOutboundEmitterJob) do
+        msg = Messages::CreateService.call(channel: channel, user: user, params: { body: 'hey @usertwo' })
       end
 
       events = enqueued_jobs.map { |j| j[:args].first['event_type'] }
       assert_equal 1, events.count('message.created')
-      assert_equal 2, events.count('user.mentioned')
+      assert_equal 1, events.count('user.mentioned')
 
-      mention_jobs = enqueued_jobs.select { |j| j[:args].first['event_type'] == 'user.mentioned' }
-      mtasks_user_ids = mention_jobs.map { |j| j[:args].first['mtasks_user_id'] }
-      assert_equal [42, 43].sort, mtasks_user_ids.sort
-      assert(mention_jobs.all? { |j| j[:args].first['message_id'] == msg.id })
+      mention_job = enqueued_jobs.find { |j| j[:args].first['event_type'] == 'user.mentioned' }
+      assert_equal 5002, mention_job[:args].first['mtasks_user_id']
+      assert_equal msg.id, mention_job[:args].first['message_id']
     end
 
     test 'does not fan out cross-app mentions when channel is unlinked' do
       channel = channels(:general)
       user = users(:one)
-      body = <<~HTML.squish
-        <p><span class="editor-mention" data-mention-username="ext@example.com"
-        data-external="true" data-mtasks-user-id="42">@ext@example.com</span></p>
-      HTML
 
       assert_no_enqueued_jobs(only: MtasksOutboundEmitterJob) do
-        Messages::CreateService.call(channel: channel, user: user, params: { body: body })
+        Messages::CreateService.call(channel: channel, user: user, params: { body: 'hey @usertwo' })
       end
     end
 

@@ -51,6 +51,9 @@ Rails.application.routes.draw do
 
   get '/mentions/search', to: 'mentions#search', as: :mentions_search
 
+  # Change-check endpoint for the polling-based refresh (Phase 2).
+  get '/poll', to: 'poll#show'
+
   resources :notifications, only: [:index] do
     member do
       patch :mark_read

@@ -8,25 +8,21 @@ module Mentions
       @channel = channels(:general)
     end
 
-    test 'populates cross_app_mentions from external mention spans' do
-      body = <<~HTML.squish
-        <p>hi <span class="editor-mention" data-mention-username="ext@example.com"
-        data-external="true" data-mtasks-user-id="42">@ext@example.com</span></p>
-      HTML
-      message = @channel.messages.create!(user: @user, body: body, message_type: :regular)
+    test 'populates cross_app_mentions for mentioned users linked to Jait' do
+      message = @channel.messages.create!(user: @user, body: 'hi @usertwo', message_type: :regular)
 
       Mentions::DetectService.call(message: message)
       message.reload
 
       assert_equal(
-        [{ 'mtasks_user_id' => 42, 'email' => 'ext@example.com', 'display_name' => 'ext@example.com' }],
+        [{ 'mtasks_user_id' => 5002, 'email' => 'two@example.com', 'display_name' => 'usertwo' }],
         message.data['cross_app_mentions']
       )
     end
 
-    test 'leaves cross_app_mentions absent when no external spans are present' do
-      body = '<p>hi <span class="editor-mention" data-mention-username="usertwo">@usertwo</span></p>'
-      message = @channel.messages.create!(user: @user, body: body, message_type: :regular)
+    test 'leaves cross_app_mentions absent when the mentioned user is not linked to Jait' do
+      MtasksUserMap.find_by(hourglass_user_id: @other.id).destroy!
+      message = @channel.messages.create!(user: @user, body: 'hi @usertwo', message_type: :regular)
 
       Mentions::DetectService.call(message: message)
       message.reload
@@ -34,13 +30,8 @@ module Mentions
       assert_nil message.data['cross_app_mentions']
     end
 
-    test 'still creates local mention notifications alongside external ones' do
-      body = <<~HTML.squish
-        <p><span class="editor-mention" data-mention-username="usertwo">@usertwo</span>
-        <span class="editor-mention" data-mention-username="ext@example.com"
-        data-external="true" data-mtasks-user-id="42">@ext@example.com</span></p>
-      HTML
-      message = @channel.messages.create!(user: @user, body: body, message_type: :regular)
+    test 'still creates local mention notifications alongside cross-app ones' do
+      message = @channel.messages.create!(user: @user, body: 'hi @usertwo', message_type: :regular)
 
       assert_difference -> { @other.notifications.where(notification_type: 'mention').count }, 1 do
         Mentions::DetectService.call(message: message)
@@ -50,14 +41,8 @@ module Mentions
       assert_equal 1, message.data['cross_app_mentions'].size
     end
 
-    test 'dedupes external mentions on the same mtasks_user_id' do
-      body = <<~HTML.squish
-        <p><span class="editor-mention" data-mention-username="ext@example.com"
-        data-external="true" data-mtasks-user-id="42">@ext</span>
-        <span class="editor-mention" data-mention-username="ext@example.com"
-        data-external="true" data-mtasks-user-id="42">@ext</span></p>
-      HTML
-      message = @channel.messages.create!(user: @user, body: body, message_type: :regular)
+    test 'dedupes repeated mentions of the same user' do
+      message = @channel.messages.create!(user: @user, body: '@usertwo @usertwo', message_type: :regular)
 
       Mentions::DetectService.call(message: message)
       message.reload

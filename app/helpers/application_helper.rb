@@ -1,4 +1,17 @@
 module ApplicationHelper
+  # Content digest for the polling-based refresh. Reads the current page context from
+  # controller ivars (nil off chat pages — sidebar/notification parts still apply).
+  def poll_digest
+    return unless Current.user
+
+    Polling::DigestService.call(
+      user: Current.user,
+      channel: @channel,
+      conversation: @conversation,
+      thread: @parent_message
+    )
+  end
+
   def user_timezone
     zone_name = Current.user&.timezone || 'UTC'
     ActiveSupport::TimeZone[zone_name] || ActiveSupport::TimeZone['UTC']

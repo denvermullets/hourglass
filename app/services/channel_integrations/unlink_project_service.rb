@@ -25,7 +25,6 @@ module ChannelIntegrations
         event_type: 'link.removed',
         data: data
       )
-      ChannelIntegrations::BroadcastLinkStateService.call(channel: @channel)
       Result.new(ok: true)
     end
   end

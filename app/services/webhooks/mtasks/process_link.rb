@@ -37,7 +37,6 @@ module Webhooks
         return error('team not resolvable') unless team_id
 
         link = upsert_project_link(channel, integration, project_id, team_id)
-        ChannelIntegrations::BroadcastLinkStateService.call(channel: channel)
         Result.new(ok: true, link: link)
       end
 
@@ -80,7 +79,6 @@ module Webhooks
                                   channel_id: channel.id,
                                   mtasks_project_id: project_id)
         link&.destroy!
-        ChannelIntegrations::BroadcastLinkStateService.call(channel: channel)
         Result.new(ok: true)
       end
 

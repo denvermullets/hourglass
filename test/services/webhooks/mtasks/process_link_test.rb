@@ -320,20 +320,9 @@ module Webhooks
         end
       end
 
-      # ---- broadcast ----
+      # ---- link state (DB-derived; the badge/panel now render via poll+morph) ----
 
-      def capture_turbo_replace_targets
-        captured = []
-        Turbo::StreamsChannel.singleton_class.alias_method(:_orig_broadcast_replace_to, :broadcast_replace_to)
-        Turbo::StreamsChannel.define_singleton_method(:broadcast_replace_to) { |*_args, **kwargs| captured << kwargs[:target] }
-        yield
-        captured
-      ensure
-        Turbo::StreamsChannel.singleton_class.alias_method(:broadcast_replace_to, :_orig_broadcast_replace_to)
-        Turbo::StreamsChannel.singleton_class.send(:remove_method, :_orig_broadcast_replace_to)
-      end
-
-      test 'project_channel create broadcasts header replace to channel stream' do
+      test 'project_channel create persists the channel link' do
         delivery = build_delivery(event: 'link.created', data: {
                                     'link_type' => 'project_channel',
                                     'mtasks_project_id' => 7,
@@ -341,11 +330,11 @@ module Webhooks
                                     'hourglass_channel_id' => @channel.id
                                   })
 
-        targets = capture_turbo_replace_targets { ProcessLink.call(delivery: delivery) }
-        assert_includes targets, "channel_#{@channel.id}_jait_linked_badge"
+        ProcessLink.call(delivery: delivery)
+        assert @channel.reload.mtasks_project_link.present?
       end
 
-      test 'project_channel remove broadcasts header replace to channel stream' do
+      test 'project_channel remove destroys the channel link' do
         MtasksLink.create!(
           link_type: MtasksLink::PROJECT_CHANNEL,
           server_integration: @integration, channel: @channel,
@@ -359,8 +348,8 @@ module Webhooks
                                     'hourglass_channel_id' => @channel.id
                                   })
 
-        targets = capture_turbo_replace_targets { ProcessLink.call(delivery: delivery) }
-        assert_includes targets, "channel_#{@channel.id}_jait_linked_badge"
+        ProcessLink.call(delivery: delivery)
+        assert_nil @channel.reload.mtasks_project_link
       end
     end
   end

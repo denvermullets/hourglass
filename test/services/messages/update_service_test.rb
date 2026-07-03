@@ -27,6 +27,17 @@ module Messages
       end
     end
 
+    test 'stamps the markdown format flag and preserves existing data keys' do
+      @message.update!(data: { 'mtasks_comment_id' => 555 })
+
+      Messages::UpdateService.call(message: @message, params: { body: '**edited**' })
+      @message.reload
+
+      assert_equal '**edited**', @message.body
+      assert_equal 'markdown', @message.data['format']
+      assert_equal 555, @message.data['mtasks_comment_id']
+    end
+
     test 'loop guard: does not enqueue when source is mtasks' do
       @message.update!(data: { 'source' => 'mtasks', 'mtasks_comment_id' => 555 })
 

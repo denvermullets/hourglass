@@ -52,6 +52,18 @@ class ServerTest < ActiveSupport::TestCase
     assert_nil server.membership_for(users(:one))
   end
 
+  test 'online_count counts members seen within the 45s window' do
+    server = servers(:one) # members: users(:one), users(:two)
+    assert_equal 0, server.online_count
+
+    users(:one).update_column(:last_seen_at, Time.current)
+    users(:two).update_column(:last_seen_at, 2.minutes.ago)
+    assert_equal 1, server.online_count
+
+    users(:two).update_column(:last_seen_at, 10.seconds.ago)
+    assert_equal 2, server.online_count
+  end
+
   test 'has_many memberships' do
     assert servers(:one).memberships.count >= 1
   end

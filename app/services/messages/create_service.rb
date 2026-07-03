@@ -16,12 +16,13 @@ class Messages::CreateService < Service
       return result.message
     end
 
-    sanitized_params = @params.merge(
-      body: Messages::SanitizeService.call(html: @params[:body])
+    attrs = @params.merge(
+      body: @params[:body].to_s.strip,
+      data: (@params[:data] || {}).merge('format' => 'markdown')
     )
 
     message = @channel.messages.create!(
-      sanitized_params.merge(user: @user, message_type: :regular)
+      attrs.merge(user: @user, message_type: :regular)
     )
 
     Messages::PostCreateBroadcaster.call(channel: @channel, user: @user, message: message)

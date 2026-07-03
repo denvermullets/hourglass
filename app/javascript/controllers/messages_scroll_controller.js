@@ -13,8 +13,23 @@ export default class extends Controller {
     }
 
     this.observeNewMessages()
-    this._onScroll = () => { this._wasNearBottom = this.isNearBottom() }
+    this._onScroll = () => {
+      this._wasNearBottom = this.isNearBottom()
+      this._syncPollBlock()
+    }
     this.containerTarget.addEventListener("scroll", this._onScroll, { passive: true })
+    this._syncPollBlock()
+  }
+
+  // Block poll-driven morph refreshes while the user is scrolled up (reading history or
+  // viewing loaded-older messages), so a morph doesn't drop them or jump the reader.
+  // Near the bottom, refreshes flow through and new messages stick.
+  _syncPollBlock() {
+    if (this._wasNearBottom) {
+      this.containerTarget.removeAttribute("data-poll-block")
+    } else {
+      this.containerTarget.setAttribute("data-poll-block", "")
+    }
   }
 
   scrollToBottom() {
@@ -70,5 +85,6 @@ export default class extends Controller {
     if (this._onScroll) {
       this.containerTarget.removeEventListener("scroll", this._onScroll)
     }
+    this.containerTarget.removeAttribute("data-poll-block")
   }
 }

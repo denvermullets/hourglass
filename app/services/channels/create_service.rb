@@ -7,10 +7,8 @@ class Channels::CreateService < Service
 
   def call
     position = @category.channels.maximum(:position).to_i + 1
-    channel = @server.channels.create!(
+    @server.channels.create!(
       @params.merge(category: @category, position: position)
     )
-    Sidebar::BroadcastService.call(server: @server, action: :replace_category, category: @category)
-    channel
   end
 end

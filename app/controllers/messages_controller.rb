@@ -1,5 +1,6 @@
 class MessagesController < ApplicationController
   include Authorization
+  include Messages::EchoResponses
 
   layout 'app'
 
@@ -28,12 +29,17 @@ class MessagesController < ApplicationController
   end
 
   def create
-    Messages::CreateService.call(
+    @message = Messages::CreateService.call(
       channel: @channel,
       user: Current.user,
       params: message_params
     )
-    head :ok
+
+    if @message&.persisted?
+      render turbo_stream: created_message_streams(@message, context: :channel, server: @server, channel: @channel)
+    else
+      head :ok
+    end
   rescue ActiveRecord::RecordInvalid
     head :unprocessable_entity
   end
@@ -48,7 +54,7 @@ class MessagesController < ApplicationController
 
   def update
     Messages::UpdateService.call(message: @message, params: message_params)
-    head :ok
+    render turbo_stream: updated_message_streams(@message, context: :channel, server: @server, channel: @channel)
   rescue ActiveRecord::RecordInvalid
     render turbo_stream: turbo_stream.replace(
       @message,
@@ -59,7 +65,7 @@ class MessagesController < ApplicationController
 
   def destroy
     Messages::DeleteService.call(message: @message)
-    head :ok
+    render turbo_stream: deleted_message_streams(@message, context: :channel, server: @server, channel: @channel)
   end
 
   def pin

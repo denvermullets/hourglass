@@ -6,8 +6,6 @@ class Categories::CreateService < Service
 
   def call
     position = @server.categories.maximum(:position).to_i + 1
-    category = @server.categories.create!(@params.merge(position: position))
-    Sidebar::BroadcastService.call(server: @server, action: :replace_all_categories)
-    category
+    @server.categories.create!(@params.merge(position: position))
   end
 end
