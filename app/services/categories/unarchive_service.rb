@@ -8,6 +8,5 @@ class Categories::UnarchiveService < Service
       @category.unarchive!
       @category.channels.each(&:unarchive!)
     end
-    Sidebar::BroadcastService.call(server: @category.server, action: :replace_all_categories)
   end
 end

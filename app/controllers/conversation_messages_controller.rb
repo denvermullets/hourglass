@@ -1,4 +1,6 @@
 class ConversationMessagesController < ApplicationController
+  include Messages::EchoResponses
+
   layout 'app'
 
   before_action :set_conversation
@@ -25,12 +27,17 @@ class ConversationMessagesController < ApplicationController
   end
 
   def create
-    Conversations::CreateMessageService.call(
+    @message = Conversations::CreateMessageService.call(
       conversation: @conversation,
       user: Current.user,
       params: message_params
     )
-    head :ok
+
+    if @message&.persisted?
+      render turbo_stream: created_message_streams(@message, context: :conversation, conversation: @conversation)
+    else
+      head :ok
+    end
   rescue ActiveRecord::RecordInvalid
     head :unprocessable_entity
   end
@@ -45,7 +52,7 @@ class ConversationMessagesController < ApplicationController
 
   def update
     Messages::UpdateService.call(message: @message, params: message_params)
-    head :ok
+    render turbo_stream: updated_message_streams(@message, context: :conversation, conversation: @conversation)
   rescue ActiveRecord::RecordInvalid
     render turbo_stream: turbo_stream.replace(
       @message,
@@ -56,7 +63,7 @@ class ConversationMessagesController < ApplicationController
 
   def destroy
     Messages::DeleteService.call(message: @message)
-    head :ok
+    render turbo_stream: deleted_message_streams(@message, context: :conversation, conversation: @conversation)
   end
 
   private

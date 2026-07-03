@@ -1,20 +1,10 @@
-# Use solid_cable in development to support broadcasts from background jobs (solid_queue).
-# The async adapter only works within the same process.
+# Live updates now use polling + Turbo morph, so this transport is unused. Kept as an
+# inert in-process async adapter so the framework still boots cleanly.
 development:
-  adapter: solid_cable
-  connects_to:
-    database:
-      writing: cable
-  polling_interval: 0.1.seconds
-  message_retention: 1.hour
+  adapter: async
 
 test:
-  adapter: test
+  adapter: async
 
 production:
-  adapter: solid_cable
-  connects_to:
-    database:
-      writing: cable
-  polling_interval: 0.1.seconds
-  message_retention: 1.day
+  adapter: async

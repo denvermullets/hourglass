@@ -32,6 +32,8 @@ export default class extends Controller {
     if (!isVisible && this.hasActionsTarget) {
       this.actionsTarget.classList.add("mobile-actions-visible")
       this.actionsTarget.style.opacity = "1"
+      // Defer poll-driven morph refreshes while an actions menu is open.
+      this.actionsTarget.setAttribute("data-poll-block", "")
     }
   }
 }
@@ -40,6 +42,7 @@ function dismissAll() {
   document.querySelectorAll("[data-long-press-target='actions'].mobile-actions-visible").forEach((el) => {
     el.classList.remove("mobile-actions-visible")
     el.style.removeProperty("opacity")
+    el.removeAttribute("data-poll-block")
   })
 }
 

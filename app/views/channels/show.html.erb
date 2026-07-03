@@ -1,6 +1,4 @@
-<div class="flex-1 flex flex-col lg:flex-row min-h-0 sidebar-container"
-     data-controller="presence"
-     data-presence-server-id-value="<%= @server.id %>">
+<div class="flex-1 flex flex-col lg:flex-row min-h-0 sidebar-container">
   <%# Desktop sidebar %>
   <div class="hidden lg:flex">
     <%= render "servers/channel_sidebar", server: @server, categories: @categories, current_channel: @channel, unread_channel_ids: @unread_channel_ids %>
@@ -49,26 +47,20 @@
         <span class="text-bunker-825">&bull;</span>
         <%= render "channels/pinned_count", server: @server, channel: @channel %>
         <span class="text-bunker-825">&bull;</span>
-        <%= render "shared/presence_indicator", server_id: @server.id, online_count: PresenceChannel.online_count(@server.id) %>
+        <%= render "shared/presence_indicator", server_id: @server.id, online_count: @server.online_count %>
         <%= render "channels/jait_linked_badge", channel: @channel %>
       </div>
     </div>
 
     <%# Message area %>
     <div class="flex-1 flex flex-col min-h-0 overflow-hidden"
-         data-controller="messages-scroll message-actions"
-         data-message-actions-current-user-value="<%= Current.user.id %>">
-
-      <%# Turbo Stream subscriptions for real-time updates %>
-      <%= turbo_stream_from @channel %>
-      <%= turbo_stream_from "server_#{@server.id}_presence" %>
-      <%= turbo_stream_from "user_#{Current.user.id}_unread" %>
+         data-controller="messages-scroll">
 
       <%# Mark channel as read after page loads (lazy frame avoids prefetch triggering) %>
       <%= turbo_frame_tag "mark_read", src: mark_read_server_channel_path(@server, @channel), loading: :lazy %>
 
       <%# Scrollable message container %>
-      <div class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
+      <div id="messages_scroll_container" class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
         <%# Load older messages %>
         <% if @has_older %>
           <div id="load_older" class="text-center py-3" data-messages-scroll-target="loadOlder">

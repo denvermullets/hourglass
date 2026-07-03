@@ -23,6 +23,8 @@ export default class extends Controller {
   open() {
     this.panelTarget.classList.remove("hidden")
     this.overlayTarget.classList.remove("hidden")
+    // Defer poll-driven morph refreshes while the panel is open.
+    this.panelTarget.setAttribute("data-poll-block", "")
 
     this._loadNotifications()
   }
@@ -30,6 +32,7 @@ export default class extends Controller {
   close() {
     this.panelTarget.classList.add("hidden")
     this.overlayTarget.classList.add("hidden")
+    this.panelTarget.removeAttribute("data-poll-block")
   }
 
   _loadNotifications() {

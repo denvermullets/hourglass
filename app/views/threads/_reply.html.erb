@@ -38,7 +38,7 @@
         <% unless grouped %>
           <%# Header %>
           <div class="flex items-baseline gap-2.5 mb-1">
-            <span class="text-xs font-medium message-username" data-author-name><%= reply.user.username %></span>
+            <span class="text-xs font-medium <%= message_author?(reply) ? 'text-granny-smith-apple-300' : 'text-jordy-blue-400' %> message-username" data-author-name><%= reply.user.username %></span>
             <span class="text-xs text-bunker-500 tracking-[0.06em]"><%= format_timestamp(reply.created_at, style: :reply) %></span>
             <% if reply.edited? %>
               <span class="text-xs text-bunker-600">(edited)</span>
@@ -86,11 +86,11 @@
           <% end %>
           <%= button_to "edit", edit_url,
                 method: :get,
-                class: "text-xs text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
+                class: "text-xs text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer #{'hidden' unless message_author?(reply)}",
                 data: { author_only: true } %>
           <%= button_to "delete", delete_url,
                 method: :delete,
-                class: "text-xs text-bunker-600 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer hidden",
+                class: "text-xs text-bunker-600 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer #{'hidden' unless message_author?(reply)}",
                 data: { turbo_confirm: "Delete this reply?", author_only: true } %>
         </div>
       </div>

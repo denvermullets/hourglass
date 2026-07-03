@@ -4,7 +4,6 @@ else
   {}
 end %>
 <%= tag.div class: "contents", data: picker_data do %>
-  <%= turbo_stream_from @channel %>
   <div class="flex-1 flex flex-col lg:flex-row min-h-0">
     <%# Collapsed channel sidebar (reuses thread layout) %>
     <div class="hidden lg:flex">

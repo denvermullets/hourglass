@@ -16,6 +16,27 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test 'create echoes the message directly to the author as a turbo stream' do
+    post server_channel_messages_path(@server, @channel),
+         params: { message: { body: 'Instant echo' } }
+    assert_response :ok
+    assert_match 'action="append"', response.body
+    assert_match 'target="messages"', response.body
+    assert_match 'Instant echo', response.body
+  end
+
+  test 'create reply echoes into the thread and updates the connector' do
+    parent = messages(:one)
+    assert_difference 'Message.count' do
+      post server_channel_messages_path(@server, @channel),
+           params: { message: { body: 'A threaded reply', parent_message_id: parent.id } }
+    end
+    assert_response :ok
+    assert_match 'target="thread_replies"', response.body
+    assert_match "thread_connector_#{parent.id}", response.body
+    assert_match "thread_header_meta_#{parent.id}", response.body
+  end
+
   test 'create with empty body returns unprocessable' do
     assert_no_difference 'Message.count' do
       post server_channel_messages_path(@server, @channel),
@@ -63,6 +84,15 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
     assert @message.edited?
   end
 
+  test 'update echoes a replace of the message to the author' do
+    patch server_channel_message_path(@server, @channel, @message),
+          params: { message: { body: 'Updated body' } }
+    assert_response :ok
+    assert_match 'action="replace"', response.body
+    assert_match "target=\"message_#{@message.id}\"", response.body
+    assert_match 'Updated body', response.body
+  end
+
   test 'update forbidden for non-author' do
     sign_out
     sign_in_as(users(:two))
@@ -76,6 +106,14 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
     @message.reload
     assert @message.deleted?
+  end
+
+  test 'destroy echoes the deleted state to the author' do
+    delete server_channel_message_path(@server, @channel, @message)
+    assert_response :ok
+    assert_match 'action="replace"', response.body
+    assert_match "target=\"message_#{@message.id}\"", response.body
+    assert_match 'message deleted', response.body
   end
 
   test 'destroy forbidden for non-author' do

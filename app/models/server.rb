@@ -40,6 +40,11 @@ class Server < ApplicationRecord
     memberships.find_by(user: user)
   end
 
+  # DB-backed presence: members seen within the online window (see ApplicationController#touch_last_seen).
+  def online_count
+    users.where('last_seen_at > ?', 45.seconds.ago).count
+  end
+
   private
 
   def generate_invite_code

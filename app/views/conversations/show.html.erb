@@ -49,18 +49,13 @@
 
     <%# Message area %>
     <div class="flex-1 flex flex-col min-h-0 overflow-hidden"
-         data-controller="messages-scroll message-actions"
-         data-message-actions-current-user-value="<%= Current.user.id %>">
-
-      <%# Turbo Stream subscriptions %>
-      <%= turbo_stream_from @conversation %>
-      <%= turbo_stream_from "user_#{Current.user.id}_unread" %>
+         data-controller="messages-scroll">
 
       <%# Mark as read %>
       <%= turbo_frame_tag "mark_read", src: mark_read_conversation_path(@conversation), loading: :lazy %>
 
       <%# Scrollable message container %>
-      <div class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
+      <div id="messages_scroll_container" class="flex-1 overflow-y-auto" data-messages-scroll-target="container">
         <%# Load older messages %>
         <% if @has_older %>
           <div id="load_older" class="text-center py-3" data-messages-scroll-target="loadOlder">

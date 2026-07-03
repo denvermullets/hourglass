@@ -47,7 +47,7 @@
         <% unless grouped %>
           <%# Header: username + timestamp %>
           <div class="flex items-baseline gap-2">
-            <span class="font-syne text-xs font-bold text-jordy-blue-400 message-username" data-author-name><%= message.user.username %></span>
+            <span class="font-syne text-xs font-bold <%= message_author?(message) ? 'text-granny-smith-apple-300' : 'text-jordy-blue-400' %> message-username" data-author-name><%= message.user.username %></span>
             <span class="text-xs text-bunker-600"><%= format_timestamp(message.created_at, style: :message) %></span>
             <% if message.edited? %>
               <span class="text-xs text-bunker-600">(edited)</span>
@@ -109,7 +109,7 @@
             <% edit_path = edit_server_channel_message_path(message.channel.server, message.channel, message) %>
             <% delete_path = server_channel_message_path(message.channel.server, message.channel, message) %>
           <% end %>
-          <div class="hidden items-center gap-2" data-author-only>
+          <div class="<%= message_author?(message) ? 'flex' : 'hidden' %> items-center gap-2" data-author-only>
             <%= link_to "edit", edit_path,
                   class: "text-xs leading-none text-bunker-600 hover:text-bunker-300 transition-colors duration-100 no-underline",
                   data: { turbo_method: :get, turbo_prefetch: false } %>
