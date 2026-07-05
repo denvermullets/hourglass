@@ -1,5 +1,10 @@
 <% edit_context = local_assigns.fetch(:context, :channel) %>
-<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5" do %>
+<%# turbo_permanent keeps the poll's morph refresh from touching this node, so new messages
+    still stream into the list while editing but the edit form (and its unsaved input, cursor,
+    and selection) is left intact. Save/cancel still swap it out because those go through
+    explicit turbo_stream.replace actions, which ignore turbo-permanent. Mirrors the composer
+    in messages/_form.html.erb. %>
+<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5", data: { turbo_permanent: true } do %>
   <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bunker-825 flex items-center justify-center">
     <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
   </div>
