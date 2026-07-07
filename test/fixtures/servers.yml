@@ -3,11 +3,9 @@ one:
   description: A test server for testing
   invite_code: testcode1
   owner: one
-  settings: '{}'
 
 two:
   name: Another Server
   description: Another test server
   invite_code: testcode2
   owner: two
-  settings: '{}'

@@ -78,6 +78,8 @@ Rails.application.routes.draw do
     member do
       get :members
       get :settings
+      get 'settings/members', to: 'servers#settings_members', as: :settings_members
+      delete 'settings/members/:user_id', to: 'servers#remove_member', as: :remove_member
       get 'settings/general', to: 'servers#settings_general', as: :settings_general
       get 'settings/invite', to: 'servers#settings_invite', as: :settings_invite
       get 'settings/danger', to: 'servers#settings_danger', as: :settings_danger
@@ -119,6 +121,9 @@ Rails.application.routes.draw do
         get :mtasks_projects
         post :link_project
         delete :link_project, action: :unlink_project
+        patch :privacy
+        post :members, action: :add_member
+        delete 'members/:user_id', action: :remove_member, as: :member
       end
     end
   end

@@ -1,0 +1,41 @@
+<%# Locals: server, membership (the current user's membership — the actor) %>
+<div class="max-w-[560px]">
+  <div class="text-xs text-bunker-500 mb-3">
+    <span class="text-bunker-600">//</span> <%= server.memberships.count %> member<%= server.memberships.count == 1 ? "" : "s" %>
+  </div>
+
+  <div class="rounded border border-bunker-825 bg-bunker-925 divide-y divide-bunker-825">
+    <% server.memberships.includes(:user).sort_by { |m| Membership.roles[m.role] }.each do |member| %>
+      <% user = member.user %>
+      <% can_remove = !member.owner? && Membership.roles[membership.role] < Membership.roles[member.role] %>
+      <div class="flex items-center gap-3 px-3 py-2.5">
+        <%# Avatar or initials %>
+        <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
+          <% if user.avatar.attached? %>
+            <%= image_tag polymorphic_path(user.avatar), alt: "", class: "w-full h-full object-cover" %>
+          <% else %>
+            <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= user.username[0] %></span>
+          <% end %>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <div class="text-xs text-bunker-200 truncate"><%= user.display_name.presence || user.username %></div>
+          <div class="text-xs text-bunker-600 truncate">@<%= user.username %></div>
+        </div>
+
+        <span class="text-xs tracking-[0.12em] uppercase text-bunker-500 border border-bunker-775 rounded px-1.5 py-0.5">
+          <%= member.role %>
+        </span>
+
+        <% if can_remove %>
+          <%= button_to "// remove", remove_member_server_path(server, user),
+            method: :delete,
+            class: "px-2.5 py-1 rounded text-xs border border-danger-800 text-danger-400 hover:bg-danger-800 cursor-pointer transition-colors duration-150 bg-transparent",
+            data: { turbo_confirm: "Remove #{user.username} from #{server.name}? Their messages will remain." } %>
+        <% else %>
+          <span class="w-[76px]"></span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

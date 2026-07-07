@@ -23,7 +23,8 @@
 
   <%# Channels list %>
   <div class="pb-1">
-    <% category.channels.select { |c| !c.archived? }.sort_by(&:position).each do |channel| %>
+    <% visible_ids = visible_channel_ids_for_server(server) %>
+    <% category.channels.select { |c| !c.archived? && visible_ids.include?(c.id) }.sort_by(&:position).each do |channel| %>
       <%= render "servers/channel_sidebar_item", channel: channel, server: server, current_channel: current_channel, mobile: mobile, unread: local_assigns[:unread_channel_ids]&.include?(channel.id) %>
     <% end %>
 

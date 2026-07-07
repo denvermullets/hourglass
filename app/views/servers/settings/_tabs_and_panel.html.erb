@@ -24,6 +24,11 @@
       class: "shrink-0 whitespace-nowrap px-4 py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
       permissions
     <% end %>
+    <%= link_to settings_members_server_path(server),
+      data: { turbo_frame: "settings_panel" },
+      class: "shrink-0 whitespace-nowrap px-4 py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'members' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
+      members
+    <% end %>
     <%= link_to settings_integrations_server_path(server),
       data: { turbo_frame: "settings_panel" },
       class: "shrink-0 whitespace-nowrap px-4 py-2.5 text-xs no-underline transition-colors duration-100 #{tab == 'integrations' ? 'text-granny-smith-apple-300 border-b-2 border-granny-smith-apple-300' : 'text-bunker-500'}" do %>
@@ -60,6 +65,11 @@
       data: { turbo_frame: "settings_panel" },
       class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == 'permissions' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
       permissions
+    <% end %>
+    <%= link_to settings_members_server_path(server),
+      data: { turbo_frame: "settings_panel" },
+      class: "block w-full text-left px-4 py-2 text-xs no-underline transition-colors duration-100 #{tab == 'members' ? 'text-granny-smith-apple-300 bg-bunker-875 border-r-2 border-granny-smith-apple-300' : 'text-bunker-500 hover:text-bunker-300 hover:bg-bunker-925'}" do %>
+      members
     <% end %>
     <%= link_to settings_integrations_server_path(server),
       data: { turbo_frame: "settings_panel" },

@@ -2,13 +2,26 @@ module Authorization
   extend ActiveSupport::Concern
 
   included do
-    helper_method :current_membership
+    helper_method :current_membership, :visible_channel_ids_for_server
   end
 
   private
 
   def current_membership
     @current_membership ||= @server&.membership_for(Current.user)
+  end
+
+  # Ids of channels the current user may see in the given server. Admins/owners
+  # bypass private-channel restrictions; everyone else sees public channels plus
+  # any private channel they hold a channel_membership for. Memoized per server.
+  def visible_channel_ids_for_server(server)
+    @visible_channel_ids_cache ||= {}
+    @visible_channel_ids_cache[server.id] ||=
+      if current_membership&.can_manage_members?
+        server.channels.ids
+      else
+        server.channels.visible_to(Current.user).ids
+      end
   end
 
   def require_membership!

@@ -6,7 +6,7 @@ module Channels
 
     before_action :set_server, :set_channel
     before_action :require_membership!
-    before_action :require_moderator!, only: %i[link_project unlink_project update]
+    before_action :require_moderator!, only: %i[link_project unlink_project update privacy add_member remove_member]
     before_action :load_integration
 
     def show
@@ -43,6 +43,25 @@ module Channels
     def unlink_project
       ChannelIntegrations::UnlinkProjectService.call(channel: @channel, user: Current.user)
       redirect_to server_channel_settings_path(@server, @channel), notice: 'Channel unlinked.'
+    end
+
+    def privacy
+      is_private = ActiveModel::Type::Boolean.new.cast(params[:is_private])
+      Channels::UpdateService.call(channel: @channel, params: { is_private: is_private })
+      notice = @channel.is_private? ? 'Channel is now private.' : 'Channel is now public.'
+      redirect_to server_channel_settings_path(@server, @channel), notice: notice
+    end
+
+    def add_member
+      user = @server.users.find(params[:user_id])
+      Channels::AddMemberService.call(channel: @channel, user: user)
+      notice = "Added #{user.username} to ##{@channel.name}."
+      redirect_to server_channel_settings_path(@server, @channel), notice: notice
+    end
+
+    def remove_member
+      @channel.channel_memberships.find_by(user_id: params[:user_id])&.destroy!
+      redirect_to server_channel_settings_path(@server, @channel), notice: 'Member removed from channel.'
     end
 
     def update

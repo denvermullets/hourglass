@@ -56,7 +56,8 @@
       </div>
 
       <%# Channels list %>
-      <% sorted_channels = category.channels.sort_by(&:position) %>
+      <% visible_ids = visible_channel_ids_for_server(server) %>
+      <% sorted_channels = category.channels.select { |c| visible_ids.include?(c.id) }.sort_by(&:position) %>
       <% sorted_channels.each_with_index do |channel, ch_index| %>
         <% ch_archived = channel.archived? %>
         <% ch_classes = ch_archived ? 'opacity-50' : '' %>
