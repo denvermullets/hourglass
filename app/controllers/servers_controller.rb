@@ -5,12 +5,12 @@ class ServersController < ApplicationController
 
   before_action :set_server,
                 only: %i[show edit update destroy settings settings_general settings_invite settings_danger
-                         settings_channels settings_permissions update_permissions
+                         settings_channels settings_permissions update_permissions settings_members remove_member
                          settings_integrations update_jait_integration members]
   before_action :require_membership!, only: %i[show members]
   before_action :require_admin!,
                 only: %i[settings settings_general settings_invite settings_danger settings_channels
-                         settings_permissions update_permissions
+                         settings_permissions update_permissions settings_members remove_member
                          settings_integrations update_jait_integration edit update]
   before_action :require_owner!, only: [:destroy]
 
@@ -87,6 +87,23 @@ class ServersController < ApplicationController
       panel_partial: 'servers/settings/permissions_content',
       panel_locals: { server: @server }
     }
+  end
+
+  def settings_members
+    render partial: 'servers/settings/tabs_and_panel', locals: {
+      server: @server, tab: 'members',
+      panel_partial: 'servers/settings/members_content',
+      panel_locals: { server: @server, membership: current_membership }
+    }
+  end
+
+  def remove_member
+    user = @server.users.find(params[:user_id])
+    Servers::RemoveMemberService.call(server: @server, actor: Current.user, target_user: user)
+    redirect_to settings_members_server_path(@server), notice: "Removed #{user.username}."
+  rescue Servers::RemoveMemberService::CannotRemoveOwnerError,
+         Servers::RemoveMemberService::InsufficientRoleError => e
+    redirect_to settings_members_server_path(@server), alert: e.message
   end
 
   def settings_integrations

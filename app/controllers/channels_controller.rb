@@ -6,6 +6,7 @@ class ChannelsController < ApplicationController
   before_action :set_server
   before_action :set_channel, only: %i[show update destroy mark_read reorder archive unarchive move]
   before_action :require_membership!
+  before_action :require_channel_access!, only: :show
   before_action :require_moderator!, only: %i[create update destroy reorder archive unarchive move]
 
   def search
@@ -92,6 +93,12 @@ class ChannelsController < ApplicationController
 
   def set_channel
     @channel = @server.channels.find(params[:id])
+  end
+
+  def require_channel_access!
+    return if visible_channel_ids_for_server(@server).include?(@channel.id)
+
+    redirect_to server_path(@server), alert: 'You do not have access to that channel.'
   end
 
   def channel_params

@@ -13,7 +13,8 @@
       <% if i > 0 %>
         <div class="w-7 h-px bg-bunker-825 my-1"></div>
       <% end %>
-      <% category.channels.sort_by(&:position).each do |channel| %>
+      <% visible_ids = visible_channel_ids_for_server(server) %>
+      <% category.channels.select { |c| visible_ids.include?(c.id) }.sort_by(&:position).each do |channel| %>
         <%= link_to server_channel_path(server, channel),
           class: "w-9 h-7 rounded-md flex items-center justify-center text-xs no-underline #{channel == current_channel ? 'bg-bunker-825 border border-bunker-775 text-granny-smith-apple-300' : 'text-bunker-775 hover:text-bunker-300'}",
           data: { turbo_frame: "_top" } do %>

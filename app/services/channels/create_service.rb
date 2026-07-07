@@ -7,8 +7,10 @@ class Channels::CreateService < Service
 
   def call
     position = @category.channels.maximum(:position).to_i + 1
-    @server.channels.create!(
+    channel = @server.channels.create!(
       @params.merge(category: @category, position: position)
     )
+    Channels::SnapshotMembersService.call(channel: channel) if channel.is_private?
+    channel
   end
 end

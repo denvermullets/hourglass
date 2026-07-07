@@ -15,3 +15,15 @@ two_owner:
   server: two
   role: 0
   joined_at: <%= 1.week.ago %>
+
+three_admin_of_one:
+  user: three
+  server: one
+  role: 1
+  joined_at: <%= 2.days.ago %>
+
+four_admin_of_one:
+  user: four
+  server: one
+  role: 1
+  joined_at: <%= 2.days.ago %>

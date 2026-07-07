@@ -1,0 +1,61 @@
+<%# Locals: server, channel %>
+<div class="rounded border border-bunker-825 bg-bunker-925 p-4">
+  <div class="flex items-center justify-between gap-3 mb-2">
+    <div class="min-w-0">
+      <div class="text-xs text-bunker-300 tracking-[0.12em]">channel access</div>
+      <div class="text-xs text-bunker-500 mt-1">
+        <% if channel.is_private? %>
+          private — only added members can see this channel.
+        <% else %>
+          public — every server member can see this channel.
+        <% end %>
+      </div>
+    </div>
+
+    <%= button_to channel.is_private? ? "// make public" : "// make private",
+      privacy_server_channel_settings_path(server, channel),
+      method: :patch,
+      params: { is_private: !channel.is_private? },
+      class: "flex-shrink-0 px-3 py-1.5 rounded text-xs border border-bunker-775 text-bunker-300 hover:bg-bunker-875 cursor-pointer transition-colors duration-150 bg-transparent",
+      data: (channel.is_private? ? {} : { turbo_confirm: "Make ##{channel.name} private? Current members keep access; new people must be added." }) %>
+  </div>
+
+  <% if channel.is_private? %>
+    <div class="mt-3 pt-3 border-t border-bunker-825">
+      <div class="text-xs text-bunker-500 mb-2">
+        <span class="text-bunker-600">//</span> members with access
+      </div>
+
+      <div class="space-y-1 mb-3">
+        <% channel.members.order(:username).each do |user| %>
+          <div class="flex items-center gap-2 py-1">
+            <span class="text-xs text-bunker-300 flex-1 min-w-0 truncate">
+              <%= user.display_name.presence || user.username %>
+              <span class="text-bunker-600">@<%= user.username %></span>
+            </span>
+            <%= button_to "remove", member_server_channel_settings_path(server, channel, user),
+              method: :delete,
+              class: "px-2 py-0.5 rounded text-xs border border-bunker-775 text-bunker-500 hover:text-danger-400 hover:border-danger-800 cursor-pointer transition-colors duration-150 bg-transparent",
+              data: { turbo_confirm: "Remove #{user.username} from ##{channel.name}?" } %>
+          </div>
+        <% end %>
+      </div>
+
+      <% addable_users = server.users.where.not(id: channel.members.ids).order(:username) %>
+      <% if addable_users.any? %>
+        <%= form_with url: members_server_channel_settings_path(server, channel), method: :post, class: "flex items-center gap-2" do %>
+          <select name="user_id"
+            class="flex-1 min-w-0 text-xs bg-bunker-950 border border-bunker-900 text-bunker-200 rounded px-2 py-1 cursor-pointer outline-none hover:border-bunker-600 transition-colors duration-100">
+            <% addable_users.each do |user| %>
+              <option value="<%= user.id %>"><%= user.display_name.presence || user.username %> (@<%= user.username %>)</option>
+            <% end %>
+          </select>
+          <%= submit_tag "// add",
+            class: "flex-shrink-0 px-3 py-1 rounded text-xs border border-bunker-775 text-bunker-300 hover:bg-bunker-875 cursor-pointer transition-colors duration-150 bg-transparent" %>
+        <% end %>
+      <% else %>
+        <div class="text-xs text-bunker-600">all server members already have access.</div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
