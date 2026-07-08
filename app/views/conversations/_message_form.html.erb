@@ -1,5 +1,7 @@
+<%# id scoped per-conversation so turbo-permanent doesn't carry this form (with its stale POST
+    action) onto another conversation/channel on navigation. See messages/_form for detail. %>
 <%= form_with scope: :message, url: conversation_messages_path(conversation),
-             id: "message_form",
+             id: "message_form_conversation_#{conversation.id}",
              data: {
                turbo_permanent: true,
                controller: "message-input attachment-upload",
