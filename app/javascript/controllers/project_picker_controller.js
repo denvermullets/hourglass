@@ -6,13 +6,20 @@ export default class extends Controller {
 
   connect() {
     this.searchTimer = null
+    // Block the poll-driven Turbo morph while the picker is open so a refresh can't
+    // dismiss it. The poller skips refreshing while any [data-poll-block] is present;
+    // the native "close" event covers every dismissal path.
+    this._onClose = () => this.dialogTarget.removeAttribute("data-poll-block")
+    this.dialogTarget.addEventListener("close", this._onClose)
   }
 
   disconnect() {
     clearTimeout(this.searchTimer)
+    this.dialogTarget.removeEventListener("close", this._onClose)
   }
 
   open() {
+    this.dialogTarget.setAttribute("data-poll-block", "")
     this.dialogTarget.showModal()
     this.searchTarget.value = ""
     this.searchTarget.focus()
