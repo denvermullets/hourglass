@@ -32,6 +32,7 @@ class ChannelsController < ApplicationController
     @has_older = messages.size > 50
     @messages = messages.first(50).reverse
     @message_count = @channel.messages.not_deleted.count
+    @move_target_channels = move_target_channels
   end
 
   def mark_read
@@ -93,6 +94,16 @@ class ChannelsController < ApplicationController
 
   def set_channel
     @channel = @server.channels.find(params[:id])
+  end
+
+  # Candidate destinations for the admin "move message" picker; nil for non-admins.
+  def move_target_channels
+    return unless current_membership&.can_move_messages?
+
+    @server.channels.active
+           .where(channel_type: %i[text announcement])
+           .where.not(id: @channel.id)
+           .order(:name)
   end
 
   def require_channel_access!

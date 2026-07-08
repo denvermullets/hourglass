@@ -1,0 +1,36 @@
+import { Controller } from "@hotwired/stimulus"
+
+// Admin action: move a root message (and its thread) to another channel.
+// A single dialog lives in the channel view; each message's "move" button opens it
+// and records which message to move. Picking a channel submits the move form.
+export default class extends Controller {
+  static targets = ["dialog", "search", "channel", "form", "channelInput"]
+  static values = { messagesBaseUrl: String }
+
+  open(event) {
+    this.messageId = event.currentTarget.dataset.messageId
+    this.searchTarget.value = ""
+    this.filter()
+    this.dialogTarget.showModal()
+    this.searchTarget.focus()
+  }
+
+  close() {
+    this.dialogTarget.close()
+  }
+
+  filter() {
+    const q = this.searchTarget.value.trim().toLowerCase()
+    this.channelTargets.forEach((el) => {
+      const name = (el.dataset.name || "").toLowerCase()
+      el.classList.toggle("hidden", q !== "" && !name.includes(q))
+    })
+  }
+
+  pick(event) {
+    if (!this.messageId) return
+    this.channelInputTarget.value = event.currentTarget.dataset.channelId
+    this.formTarget.action = `${this.messagesBaseUrlValue}/${this.messageId}/move`
+    this.formTarget.requestSubmit()
+  }
+}

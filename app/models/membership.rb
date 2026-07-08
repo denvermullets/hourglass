@@ -23,6 +23,10 @@ class Membership < ApplicationRecord
     at_least?(:admin)
   end
 
+  def can_move_messages?
+    at_least?(:admin)
+  end
+
   def can_manage_server?
     at_least?(:admin)
   end

@@ -6,8 +6,9 @@
 
   <%# Channel content %>
   <div class="flex-1 flex flex-col min-w-0 min-h-0 relative"
-       data-controller="dropzone"
+       data-controller="dropzone<%= ' message-mover' if @move_target_channels %>"
        data-dropzone-channel-name-value="<%= @channel.name %>"
+       <% if @move_target_channels %>data-message-mover-messages-base-url-value="<%= server_channel_messages_path(@server, @channel) %>"<% end %>
        >
     <%# Channel header %>
     <div class="px-4 lg:px-5 py-3 border-b border-bunker-825 flex-shrink-0">
@@ -89,7 +90,7 @@
                 <% previous_date = local_date(message.created_at) %>
                 <% previous_message = nil %>
               <% end %>
-              <%= render "messages/message", message: message, grouped: grouped_with_previous?(message, previous_message) %>
+              <%= render "messages/message", message: message, grouped: grouped_with_previous?(message, previous_message), movable: @move_target_channels.present? %>
               <% previous_message = message %>
             <% end %>
           <% end %>
@@ -121,5 +122,10 @@
         <div class="text-xs text-granny-smith-apple-600 mt-1">max 50mb per file</div>
       </div>
     </div>
+
+    <%# Admin: move-message channel picker (single shared dialog) %>
+    <% if @move_target_channels %>
+      <%= render "messages/move_dialog", server: @server, channel: @channel, channels: @move_target_channels %>
+    <% end %>
   </div>
 </div>

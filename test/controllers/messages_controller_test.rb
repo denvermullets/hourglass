@@ -133,4 +133,38 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
                                      before: Time.current.iso8601(6), format: :turbo_stream)
     assert_response :ok
   end
+
+  test 'move relocates a message to another channel and redirects there' do
+    target = @server.channels.create!(name: 'releases', category: categories(:general), channel_type: :text)
+
+    patch move_server_channel_message_path(@server, @channel, @message),
+          params: { target_channel_id: target.id }
+
+    assert_redirected_to server_channel_path(@server, target)
+    assert_equal target.id, @message.reload.channel_id
+  end
+
+  test 'move is forbidden for a non-admin member' do
+    sign_out
+    sign_in_as(users(:two)) # role: member of server one
+    target = @server.channels.create!(name: 'releases', category: categories(:general), channel_type: :text)
+
+    patch move_server_channel_message_path(@server, @channel, @message),
+          params: { target_channel_id: target.id }
+
+    assert_response :forbidden
+    assert_equal @channel.id, @message.reload.channel_id
+  end
+
+  test 'move refuses a threaded reply' do
+    reply = @channel.messages.create!(body: 'a reply', user: users(:one),
+                                      parent_message: @message, message_type: :regular)
+    target = @server.channels.create!(name: 'releases', category: categories(:general), channel_type: :text)
+
+    patch move_server_channel_message_path(@server, @channel, reply),
+          params: { target_channel_id: target.id }
+
+    assert_redirected_to server_channel_path(@server, @channel)
+    assert_equal @channel.id, reply.reload.channel_id
+  end
 end
