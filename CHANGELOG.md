@@ -1,5 +1,12 @@
-<!-- last-sha: 76992d1d698d9d4ab6c3021c80f33583df80aa5a -->
+<!-- last-sha: aa9a756beb931a39c7cad20294d1869f0f892454 -->
 # What's new
+
+## 2026-07-08
+- **Private channels.** Channels can now be made private so only invited members can see and join them, with per-channel access controls.
+- **Manage your members.** Admins can add or remove people from a channel and remove members from a server.
+- **Move a message.** Admins can move a message — and its threaded replies — to a different channel when it lands in the wrong place.
+- **Steadier messaging.** Fixed messages briefly disappearing and a race that could drop a message when sending quickly.
+- **Edits survive refreshes.** Your in-progress message edits are no longer lost if the app refreshes while you're typing.
 
 ## 2026-07-03
 - **New message composer.** The rich-text editor has been replaced with a simpler, faster composer that writes in Markdown, so what you type renders cleanly every time.
