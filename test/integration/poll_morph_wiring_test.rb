@@ -23,7 +23,7 @@ class PollMorphWiringTest < ActionDispatch::IntegrationTest
     assert_select 'body[data-poller-url-value="/poll"]'
 
     assert_select '#messages_scroll_container'
-    assert_select 'form#message_form[data-turbo-permanent]'
+    assert_select "form#message_form_channel_#{@channel.id}[data-turbo-permanent]"
   end
 
   test 'page poll-digest matches the /poll endpoint digest for the same context' do
