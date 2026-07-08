@@ -1,5 +1,8 @@
+<%# id scoped per-channel: turbo-permanent preserves the draft across a same-channel poll
+    morph, but a channel-specific id stops Turbo from carrying this form (and its stale POST
+    action) onto a different channel/conversation on navigation. %>
 <%= form_with scope: :message, url: server_channel_messages_path(server, channel),
-             id: "message_form",
+             id: "message_form_channel_#{channel.id}",
              data: {
                turbo_permanent: true,
                controller: "message-input attachment-upload",

@@ -9,7 +9,7 @@
     <% previous_message = nil %>
   <% end %>
   <%= turbo_stream.prepend "messages" do %>
-    <%= render "messages/message", message: message, grouped: grouped_with_previous?(message, previous_message) %>
+    <%= render "messages/message", message: message, grouped: grouped_with_previous?(message, previous_message), movable: current_membership&.can_move_messages? %>
   <% end %>
   <% previous_message = message %>
 <% end %>

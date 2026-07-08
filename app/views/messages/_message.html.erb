@@ -101,6 +101,14 @@
                   class: "text-xs leading-none text-bunker-600 hover:text-granny-smith-apple-300 transition-colors duration-100 no-underline" %>
           <% end %>
 
+          <%# Move — channel context, root message, admins/owners only %>
+          <% if context == :channel && message.parent_message_id.nil? && local_assigns[:movable] %>
+            <%= tag.button "move",
+                  type: "button",
+                  data: { action: "message-mover#open", message_id: message.id },
+                  class: "text-xs leading-none font-normal text-bunker-600 hover:text-jordy-blue-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer" %>
+          <% end %>
+
           <%# Edit/Delete — author only %>
           <% if context == :conversation %>
             <% edit_path = edit_conversation_message_path(message.conversation, message) %>

@@ -4,7 +4,7 @@
 </div>
 
 <%= form_with scope: :message, url: server_channel_messages_path(server, channel),
-             id: "thread_message_form",
+             id: "thread_message_form_#{parent_message.id}",
              data: {
                turbo_permanent: true,
                controller: "message-input attachment-upload",

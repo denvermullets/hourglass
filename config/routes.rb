@@ -114,6 +114,7 @@ Rails.application.routes.draw do
         member do
           post   :pin
           delete :pin, action: :unpin
+          patch  :move
         end
       end
       resource :pinned_messages, only: [:show], controller: 'pinned_messages'

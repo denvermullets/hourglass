@@ -1,0 +1,56 @@
+<%# locals: server, channel (source), channels (candidate targets) %>
+<% input_classes = "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300 placeholder:text-bunker-600 focus:border-jordy-blue-400" %>
+
+<dialog data-message-mover-target="dialog"
+        class="fixed inset-0 m-auto rounded-lg bg-bunker-925 border border-bunker-825 text-bunker-300 w-[420px] max-w-[95vw] max-h-[80vh] p-0 backdrop:bg-bunker-950/60">
+  <div class="flex flex-col">
+    <div class="px-4 py-3 border-b border-bunker-825 flex items-center justify-between">
+      <div>
+        <div class="text-xs tracking-[0.16em] text-jordy-blue-400 font-dm-mono">// move message</div>
+        <div class="text-[11px] text-bunker-500 mt-0.5">relocate this message and its replies to another channel</div>
+      </div>
+      <button type="button" data-action="message-mover#close"
+        class="text-bunker-500 hover:text-bunker-300 text-xs cursor-pointer bg-transparent border-0">close</button>
+    </div>
+
+    <div class="px-4 py-3 border-b border-bunker-825">
+      <input type="search"
+             placeholder="search channels…"
+             autocomplete="off"
+             data-message-mover-target="search"
+             data-action="input->message-mover#filter"
+             class="<%= input_classes %>">
+    </div>
+
+    <div class="flex flex-col gap-1 px-2 py-3 max-h-[320px] overflow-y-auto">
+      <% if channels.empty? %>
+        <div class="text-xs text-bunker-500 py-4 text-center">no other channels available</div>
+      <% else %>
+        <% channels.each do |target| %>
+          <button type="button"
+                  data-message-mover-target="channel"
+                  data-action="message-mover#pick"
+                  data-channel-id="<%= target.id %>"
+                  data-name="<%= target.name %>"
+                  class="text-left rounded px-3 py-2 cursor-pointer bg-transparent border border-transparent hover:border-bunker-775 hover:bg-bunker-875 transition-colors duration-100 w-full">
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-bunker-600 text-xs"><%= target.voice? ? "" : "#" %></span>
+              <span class="text-xs text-bunker-50"><%= target.name %></span>
+              <% if target.is_private? %>
+                <span class="text-[10px] text-bunker-600 font-dm-mono">private</span>
+              <% end %>
+            </div>
+            <% if target.topic.present? %>
+              <div class="text-[11px] text-bunker-500 truncate"><%= target.topic %></div>
+            <% end %>
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%= form_with url: server_channel_messages_path(server, channel), method: :patch,
+          scope: nil, data: { message_mover_target: "form" } do %>
+      <%= hidden_field_tag :target_channel_id, "", data: { message_mover_target: "channelInput" } %>
+    <% end %>
+  </div>
+</dialog>

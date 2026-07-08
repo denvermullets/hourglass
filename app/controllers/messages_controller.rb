@@ -7,8 +7,9 @@ class MessagesController < ApplicationController
   before_action :set_server
   before_action :set_channel
   before_action :require_membership!
-  before_action :set_message, only: %i[show edit update destroy pin unpin]
+  before_action :set_message, only: %i[show edit update destroy pin unpin move]
   before_action :require_author!, only: %i[edit update destroy]
+  before_action :require_move_permission!, only: :move
 
   def index
     scope = @channel.messages.root_messages.not_deleted.includes(:user, files_attachments: :blob)
@@ -80,7 +81,25 @@ class MessagesController < ApplicationController
     head :ok
   end
 
+  def move
+    if @message.parent_message_id.present?
+      redirect_to(server_channel_path(@server, @channel), alert: 'Only top-level messages can be moved.') and return
+    end
+
+    target = @server.channels.active.find(params[:target_channel_id])
+    Messages::MoveService.call(message: @message, target_channel: target)
+    redirect_to server_channel_path(@server, target)
+  rescue ActiveRecord::RecordNotFound
+    redirect_to server_channel_path(@server, @channel), alert: 'That channel is unavailable.'
+  end
+
   private
+
+  def require_move_permission!
+    return if current_membership&.can_move_messages?
+
+    head :forbidden
+  end
 
   def set_server
     @server = Server.find(params[:server_id])
