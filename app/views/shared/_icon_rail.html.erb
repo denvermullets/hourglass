@@ -6,15 +6,24 @@
   <% end %>
 
   <%# Server icons %>
+  <% unread_server_ids = Current.user.unread_server_ids %>
   <% Current.user.servers.each do |server| %>
+    <% active = current_server&.id == server.id %>
+    <% is_unread = unread_server_ids.include?(server.id) && !active %>
+    <% state_classes = active ? "bg-bunker-875 border-bunker-775 text-granny-smith-apple-300" : "bg-transparent border-transparent text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300" %>
     <%= link_to server_path(server),
-      class: "w-8.5 h-8.5 rounded-lg flex items-center justify-center text-xs cursor-pointer transition-all duration-100 border #{current_server&.id == server.id ? 'bg-bunker-875 border-bunker-775 text-granny-smith-apple-300' : 'bg-transparent border-transparent text-bunker-500 hover:bg-bunker-875 hover:text-bunker-300'}",
+      class: "relative w-8.5 h-8.5 rounded-lg flex items-center justify-center text-xs cursor-pointer transition-all duration-100 border #{state_classes}",
       title: server.name do %>
       <% if server.icon.attached? %>
         <%= image_tag server.icon, alt: server.name, class: "w-full h-full rounded-lg object-cover" %>
       <% else %>
         <%= server.name[0, 2].upcase %>
       <% end %>
+      <span id="unread_indicator_server_<%= server.id %>">
+        <% if is_unread %>
+          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-granny-smith-apple-600 border-2 border-bunker-950"></span>
+        <% end %>
+      </span>
     <% end %>
   <% end %>
 

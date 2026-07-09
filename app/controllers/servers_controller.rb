@@ -16,6 +16,7 @@ class ServersController < ApplicationController
 
   def index
     @servers = Current.user.servers
+    @unread_server_ids = Current.user.unread_server_ids
   end
 
   def new

@@ -115,22 +115,33 @@ class User < ApplicationRecord
   end
 
   def unread_channels?
+    unread_server_ids.any?
+  end
+
+  # Ids of servers holding at least one unread channel for this user.
+  def unread_server_ids
+    @unread_server_ids ||= compute_unread_server_ids
+  end
+
+  private
+
+  def compute_unread_server_ids
     channels = Channel.joins(:server)
                       .visible_to(self)
                       .where(servers: { id: servers.select(:id) })
                       .where.not(last_message_at: nil)
-                      .pluck(:id, :last_message_at)
+                      .pluck(:id, :server_id, :last_message_at)
 
-    return false if channels.empty?
+    return Set.new if channels.empty?
 
     read_times = ChannelMembership
                  .where(user: self, channel_id: channels.map(&:first))
                  .pluck(:channel_id, :last_read_at)
                  .to_h
 
-    channels.any? do |ch_id, last_msg_at|
+    channels.each_with_object(Set.new) do |(ch_id, server_id, last_msg_at), ids|
       last_read = read_times[ch_id]
-      last_read.nil? || last_msg_at > last_read
+      ids.add(server_id) if last_read.nil? || last_msg_at > last_read
     end
   end
 end
