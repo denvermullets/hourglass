@@ -2,9 +2,16 @@
 <nav class="fixed bottom-0 left-0 right-0 border-t border-bunker-825 bg-bunker-950 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-50">
   <%# Servers %>
   <%= link_to servers_path, class: "flex flex-col items-center gap-0.5 px-2.5 no-underline #{controller_name == 'servers' && action_name == 'index' ? 'text-granny-smith-apple-300' : 'text-bunker-500'}" do %>
-    <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 5h18M3 12h18M3 19h18"/>
-    </svg>
+    <div class="relative">
+      <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 5h18M3 12h18M3 19h18"/>
+      </svg>
+      <span id="server_unread_badge_mobile">
+        <% if Current.user&.unread_channels? %>
+          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-granny-smith-apple-600"></span>
+        <% end %>
+      </span>
+    </div>
     <span class="text-xs tracking-[0.08em]">servers</span>
   <% end %>
 
