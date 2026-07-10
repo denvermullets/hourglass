@@ -85,7 +85,7 @@ class Jait::HighlightService < Service
         [helpers.jait_card_path(server_id: @server.id, team_id: team_id, kind: singular),
          "jait-#{singular}-#{team_id}"]
       end
-    %(<turbo-frame id="#{frame_id}" src="#{src}" loading="lazy">#{fallback}</turbo-frame>)
+    %(<turbo-frame id="#{frame_id}" src="#{src}" loading="lazy" data-turbo-permanent>#{fallback}</turbo-frame>)
   end
 
   def singularize_kind(kind)
