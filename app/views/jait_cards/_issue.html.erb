@@ -4,7 +4,7 @@
 <% lane = data['lane'] || {} %>
 <% labels = data['labels'] || [] %>
 <% priority = data['priority'].to_s %>
-<%= turbo_frame_tag frame_id do %>
+<%= turbo_frame_tag frame_id, data: { turbo_permanent: true } do %>
   <%= link_to url, target: "_blank", rel: "noopener noreferrer",
         class: "jait-card not-prose block max-w-md rounded-lg border border-granny-smith-apple-600 bg-bunker-875 hover:bg-bunker-825 transition px-3 py-2.5 my-1 no-underline" do %>
     <div class="flex items-center justify-between mb-1">

@@ -97,6 +97,9 @@ export class TextareaTypeahead {
     const dropdown = document.createElement("div")
     dropdown.className = "mention-autocomplete"
     if (this.provider.dropdownClass) dropdown.classList.add(this.provider.dropdownClass)
+    // Suppress poll-driven morph refreshes while the popup is open — a morph would tear down
+    // the composer/popup mid-typing. Removed automatically when hide() removes the node.
+    dropdown.setAttribute("data-poll-block", "")
 
     items.forEach((item, index) => {
       const el = document.createElement("div")

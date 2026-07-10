@@ -9,6 +9,9 @@ export default class extends Controller {
 
     this.overlay = document.createElement("div")
     this.overlay.className = "fixed inset-0 z-50 bg-bunker-950/90 flex items-center justify-center p-4 cursor-zoom-out"
+    // Suppress poll-driven morph refreshes while open — the overlay isn't in the server
+    // render, so a morph would remove it and collapse the enlarged image back to the message.
+    this.overlay.setAttribute("data-poll-block", "")
 
     if (this.typeValue === "video") {
       this.overlay.innerHTML = `
