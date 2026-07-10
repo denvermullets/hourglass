@@ -24,7 +24,7 @@ class JaitWebhookTestsController < ApplicationController
   private
 
   def set_server
-    @server = Server.find(params[:server_id])
+    @server = Server.find(params[:id])
   end
 
   def parse_payload
