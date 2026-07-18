@@ -51,8 +51,10 @@
 .message-content p:has(> br:only-child) {
   min-height: 1em;
 }
+/* Paragraph break should read as a blank line, not a bare <br>. Roughly one
+   line of leading so double-spaced markdown survives the round trip visually. */
 .message-content p + p {
-  margin-top: 0.25rem;
+  margin-top: 0.85em;
 }
 .message-content strong {
   font-weight: bold;

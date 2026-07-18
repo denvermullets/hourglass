@@ -63,4 +63,44 @@ class MessagesPinTest < ActionDispatch::IntegrationTest
     assert_response :ok
     assert_not @message.reload.pinned?
   end
+
+  # The pinned state has to land on the actor's screen immediately rather than waiting
+  # for the next poll+morph, so both actions echo turbo_streams like create/update/destroy.
+  test 'pin echoes streams for the message and the pinned count' do
+    post pin_server_channel_message_path(@server, @channel, @message)
+
+    assert_equal Mime[:turbo_stream], response.media_type
+    assert_select 'turbo-stream[action=replace][target=?]', dom_id(@message)
+    assert_select 'turbo-stream[action=replace][target=?]', "channel_#{@channel.id}_pinned_count"
+  end
+
+  test 'unpin echoes streams for the message and the pinned count' do
+    @message.pin!(users(:one))
+
+    delete pin_server_channel_message_path(@server, @channel, @message)
+
+    assert_equal Mime[:turbo_stream], response.media_type
+    assert_select 'turbo-stream[action=replace][target=?]', dom_id(@message)
+    assert_select 'turbo-stream[action=replace][target=?]', "channel_#{@channel.id}_pinned_count"
+  end
+
+  test 'pinned message stream renders the pinned chrome and an unpin link' do
+    post pin_server_channel_message_path(@server, @channel, @message)
+
+    assert_select 'turbo-stream[target=?]', dom_id(@message) do
+      assert_match(%r{// pinned}, response.body)
+      assert_match(/unpin/, response.body)
+    end
+  end
+
+  test 'pinning a thread reply echoes streams without a pinned count target in the DOM' do
+    reply = @channel.messages.create!(user: users(:one), body: 'reply', message_type: :regular,
+                                      parent_message: @message)
+
+    post pin_server_channel_message_path(@server, @channel, reply)
+
+    assert_response :ok
+    assert_select 'turbo-stream[action=replace][target=?]', dom_id(reply)
+    assert reply.reload.pinned?
+  end
 end
