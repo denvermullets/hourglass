@@ -71,14 +71,14 @@ class MessagesController < ApplicationController
 
   def pin
     Messages::PinService.call(message: @message, user: Current.user) unless @message.pinned?
-    head :ok
+    render turbo_stream: pinned_message_streams(@message)
   rescue ActiveRecord::RecordInvalid
     head :unprocessable_entity
   end
 
   def unpin
     Messages::UnpinService.call(message: @message) if @message.pinned?
-    head :ok
+    render turbo_stream: pinned_message_streams(@message)
   end
 
   def move
@@ -94,6 +94,16 @@ class MessagesController < ApplicationController
   end
 
   private
+
+  # Pin/unpin repaints the message itself (pinned chrome + the pin/unpin link label) and
+  # the channel header's pinned count. The count target only exists on channels#show, so
+  # pinning a reply from the thread page just no-ops that stream.
+  def pinned_message_streams(message)
+    updated_message_streams(message, context: :channel, server: @server, channel: @channel) +
+      [turbo_stream.replace("channel_#{@channel.id}_pinned_count",
+                            partial: 'channels/pinned_count',
+                            locals: { server: @server, channel: @channel })]
+  end
 
   def require_move_permission!
     return if current_membership&.can_move_messages?
