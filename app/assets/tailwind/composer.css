@@ -214,13 +214,20 @@
 
 /* Blank lines in the source markdown separate every kind of block, not just
    paragraph pairs — a list between two paragraphs needs the same breathing room.
-   Declared after the element rules above so it wins their margin-top. */
-.message-content > * + * {
-  margin-top: 0.85em;
+   A flex gap owns that spacing instead of per-element margins, so the element
+   rules above (`.message-content p`, `.message-content ul`, …) can't out-specify
+   it. The changelog page opts out; it sets its own rhythm further down. */
+.message-content:not(.changelog-content) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85em;
 }
-/* Headings stay tight against the content they introduce. */
-.message-content > :is(h1, h2, h3) + * {
-  margin-top: 0.25rem;
+/* The element rules keep their margins for nesting (a `ul` inside an `li` is not
+   a flex item), but at the top level the gap is the only separator. */
+.message-content:not(.changelog-content)
+  > :is(p, ul, ol, pre, table, blockquote, hr, h1, h2, h3) {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* JAIT unfurl card — opt out of the default .message-content a styling */
