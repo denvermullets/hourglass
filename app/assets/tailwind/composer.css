@@ -212,6 +212,17 @@
   font-family: Georgia, serif;
 }
 
+/* Blank lines in the source markdown separate every kind of block, not just
+   paragraph pairs — a list between two paragraphs needs the same breathing room.
+   Declared after the element rules above so it wins their margin-top. */
+.message-content > * + * {
+  margin-top: 0.85em;
+}
+/* Headings stay tight against the content they introduce. */
+.message-content > :is(h1, h2, h3) + * {
+  margin-top: 0.25rem;
+}
+
 /* JAIT unfurl card — opt out of the default .message-content a styling */
 .message-content a.jait-card,
 .message-content a.jait-card:hover {
