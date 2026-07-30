@@ -7,7 +7,8 @@ class ChannelsController < ApplicationController
   before_action :set_channel, only: %i[show update destroy mark_read reorder archive unarchive move]
   before_action :require_membership!
   before_action :require_channel_access!, only: :show
-  before_action :require_moderator!, only: %i[create update destroy reorder archive unarchive move]
+  before_action :require_can_create_channels!, only: :create
+  before_action :require_moderator!, only: %i[update destroy reorder archive unarchive move]
 
   def search
     channels = @server.channels
