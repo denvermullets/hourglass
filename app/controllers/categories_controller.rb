@@ -6,7 +6,8 @@ class CategoriesController < ApplicationController
   before_action :set_server
   before_action :set_category, only: %i[update destroy reorder archive unarchive]
   before_action :require_membership!
-  before_action :require_moderator!
+  before_action :require_can_create_categories!, only: :create
+  before_action :require_moderator!, except: :create
 
   def create
     @category = Categories::CreateService.call(server: @server, params: category_params)

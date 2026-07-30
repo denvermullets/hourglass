@@ -39,8 +39,27 @@ module Authorization
     redirect_to server_path(@server), alert: "You don't have permission to do that."
   end
 
+  def require_permission!(predicate)
+    require_membership!
+    return if performed?
+
+    return if current_membership.public_send(predicate)
+
+    redirect_to server_path(@server), alert: "You don't have permission to do that."
+  end
+
   def require_moderator!
     require_role!(:moderator)
+  end
+
+  # Creation is gated separately from management: moderators can always create,
+  # and plain members can too when the server enables it in settings.
+  def require_can_create_channels!
+    require_permission!(:can_create_channels?)
+  end
+
+  def require_can_create_categories!
+    require_permission!(:can_create_categories?)
   end
 
   def require_admin!
