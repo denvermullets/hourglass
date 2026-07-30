@@ -38,8 +38,9 @@ class ConversationMessagesController < ApplicationController
     else
       head :ok
     end
-  rescue ActiveRecord::RecordInvalid
-    head :unprocessable_entity
+  rescue ActiveRecord::RecordInvalid => e
+    render turbo_stream: composer_error_streams(e.record, target: composer_errors_target),
+           status: :unprocessable_entity
   end
 
   def edit
@@ -67,6 +68,11 @@ class ConversationMessagesController < ApplicationController
   end
 
   private
+
+  def composer_errors_target
+    helpers.composer_errors_id(parent_message_id: message_params[:parent_message_id],
+                               conversation: @conversation)
+  end
 
   def set_conversation
     @conversation = Conversation.find(params[:conversation_id])

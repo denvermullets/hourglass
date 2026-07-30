@@ -41,8 +41,9 @@ class MessagesController < ApplicationController
     else
       head :ok
     end
-  rescue ActiveRecord::RecordInvalid
-    head :unprocessable_entity
+  rescue ActiveRecord::RecordInvalid => e
+    render turbo_stream: composer_error_streams(e.record, target: composer_errors_target),
+           status: :unprocessable_entity
   end
 
   def edit
@@ -103,6 +104,10 @@ class MessagesController < ApplicationController
       [turbo_stream.replace("channel_#{@channel.id}_pinned_count",
                             partial: 'channels/pinned_count',
                             locals: { server: @server, channel: @channel })]
+  end
+
+  def composer_errors_target
+    helpers.composer_errors_id(parent_message_id: message_params[:parent_message_id], channel: @channel)
   end
 
   def require_move_permission!

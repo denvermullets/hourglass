@@ -9,9 +9,15 @@ class MessageTest < ActiveSupport::TestCase
 
   test 'validates body max length' do
     message = messages(:one)
-    message.body = 'a' * 8001
+    message.body = 'a' * (Message::BODY_MAX_LENGTH + 1)
     assert_not message.valid?
     assert message.errors[:body].any?
+  end
+
+  test 'accepts a body at the max length' do
+    message = messages(:one)
+    message.body = 'a' * Message::BODY_MAX_LENGTH
+    assert message.valid?, message.errors.full_messages.to_sentence
   end
 
   test 'ordered scope returns messages in chronological order' do

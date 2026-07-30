@@ -11,6 +11,8 @@
              } do |f| %>
   <input type="file" multiple class="hidden" data-attachment-upload-target="fileInput" data-action="change->attachment-upload#filesSelected">
 
+  <%= render 'messages/composer_errors', id: composer_errors_id(conversation: conversation) %>
+
   <div class="bg-bunker-950 border border-bunker-900 rounded-lg overflow-clip focus-within:border-granny-smith-apple-600 transition-colors duration-150">
     <%# Attachment preview strip %>
     <div data-attachment-upload-target="previewStrip"

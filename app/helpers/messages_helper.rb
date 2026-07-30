@@ -1,6 +1,17 @@
 module MessagesHelper
   GROUP_WINDOW = 60.seconds
 
+  # Per-composer id for the messages/_composer_errors region, mirroring the form ids in
+  # messages/_form, threads/_form, conversations/_message_form and conversation_threads/_form
+  # so a failed send only paints the composer it was sent from. Both the views and the
+  # create actions derive the target through here.
+  def composer_errors_id(parent_message_id: nil, channel: nil, conversation: nil)
+    return "composer_errors_thread_#{parent_message_id}" if parent_message_id.present?
+    return "composer_errors_channel_#{channel.id}" if channel
+
+    "composer_errors_conversation_#{conversation.id}"
+  end
+
   def sanitize_message(message_or_html)
     return render_markdown(message_or_html) if message_or_html.is_a?(Message) && message_or_html.markdown?
 

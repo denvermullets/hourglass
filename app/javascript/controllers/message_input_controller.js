@@ -7,7 +7,7 @@ import { TextareaTypeahead } from "composer/textarea_typeahead"
 // quote-reply, and @mention / #channel / /slash typeahead. No Lexical/prism
 // imports.
 export default class extends Controller {
-  static targets = ["textarea", "resizeBtn"]
+  static targets = ["textarea", "resizeBtn", "errors"]
   // serverId / channelId / channelLinked are consumed by the typeahead
   // features added in a later issue; declared here so they survive on connect.
   static values = {
@@ -94,9 +94,14 @@ export default class extends Controller {
     this._applyEditorSize("full")
   }
 
-  // Clear the textarea after a successful submit (turbo:submit-end).
-  reset() {
+  // Clear the textarea after a successful submit (turbo:submit-end). A rejected send
+  // (422 + a composer_errors stream) must keep the draft, or the author loses the whole
+  // message with nothing to paste back.
+  reset(event) {
+    if (event?.detail?.success === false) return
+
     this.textareaTarget.value = ""
+    if (this.hasErrorsTarget) this.errorsTarget.innerHTML = ""
     this._applyEditorSize("default")
     this._autoGrow()
     this.textareaTarget.focus()
