@@ -147,7 +147,11 @@ export default class extends Controller {
     }
   }
 
-  reset() {
+  // Wired to turbo:submit-end. A rejected send keeps its attachments so re-sending after
+  // fixing the error doesn't mean re-picking every file.
+  reset(event) {
+    if (event?.detail?.success === false) return;
+
     this.pendingFiles.forEach((pf) => {
       if (pf.previewUrl) URL.revokeObjectURL(pf.previewUrl);
     });

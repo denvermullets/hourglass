@@ -3,11 +3,20 @@
 # refresh that other viewers get. Mirrors the targets/partials/locals used when the same
 # message renders on a full page load / morph (Messages::PostCreateBroadcaster,
 # Conversations::CreateMessageService, Messages::UpdateService and Messages::DeleteService).
+# Also carries the failed-send response, which is author-only for the same reason.
 module Messages
   module EchoResponses
     extend ActiveSupport::Concern
 
     private
+
+    # Paints the composer's error region so a rejected send says why. Rendered with a 422 by
+    # the caller: Turbo applies turbo-stream responses regardless of status, and the non-2xx
+    # is what tells message-input#reset / attachment-upload#reset to leave the draft alone.
+    def composer_error_streams(record, target:)
+      [turbo_stream.replace(target, partial: 'messages/composer_errors',
+                                    locals: { id: target, errors: record.errors.full_messages })]
+    end
 
     def created_message_streams(message, context:, **ctx)
       if message.parent_message_id.present?

@@ -1,0 +1,14 @@
+<%# Validation errors for a failed send, rendered empty on page load and replaced by
+    messages#create / conversation_messages#create so the author sees why their message
+    didn't post. Lives inside the composer form (see messages/_form) so the draft stays
+    put and message-input#reset can clear this on the next successful send. %>
+<div id="<%= id %>" data-message-input-target="errors">
+  <% if local_assigns[:errors].present? %>
+    <div class="flex items-start gap-2 rounded px-3 py-2 mb-2 text-xs font-dm-mono border border-danger-400 text-danger-400">
+      <span class="opacity-80 shrink-0">!!</span>
+      <span class="min-w-0">
+        <%= errors.to_sentence %>
+      </span>
+    </div>
+  <% end %>
+</div>

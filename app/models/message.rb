@@ -11,9 +11,11 @@ class Message < ApplicationRecord
 
   enum :message_type, { regular: 0, system: 1, user_join: 2, user_leave: 3 }
 
-  validates :body, length: { maximum: 20_000 }
+  # Postgres text has no practical ceiling; this is a product limit, not a storage one.
+  BODY_MAX_LENGTH = 20_000
+
+  validates :body, length: { maximum: BODY_MAX_LENGTH }
   validate :body_or_files_present
-  validate :body_text_length
   validate :validate_file_limits
   validate :channel_or_conversation_present
 
@@ -92,15 +94,6 @@ class Message < ApplicationRecord
     return if body.present? || files.attached?
 
     errors.add(:base, 'must have a message body or attachments')
-  end
-
-  def body_text_length
-    return if body.blank?
-
-    stripped = ActionController::Base.helpers.strip_tags(body).to_s.strip
-    return unless stripped.length > 8000
-
-    errors.add(:body, 'is too long (maximum is 8000 characters)')
   end
 
   def channel_or_conversation_present
