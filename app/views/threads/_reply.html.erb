@@ -4,8 +4,9 @@
 <% outer_classes = if pinned
      "group relative border border-bunker-825 rounded-lg bg-bunker-925 px-3.5 py-3 my-1 overflow-hidden flex flex-col gap-2.5"
    else
-     "group flex gap-3 #{ grouped ? '-mt-0.5' : 'py-2.5 border-b border-bunker-825' } last:border-b-0"
+     "group relative flex gap-3 #{ grouped ? '-mt-0.5' : 'py-2.5 border-b border-bunker-825' } last:border-b-0"
    end %>
+<% actions_classes = "absolute top-1/2 -translate-y-1/2 #{ pinned ? 'right-3.5' : 'right-0' } z-10 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-100 flex items-center gap-2 px-2 py-1 rounded-md border border-bunker-825 bg-bunker-925 shadow-sm" %>
 <%= tag.div id: dom_id(reply), class: outer_classes, data: { message_author_id: reply.user_id, message_user_id: reply.user_id, message_created_at: reply.created_at.iso8601, controller: "long-press" } do %>
   <% if pinned %>
     <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
@@ -56,8 +57,8 @@
           <%= render "messages/attachments", message: reply %>
         <% end %>
 
-        <%# Actions — below reply content %>
-        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
+        <%# Actions — floating toolbar, top-right %>
+        <div class="<%= actions_classes %>"
              data-long-press-target="actions">
           <%# strip_tags returns html_safe; wrap in String.new so the tag helper
               HTML-escapes `"` in the attribute value (otherwise the body breaks
@@ -84,13 +85,16 @@
             <% edit_url = edit_server_channel_message_path(server, channel, reply) %>
             <% delete_url = server_channel_message_path(server, channel, reply) %>
           <% end %>
+          <% author_form_class = message_author?(reply) ? "" : "hidden" %>
           <%= button_to "edit", edit_url,
                 method: :get,
-                class: "text-xs text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer #{'hidden' unless message_author?(reply)}",
+                form_class: author_form_class,
+                class: "text-xs text-bunker-600 hover:text-bunker-300 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer",
                 data: { author_only: true } %>
           <%= button_to "delete", delete_url,
                 method: :delete,
-                class: "text-xs text-bunker-600 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer #{'hidden' unless message_author?(reply)}",
+                form_class: author_form_class,
+                class: "text-xs text-bunker-600 hover:text-danger-400 transition-colors duration-100 bg-transparent border-0 p-0 cursor-pointer",
                 data: { turbo_confirm: "Delete this reply?", author_only: true } %>
         </div>
       </div>

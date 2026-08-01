@@ -3,7 +3,7 @@
 <% issue = data['issue'] || {} %>
 <% team_id = data['team_id'].to_i %>
 <% integration = ServerIntegration.find_by(id: data['integration_id']) %>
-<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5 rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
+<%= tag.div id: dom_id(message), class: "group relative flex gap-3 px-2 py-1.5 rounded hover:bg-bunker-875/50 transition-colors duration-100", data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
   <%# Avatar %>
   <div class="flex-shrink-0 w-8 h-8 rounded-md bg-bunker-825 border border-bunker-775 flex items-center justify-center overflow-hidden">
     <% if message.user.avatar.attached? %>
@@ -31,7 +31,7 @@
     <%= render "messages/reply_indicator", message: message %>
 
     <%# Actions %>
-    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
+    <div class="absolute top-1/2 -translate-y-1/2 right-2 z-10 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-100 flex items-center gap-2 px-2 py-1 rounded-md border border-bunker-825 bg-bunker-925 shadow-sm"
          data-long-press-target="actions">
       <% thread_path = context == :conversation ? conversation_message_thread_path(message.conversation, message) : server_channel_message_thread_path(message.channel.server, message.channel, message) %>
       <%= link_to "reply", thread_path,
