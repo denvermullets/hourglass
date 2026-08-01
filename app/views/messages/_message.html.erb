@@ -13,8 +13,9 @@
 <% outer_classes = if pinned
      "group relative border border-bunker-825 rounded-lg bg-bunker-925 px-3.5 py-3 my-1 overflow-hidden flex flex-col gap-2.5"
    else
-     "group flex gap-3 px-2 #{ grouped ? '-mt-0.5' : 'py-1.5' } rounded hover:bg-bunker-875/50 transition-colors duration-100"
+     "group relative flex gap-3 px-2 #{ grouped ? '-mt-0.5' : 'py-1.5' } rounded hover:bg-bunker-875/50 transition-colors duration-100"
    end %>
+<% actions_classes = "absolute top-1/2 -translate-y-1/2 #{ pinned ? 'right-3.5' : 'right-2' } z-10 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-100 flex items-center gap-2 px-2 py-1 rounded-md border border-bunker-825 bg-bunker-925 shadow-sm" %>
 <%= tag.div id: dom_id(message), class: outer_classes, data: { message_author_id: message.user_id, message_user_id: message.user_id, message_created_at: message.created_at.iso8601, controller: "long-press" } do %>
   <% if pinned %>
     <div class="absolute top-0 left-0 w-full h-0.5 bg-granny-smith-apple-600"></div>
@@ -70,8 +71,8 @@
           <%= render "messages/reply_indicator", message: message %>
         <% end %>
 
-        <%# Actions (hover on desktop, tap on mobile) — below message content %>
-        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-100 flex items-center gap-2 mt-1"
+        <%# Actions (hover on desktop, tap on mobile) — floating toolbar, top-right %>
+        <div class="<%= actions_classes %>"
              data-long-press-target="actions">
           <%# Reply — visible to all users %>
           <% if message.parent_message_id.nil? %>
