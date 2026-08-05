@@ -1,6 +1,9 @@
+<%# id scoped per-category: one of these renders per category, and the poller restores an
+    unsubmitted draft across a morph refresh by id — a shared id would be ambiguous. %>
 <%= form_with model: Channel.new, url: server_channels_path(server), class: "flex items-center gap-2" do |f| %>
   <%= f.hidden_field :category_id, value: category.id %>
   <%= f.text_field :name,
+    id: "new_channel_name_#{mobile ? 'mobile' : 'desktop'}_#{category.id}",
     placeholder: "// new channel",
     class: "flex-1 min-w-0 bg-bunker-950 border border-bunker-900 rounded px-2 py-1 text-xs text-bunker-200 placeholder:text-bunker-600 focus:outline-none focus:border-bunker-600 font-dm-mono" %>
   <%= f.submit "+",

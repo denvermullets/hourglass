@@ -104,6 +104,8 @@ Rails.application.routes.draw do
       end
       member do
         get :mark_read
+        get :edit_name
+        patch :rename
         patch :reorder
         patch :archive
         patch :unarchive

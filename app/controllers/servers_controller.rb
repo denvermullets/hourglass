@@ -13,6 +13,9 @@ class ServersController < ApplicationController
                          settings_permissions update_permissions settings_members remove_member
                          settings_integrations update_jait_integration edit update]
   before_action :require_owner!, only: [:destroy]
+  before_action :skip_polling!,
+                only: %i[new edit settings settings_general settings_invite settings_danger settings_channels
+                         settings_permissions settings_members settings_integrations]
 
   def index
     @servers = Current.user.servers

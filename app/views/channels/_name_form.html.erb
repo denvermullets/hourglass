@@ -1,0 +1,22 @@
+<%# Inline rename inside the server settings channel list. Locals: server, channel.
+    Lives in the same frame as the name it replaces: saving redirects to the channels tab and
+    cancelling re-requests it, so either way Turbo pulls this frame back to its display state. %>
+<% error = channel.errors[:name].first %>
+<% input_classes = "flex-1 min-w-0 bg-bunker-950 border rounded px-2 py-1 text-xs text-bunker-200 focus:outline-none font-dm-mono #{error ? 'border-danger-800 focus:border-danger-800' : 'border-bunker-900 focus:border-bunker-600'}" %>
+<% save_classes = "px-2 py-1 rounded text-xs border border-bunker-775 text-bunker-300 hover:bg-bunker-875 cursor-pointer transition-colors duration-100 bg-transparent" %>
+<% cancel_classes = "px-2 py-1 rounded text-xs text-bunker-500 hover:text-bunker-300 no-underline transition-colors duration-100" %>
+
+<%= turbo_frame_tag dom_id(channel, :name), class: "flex-1 min-w-0" do %>
+  <%= form_with model: channel, url: rename_server_channel_path(server, channel), method: :patch,
+        class: "flex items-center gap-2 min-w-0" do |f| %>
+    <span class="text-xs text-bunker-600">#</span>
+    <%= f.text_field :name, id: "rename_channel_#{channel.id}", autofocus: true,
+          autocomplete: "off", class: input_classes %>
+    <%= f.submit "save", class: save_classes %>
+    <%= link_to "cancel", settings_channels_server_path(server), class: cancel_classes %>
+  <% end %>
+
+  <% if error %>
+    <div class="text-xs text-danger-400 mt-1 pl-4">// name <%= error %></div>
+  <% end %>
+<% end %>

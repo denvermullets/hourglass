@@ -1,6 +1,8 @@
 class Settings::ApiTokensController < ApplicationController
   layout 'app'
 
+  before_action :skip_polling!
+
   def index
     @tokens = current_user_tokens
     render_tab

@@ -1,0 +1,19 @@
+<%# Locals: server, channel %>
+<% input_classes = "flex-1 min-w-0 bg-bunker-950 border border-bunker-900 rounded px-2 py-1.5 text-xs text-bunker-200 focus:outline-none focus:border-bunker-600 font-dm-mono" %>
+<% save_classes = "flex-shrink-0 px-3 py-1.5 rounded text-xs border border-bunker-775 text-bunker-300 hover:bg-bunker-875 cursor-pointer transition-colors duration-150 bg-transparent" %>
+
+<div class="rounded border border-bunker-825 bg-bunker-925 p-4">
+  <div class="text-xs text-bunker-300 tracking-[0.12em]">channel name</div>
+  <div class="text-xs text-bunker-500 mt-1">
+    lowercase letters, numbers and hyphens. renaming keeps every message, pin and link intact.
+  </div>
+
+  <%= form_with model: channel, url: rename_server_channel_path(server, channel), method: :patch,
+        class: "flex items-center gap-2 mt-3" do |f| %>
+    <%= hidden_field_tag :return_to, "channel_settings" %>
+    <span class="text-xs text-bunker-600">#</span>
+    <%= f.text_field :name, id: "channel_settings_name_#{channel.id}", autocomplete: "off",
+          class: input_classes %>
+    <%= f.submit "// save", class: save_classes %>
+  <% end %>
+</div>

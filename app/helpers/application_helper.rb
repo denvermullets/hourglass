@@ -12,6 +12,12 @@ module ApplicationHelper
     )
   end
 
+  # Whether this page should run the polling morph refresh. Controllers turn it off with
+  # skip_polling! for form-first screens, where a morph costs more than it gains.
+  def poll_refresh?
+    Current.user.present? && !@skip_polling
+  end
+
   def user_timezone
     zone_name = Current.user&.timezone || 'UTC'
     ActiveSupport::TimeZone[zone_name] || ActiveSupport::TimeZone['UTC']

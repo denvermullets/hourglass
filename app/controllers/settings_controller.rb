@@ -1,6 +1,8 @@
 class SettingsController < ApplicationController
   layout 'app'
 
+  before_action :skip_polling!
+
   def show
     redirect_to profile_settings_path
   end

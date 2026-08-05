@@ -37,6 +37,7 @@ end %>
         <div class="max-w-2xl space-y-5">
           <%= render "shared/auth_flash" %>
           <% if current_membership&.can_manage_channels? %>
+            <%= render "channels/settings/name_panel", server: @server, channel: @channel %>
             <%= render "channels/settings/privacy_panel", server: @server, channel: @channel %>
           <% end %>
           <%= render "channels/settings/jait_link_panel",
