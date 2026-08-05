@@ -5,6 +5,10 @@ import { Turbo } from "@hotwired/turbo-rails"
 // refresh of the current page (Phase 2 of the WebSocket -> polling migration). Lives on
 // <body>, so it is preserved across morphs and connect() runs once — the baseline digest
 // is re-read from <meta name="poll-digest"> each tick (morph keeps that meta fresh).
+// Fields whose half-typed contents are worth carrying across a morph (an unsubmitted
+// "new channel" name). Checkboxes/radios/hidden fields are left to the server render.
+const DRAFT_SELECTOR = 'input[type="text"], input[type="search"], input[type="url"], input:not([type]), textarea'
+
 export default class extends Controller {
   static values = {
     url: String,
@@ -29,7 +33,11 @@ export default class extends Controller {
     this._onVisibility = () => this._handleVisibility()
     document.addEventListener("visibilitychange", this._onVisibility)
 
-    this._onRender = () => { this._refreshing = false }
+    this._drafts = []
+    this._onRender = () => {
+      this._refreshing = false
+      this._restoreDrafts()
+    }
     document.addEventListener("turbo:render", this._onRender)
 
     this._onSubmitStart = (e) => this._handleSubmitStart(e)
@@ -74,7 +82,9 @@ export default class extends Controller {
     if (this._lastSendAt > this._morphDispatchedAt) {
       event.preventDefault()
       this._refreshing = false
+      return
     }
+    this._snapshotDrafts()
   }
 
   _isMessageSubmit(event) {
@@ -129,10 +139,49 @@ export default class extends Controller {
     if (this._sends > 0) return
     // A transient island (open menu, active upload, scrolled-up reading) wants us to wait.
     if (document.querySelector("[data-poll-block]")) return
+    // The user is mid-interaction with a field the morph would reset — typing a channel
+    // name, or holding an <option> list open (a <select> is focused while its menu is
+    // down). Sit this tick out; the next one refreshes once they've moved on.
+    if (this._isEditingField()) return
 
     this._refreshing = true
     this._morphDispatchedAt = ++this._tick
     Turbo.visit(window.location.href, { action: "replace" })
+  }
+
+  // Focus sits in an editable control that the morph would rewrite. Fields inside a
+  // [data-turbo-permanent] island (the composer) are carried across untouched, so they
+  // never need to block.
+  _isEditingField() {
+    const el = document.activeElement
+    if (!el || el === document.body || typeof el.closest !== "function") return false
+    if (!el.isContentEditable && !el.matches("input, textarea, select")) return false
+    return !el.closest("[data-turbo-permanent]")
+  }
+
+  // Text typed but not yet submitted (a half-filled "new channel" box the user has since
+  // clicked away from) is reset to the server's value by the morph. Stash those drafts
+  // just before the morph and put them back after it — keyed by id, and only for ids that
+  // are unambiguous, so a draft can never land in the wrong field.
+  _snapshotDrafts() {
+    this._drafts = []
+    document.querySelectorAll(DRAFT_SELECTOR).forEach((field) => {
+      if (!field.id || field.value === field.defaultValue) return
+      if (field.closest("[data-turbo-permanent]")) return
+      if (document.querySelectorAll(`#${CSS.escape(field.id)}`).length !== 1) return
+
+      this._drafts.push([field.id, field.value])
+    })
+  }
+
+  _restoreDrafts() {
+    if (!this._drafts.length) return
+
+    this._drafts.forEach(([id, value]) => {
+      const field = document.getElementById(id)
+      if (field) field.value = value
+    })
+    this._drafts = []
   }
 
   _currentDigest() {

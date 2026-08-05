@@ -31,7 +31,7 @@
     <%# Inline channel creation form — moderator+ %>
     <% if defined?(current_membership) && current_membership&.can_create_channels? %>
       <div class="px-3.5 py-1">
-        <%= render "channels/form", server: server, category: category %>
+        <%= render "channels/form", server: server, category: category, mobile: mobile %>
       </div>
     <% end %>
   </div>

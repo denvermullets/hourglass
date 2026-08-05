@@ -4,11 +4,12 @@ class ChannelsController < ApplicationController
   layout 'app'
 
   before_action :set_server
-  before_action :set_channel, only: %i[show update destroy mark_read reorder archive unarchive move]
+  before_action :set_channel,
+                only: %i[show update destroy mark_read edit_name rename reorder archive unarchive move]
   before_action :require_membership!
   before_action :require_channel_access!, only: :show
   before_action :require_can_create_channels!, only: :create
-  before_action :require_moderator!, only: %i[update destroy reorder archive unarchive move]
+  before_action :require_moderator!, only: %i[update destroy edit_name rename reorder archive unarchive move]
 
   def search
     channels = @server.channels
@@ -66,6 +67,20 @@ class ChannelsController < ApplicationController
     redirect_to server_path(@server)
   end
 
+  # Swaps the channel's name in the server settings list for an inline edit form.
+  def edit_name
+    render partial: 'channels/name_form', locals: { server: @server, channel: @channel }
+  end
+
+  # Rename only — offered from both the server settings channel list and the channel's own
+  # settings page, so the caller says which one to return to.
+  def rename
+    Channels::UpdateService.call(channel: @channel, params: params.require(:channel).permit(:name))
+    redirect_to rename_return_path, notice: "Channel renamed to ##{@channel.name}."
+  rescue ActiveRecord::RecordInvalid => e
+    rename_failed(e.record)
+  end
+
   def reorder
     Channels::ReorderService.call(channel: @channel, direction: params[:direction].to_sym)
     redirect_to settings_channels_server_path(@server)
@@ -105,6 +120,23 @@ class ChannelsController < ApplicationController
            .where(channel_type: %i[text announcement])
            .where.not(id: @channel.id)
            .order(:name)
+  end
+
+  def rename_return_path
+    return server_channel_settings_path(@server, @channel) if params[:return_to] == 'channel_settings'
+
+    settings_channels_server_path(@server)
+  end
+
+  # The channel settings page has a flash region to fall back on; the settings-list form is a
+  # bare turbo frame, so it has to re-render itself with the error attached to the field.
+  def rename_failed(record)
+    if params[:return_to] == 'channel_settings'
+      redirect_to server_channel_settings_path(@server, @channel), alert: record.errors.full_messages.to_sentence
+    else
+      render partial: 'channels/name_form', locals: { server: @server, channel: record },
+             status: :unprocessable_entity
+    end
   end
 
   def require_channel_access!

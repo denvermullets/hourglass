@@ -34,6 +34,22 @@ class PollMorphWiringTest < ActionDispatch::IntegrationTest
     assert_equal page_digest, JSON.parse(response.body)['digest']
   end
 
+  # Settings screens keep state in the DOM (open <select>, half-typed field, active
+  # turbo-frame tab) that a morph would reset, and hold nothing the poll keeps fresh.
+  test 'settings pages opt out of the poller' do
+    %w[server_settings channel_settings user_settings].each do |page|
+      case page
+      when 'server_settings' then get settings_server_path(@server)
+      when 'channel_settings' then get server_channel_settings_path(@server, @channel)
+      when 'user_settings' then get profile_settings_path
+      end
+      assert_response :ok, page
+
+      assert_select 'body[data-controller~="poller"]', false, "#{page} should not attach the poller"
+      assert_select 'meta[name="poll-digest"]', false, "#{page} should not render a poll digest"
+    end
+  end
+
   # Phase 4: presence is DB-derived; the cable presence/monitor markup is gone.
   test 'presence pill renders from Server#online_count; no cable presence/monitor markup' do
     get server_channel_path(@server, @channel)

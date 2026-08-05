@@ -4,5 +4,9 @@ jait_one:
   enabled: true
   api_token: test-token-1
   base_url: https://justanotherissuetracker.com
-  discovered_teams: '[{"id":21,"identifier":"HOUR","name":"Hourglass"}]'
+  # jsonb column — a quoted JSON string round-trips as a String, not an Array of team hashes.
+  discovered_teams:
+    - id: 21
+      identifier: HOUR
+      name: Hourglass
   webhook_secret: test-webhook-secret

@@ -12,6 +12,14 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # Opt a form-first screen (settings, onboarding, server setup) out of the polling morph
+  # refresh. Those pages hold their state in the DOM rather than the URL — an open <select>,
+  # a half-typed field, the active turbo-frame tab — all of which a morph resets, and none of
+  # which the poll is there to keep fresh. Read back by ApplicationHelper#poll_refresh?.
+  def skip_polling!
+    @skip_polling = true
+  end
+
   # DB-backed presence: mark the current user "seen" on any request (poll or navigation).
   # Throttled so we write at most ~once per 20s per active user, well inside the 45s
   # online window used by Server#online_count.

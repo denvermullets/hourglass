@@ -1,5 +1,9 @@
+<%# id scoped per-layout: the desktop sidebar and the mobile list both render this form, and
+    the poller restores an unsubmitted draft across a morph refresh by id. %>
+<% variant = local_assigns.fetch(:mobile, false) ? "mobile" : "desktop" %>
 <%= form_with model: Category.new, url: server_categories_path(server), class: "flex items-center gap-2" do |f| %>
   <%= f.text_field :name,
+    id: "new_category_name_#{variant}_#{server.id}",
     placeholder: "// new category",
     class: "flex-1 min-w-0 bg-bunker-950 border border-bunker-900 rounded px-2 py-1 text-xs text-bunker-200 placeholder:text-bunker-600 focus:outline-none focus:border-bunker-600 font-dm-mono" %>
   <%= f.submit "+",

@@ -4,6 +4,7 @@ module Channels
 
     layout 'app'
 
+    before_action :skip_polling!
     before_action :set_server, :set_channel
     before_action :require_membership!
     before_action :require_moderator!, only: %i[link_project unlink_project update privacy add_member remove_member]

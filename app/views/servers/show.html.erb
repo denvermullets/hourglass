@@ -35,7 +35,7 @@
 
       <% if current_membership&.can_create_categories? %>
         <div class="px-4 py-3 border-t border-bunker-825">
-          <%= render "categories/form", server: @server %>
+          <%= render "categories/form", server: @server, mobile: true %>
         </div>
       <% end %>
 
