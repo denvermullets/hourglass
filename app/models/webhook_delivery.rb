@@ -2,6 +2,10 @@ class WebhookDelivery < ApplicationRecord
   SOURCE_MTASKS = 'mtasks'.freeze
   SOURCES = [SOURCE_MTASKS].freeze
 
+  # The integration whose secret signed the request. Processors act only on
+  # that integration's server.
+  belongs_to :server_integration, optional: true
+
   validates :source, presence: true, inclusion: { in: SOURCES }
   validates :delivery_id, presence: true, uniqueness: { scope: :source }
   validates :event_type, presence: true

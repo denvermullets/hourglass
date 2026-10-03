@@ -7,9 +7,12 @@ module Webhooks
         @delivery = delivery
         @event = delivery.event_type
         @data = delivery.payload['data'] || {}
+        @integration = delivery.server_integration
       end
 
       def call
+        return error('no enabled integration') unless integration_usable?
+
         case [@event, @data['link_type']]
         when ['link.created', MtasksLink::PROJECT_CHANNEL] then create_project_channel
         when ['link.created', MtasksLink::ISSUE_THREAD]    then create_issue_thread
@@ -22,21 +25,24 @@ module Webhooks
       private
 
       # ---- handlers ----
+      #
+      # Every lookup is scoped to the server of the integration that signed the
+      # delivery, so a payload signed by server A can never touch server B.
 
       def create_project_channel
         channel = find_channel
         return error('channel not found') unless channel
 
-        integration = integration_for(channel)
-        return error('no enabled integration') unless integration
-
         project_id = @data['mtasks_project_id'].presence
         return error('mtasks_project_id missing') unless project_id
 
-        team_id = resolve_with_refresh(integration, project_id: project_id)
+        payload_team_id = @data['mtasks_team_id'].presence
+        return foreign_team_error(payload_team_id) if payload_team_id && !@integration.knows_team?(payload_team_id)
+
+        team_id = resolve_with_refresh(project_id: project_id)
         return error('team not resolvable') unless team_id
 
-        link = upsert_project_link(channel, integration, project_id, team_id)
+        link = upsert_project_link(channel, project_id, team_id)
         Result.new(ok: true, link: link)
       end
 
@@ -48,7 +54,7 @@ module Webhooks
         return error('thread root message not found') unless parent
 
         project_link = parent.channel.mtasks_project_link
-        return error('thread channel has no project link') unless project_link
+        return error('thread channel has no project link') unless project_link&.server_integration_id == @integration.id
 
         validation_error = validate_issue_against_project(issue_id, project_link)
         return validation_error if validation_error
@@ -75,9 +81,9 @@ module Webhooks
         project_id = @data['mtasks_project_id'].presence
         return error('mtasks_project_id missing') unless project_id
 
-        link = MtasksLink.find_by(link_type: MtasksLink::PROJECT_CHANNEL,
-                                  channel_id: channel.id,
-                                  mtasks_project_id: project_id)
+        link = integration_links.find_by(link_type: MtasksLink::PROJECT_CHANNEL,
+                                         channel_id: channel.id,
+                                         mtasks_project_id: project_id)
         link&.destroy!
         Result.new(ok: true)
       end
@@ -89,21 +95,21 @@ module Webhooks
         parent = find_message
         return error('thread root message not found') unless parent
 
-        link = MtasksLink.find_by(link_type: MtasksLink::ISSUE_THREAD,
-                                  thread_id: parent.id,
-                                  mtasks_issue_id: issue_id)
+        link = integration_links.find_by(link_type: MtasksLink::ISSUE_THREAD,
+                                         thread_id: parent.id,
+                                         mtasks_issue_id: issue_id)
         link&.destroy!
         Result.new(ok: true)
       end
 
       # ---- upserts ----
 
-      def upsert_project_link(channel, integration, project_id, team_id)
+      def upsert_project_link(channel, project_id, team_id)
         link = MtasksLink.where(link_type: MtasksLink::PROJECT_CHANNEL,
                                 channel_id: channel.id,
                                 mtasks_project_id: project_id).first_or_initialize
         link.assign_attributes(
-          server_integration: integration,
+          server_integration: @integration,
           mtasks_team_id: team_id,
           created_by_user: resolve_creator(channel.server)
         )
@@ -128,61 +134,40 @@ module Webhooks
       # ---- helpers ----
 
       def find_channel
-        Channel.find_by(id: @data['hourglass_channel_id'])
+        @integration.server.channels.find_by(id: @data['hourglass_channel_id'])
       end
 
       def find_message
-        Message.find_by(id: @data['hourglass_thread_id'])
+        Message.joins(:channel)
+               .where(channels: { server_id: @integration.server_id })
+               .find_by(id: @data['hourglass_thread_id'])
       end
 
-      def integration_for(channel)
-        channel.server.server_integrations.enabled.for_kind(ServerIntegration::KIND_JAIT).first
+      def integration_links
+        MtasksLink.where(server_integration: @integration)
       end
 
-      # Resolve the mtasks team for an inbound link.created event. Trusts the
-      # payload's mtasks_team_id when present and known to the integration;
-      # refreshes discovered_teams once if the team is unknown (mtasks may
-      # have added it since we last loaded). Falls back to iterative probing
-      # only when the payload omits team_id.
-      def resolve_with_refresh(integration, project_id:)
-        payload_id = resolve_payload_team_id(integration)
-        return payload_id if payload_id
+      # Resolve the mtasks team for an inbound link.created event. The payload's
+      # mtasks_team_id (already verified against this integration) wins; when
+      # absent, probe this integration's teams, refreshing them once if the
+      # project isn't found.
+      def resolve_with_refresh(project_id:)
+        return @data['mtasks_team_id'].to_i if @data['mtasks_team_id'].present?
 
-        team_id = resolve_team_id(integration, project_id: project_id)
+        team_id = resolve_team_id(project_id: project_id)
         return team_id if team_id
+        return nil unless @integration.refresh_discovered_teams!
 
-        return nil unless refresh_discovered_teams(integration)
-
-        resolve_team_id(integration, project_id: project_id)
-      end
-
-      def resolve_payload_team_id(integration)
-        payload_id = @data['mtasks_team_id'].presence&.to_i
-        return nil unless payload_id
-        return payload_id if integration.team_for(payload_id)
-        return payload_id if refresh_discovered_teams(integration) && integration.team_for(payload_id)
-
-        nil
-      end
-
-      def refresh_discovered_teams(integration)
-        teams = Jait::ApiClient.new(integration).discover_teams!
-        return false if teams.blank?
-
-        integration.update!(discovered_teams: teams, last_verified_at: Time.current)
-        true
-      rescue Jait::ApiClient::Error => e
-        Rails.logger.warn("Webhooks::Mtasks::ProcessLink refresh_discovered_teams failed: #{e.class} #{e.message}")
-        false
+        resolve_team_id(project_id: project_id)
       end
 
       # Probe each discovered team for the project. Verifies even single-team
       # integrations — a "lone" team is no guarantee the project actually
       # lives there, and assigning the wrong mtasks_team_id leaves the link
       # unrecoverably broken.
-      def resolve_team_id(integration, project_id:)
-        Array(integration.discovered_teams).each do |t|
-          remote = Jait::Fetcher.call(integration: integration, kind: 'project', team_id: t['id'], id: project_id)
+      def resolve_team_id(project_id:)
+        Array(@integration.discovered_teams).each do |t|
+          remote = Jait::Fetcher.call(integration: @integration, kind: 'project', team_id: t['id'], id: project_id)
           return t['id'] if remote
         end
         nil
@@ -194,6 +179,14 @@ module Webhooks
           return mapped.hourglass_user if mapped
         end
         server.owner
+      end
+
+      def integration_usable?
+        @integration.present? && @integration.enabled? && @integration.jait?
+      end
+
+      def foreign_team_error(team_id)
+        error("team #{team_id} not in integration #{@integration.id}")
       end
 
       def error(message)

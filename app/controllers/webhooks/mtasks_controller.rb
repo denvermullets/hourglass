@@ -24,6 +24,7 @@ module Webhooks
     def persist_and_enqueue(delivery_id:, event_type:)
       delivery = WebhookDelivery.create!(
         source: WebhookDelivery::SOURCE_MTASKS,
+        server_integration: @integration,
         delivery_id: delivery_id,
         event_type: event_type,
         received_at: Time.current,

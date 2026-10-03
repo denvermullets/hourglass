@@ -18,13 +18,33 @@ module Webhooks
         )
       end
 
-      def build_delivery(event:, data:)
+      def build_delivery(event:, data:, integration: @integration)
         WebhookDelivery.create!(
           source: WebhookDelivery::SOURCE_MTASKS,
+          server_integration: integration,
           delivery_id: SecureRandom.uuid,
           event_type: event,
           received_at: Time.current,
           payload: { 'event' => event, 'data' => data }
+        )
+      end
+
+      # A second tenant: its own server, JAIT integration, channel and thread
+      # root. Deliveries signed by @integration must never touch any of it.
+      def build_other_server
+        @other_server = servers(:two)
+        @other_integration = ServerIntegration.create!(
+          server: @other_server, kind: ServerIntegration::KIND_JAIT, enabled: true,
+          api_token: 'test-token-2', base_url: 'https://justanotherissuetracker.com',
+          discovered_teams: [{ 'id' => 31, 'identifier' => 'OTH', 'name' => 'Other' }]
+        )
+        @other_channel = @other_server.channels.create!(name: 'elsewhere')
+        @other_message = @other_channel.messages.create!(body: 'root', user: users(:two))
+        @other_project_link = MtasksLink.create!(
+          link_type: MtasksLink::PROJECT_CHANNEL,
+          server_integration: @other_integration, channel: @other_channel,
+          mtasks_team_id: 31, mtasks_project_id: 8,
+          created_by_user: users(:two)
         )
       end
 
@@ -261,6 +281,96 @@ module Webhooks
         ProcessIssue.call(delivery: delivery)
         assert_nil Rails.cache.read("jait:#{@integration.id}:t21:issue:91")
         assert_nil Rails.cache.read("jait:#{@integration.id}:t21:issue:ident:HOUR-91")
+      end
+
+      # ---- cross-server isolation ----
+
+      test 'rejects delivery with no signing integration' do
+        delivery = build_delivery(integration: nil, event: 'issue.created', data: {
+                                    'issue_id' => 91, 'identifier' => 'HOUR-91',
+                                    'project_id' => 7, 'team_id' => 21
+                                  })
+
+        assert_no_difference -> { MtasksIssueCache.count } => 0, -> { Message.count } => 0 do
+          result = ProcessIssue.call(delivery: delivery)
+          assert_not result.ok
+          assert_match(/no enabled integration/, result.error)
+        end
+      end
+
+      test 'issue.created rejects a team outside the signing integration' do
+        build_other_server
+
+        delivery = build_delivery(event: 'issue.created', data: {
+                                    'issue_id' => 92, 'identifier' => 'OTH-92',
+                                    'project_id' => 8, 'team_id' => 31
+                                  })
+
+        with_stubbed_instance_method(Jait::ApiClient, :discover_teams!,
+                                     [{ 'id' => 21, 'identifier' => 'HOUR', 'name' => 'Hourglass' }]) do
+          assert_no_difference -> { MtasksIssueCache.count } => 0, -> { Message.count } => 0 do
+            result = ProcessIssue.call(delivery: delivery)
+            assert_not result.ok
+            assert_match(/team 31 not in integration/, result.error)
+          end
+        end
+      end
+
+      test 'issue.created does not post into a project channel on another server' do
+        build_other_server
+
+        delivery = build_delivery(event: 'issue.created', data: {
+                                    'issue_id' => 92, 'identifier' => 'HOUR-92',
+                                    'project_id' => 8, 'team_id' => 21 # project 8 is linked on the other server
+                                  })
+
+        assert_no_difference -> { @other_channel.messages.count } do
+          result = ProcessIssue.call(delivery: delivery)
+          assert result.ok, result.error
+        end
+      end
+
+      test 'issue.status_changed does not reply in a thread on another server' do
+        build_other_server
+        MtasksLink.create!(
+          link_type: MtasksLink::ISSUE_THREAD,
+          server_integration: @other_integration, thread: @other_message,
+          mtasks_team_id: 31, mtasks_issue_id: 92,
+          created_by_user: users(:two)
+        )
+        MtasksIssueCache.create!(
+          mtasks_issue_id: 92, identifier: 'OTH-92', title: 'theirs',
+          payload: { 'project_id' => 8 }, last_synced_at: Time.current
+        )
+
+        delivery = build_delivery(event: 'issue.status_changed', data: {
+                                    'issue_id' => 92, 'identifier' => 'OTH-92',
+                                    'to_lane_id' => 14, 'to_lane_name' => 'In Progress'
+                                  })
+
+        assert_no_difference -> { Message.count } do
+          ProcessIssue.call(delivery: delivery)
+        end
+      end
+
+      test 'cache backfill only probes the signing integration' do
+        build_other_server
+        probed = []
+        original = Jait::Fetcher.method(:call)
+        Jait::Fetcher.define_singleton_method(:call) do |integration:, **|
+          probed << integration.id
+          nil
+        end
+
+        delivery = build_delivery(event: 'issue.assigned', data: {
+                                    'issue_id' => 93, 'identifier' => 'HOUR-93', 'assignee_email' => 'a@b.c'
+                                  })
+        result = ProcessIssue.call(delivery: delivery)
+
+        assert_not result.ok
+        assert_equal [@integration.id], probed.uniq
+      ensure
+        Jait::Fetcher.define_singleton_method(:call, original)
       end
     end
   end
