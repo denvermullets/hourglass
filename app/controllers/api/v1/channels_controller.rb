@@ -2,7 +2,7 @@ module Api
   module V1
     class ChannelsController < BaseController
       def index
-        server = current_user.servers.find_by(id: params[:server_id])
+        server = accessible_servers.find_by(id: params[:server_id])
         return render_not_found('Server not found') unless server
 
         channels = server.channels.active.visible_to(current_user).ordered
@@ -10,7 +10,7 @@ module Api
       end
 
       def show
-        channel = Channel.visible_to(current_user).find_by(id: params[:id])
+        channel = accessible_channels.find_by(id: params[:id])
         return render_not_found('Channel not found') unless channel
 
         render json: ChannelSerializer.new(channel).as_json
