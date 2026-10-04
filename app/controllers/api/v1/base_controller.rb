@@ -38,6 +38,24 @@ module Api
         Current.user
       end
 
+      # A token bound to a server may only reach that server (and only while the
+      # user is still a member). Unbound tokens reach every server the user is in.
+      def accessible_servers
+        return current_user.servers unless @current_api_token.server_id
+
+        current_user.servers.where(id: @current_api_token.server_id)
+      end
+
+      def accessible_channels
+        Channel.visible_to(current_user).where(server_id: accessible_servers.select(:id))
+      end
+
+      def token_server
+        return unless @current_api_token.server_id
+
+        @token_server ||= accessible_servers.first
+      end
+
       def render_validation_errors(record)
         render json: { error: 'Unprocessable Entity', errors: record.errors.full_messages },
                status: :unprocessable_entity

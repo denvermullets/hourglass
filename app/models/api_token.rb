@@ -10,6 +10,7 @@ class ApiToken < ApplicationRecord
   validates :name, presence: true, length: { maximum: 100 }
   validates :token_digest, presence: true, uniqueness: true
   validate :scopes_must_be_allowed
+  validate :server_must_be_joined, on: :create
 
   scope :active, -> { where(revoked_at: nil) }
 
@@ -61,5 +62,12 @@ class ApiToken < ApplicationRecord
     return if scopes.is_a?(Array) && scopes.all? { |s| ALLOWED_SCOPES.include?(s) }
 
     errors.add(:scopes, "must be a subset of #{ALLOWED_SCOPES.join(', ')}")
+  end
+
+  def server_must_be_joined
+    return if server.nil? || user.nil?
+    return if user.servers.exists?(id: server.id)
+
+    errors.add(:server, 'must be a server you belong to')
   end
 end

@@ -7,9 +7,12 @@ module Webhooks
         @delivery = delivery
         @event = delivery.event_type
         @data = delivery.payload['data'] || {}
+        @integration = delivery.server_integration
       end
 
       def call
+        return error('no enabled integration') unless integration_usable?
+
         case @event
         when 'issue.created'        then handle_created
         when 'issue.updated'        then handle_updated
@@ -30,6 +33,7 @@ module Webhooks
         team_id = @data['team_id'].presence
 
         return error('issue.created missing required fields') unless issue_id && identifier && project_id
+        return foreign_team_error(team_id) if team_id && !@integration.knows_team?(team_id)
 
         upsert_cache_from_payload(issue_id: issue_id, identifier: identifier, payload: @data)
         post_message_if_destination_found(issue_id: issue_id, project_id: project_id, integration_team_id: team_id)
@@ -80,14 +84,12 @@ module Webhooks
       end
 
       def backfill_cache(issue_id, identifier)
-        # No team_id in the payload — walk the integrations on every server until one resolves.
-        ServerIntegration.enabled.for_kind(ServerIntegration::KIND_JAIT).find_each do |integration|
-          Array(integration.discovered_teams).each do |t|
-            remote = Jait::Fetcher.call(integration: integration, kind: 'issue', team_id: t['id'], id: issue_id)
-            next unless remote
+        # No team_id in the payload — probe the signing integration's teams only.
+        Array(@integration.discovered_teams).each do |t|
+          remote = Jait::Fetcher.call(integration: @integration, kind: 'issue', team_id: t['id'], id: issue_id)
+          next unless remote
 
-            return upsert_cache_from_full_serializer(issue_id: issue_id, identifier: identifier, payload: remote)
-          end
+          return upsert_cache_from_full_serializer(issue_id: issue_id, identifier: identifier, payload: remote)
         end
         nil
       end
@@ -157,10 +159,12 @@ module Webhooks
       end
 
       def destination_for(issue_id:, project_id:)
-        thread_link = MtasksLink.issue_threads.find_by(mtasks_issue_id: issue_id)
+        links = MtasksLink.where(server_integration: @integration)
+
+        thread_link = links.issue_threads.find_by(mtasks_issue_id: issue_id)
         return [thread_link.thread.channel, thread_link.thread] if thread_link&.thread
 
-        project_link = MtasksLink.project_channels.find_by(mtasks_project_id: project_id)
+        project_link = links.project_channels.find_by(mtasks_project_id: project_id)
         return [project_link.channel, nil] if project_link
 
         [nil, nil]
@@ -204,17 +208,23 @@ module Webhooks
       end
 
       def bust_caches_best_effort(issue_id:, identifier:, integration_team_id:)
-        ServerIntegration.enabled.for_kind(ServerIntegration::KIND_JAIT).find_each do |integration|
-          team_id = integration_team_id || Array(integration.discovered_teams).first&.dig('id')
-          next unless team_id
+        team_id = integration_team_id || Array(@integration.discovered_teams).first&.dig('id')
+        return unless team_id
 
-          bust_keys(integration: integration, team_id: team_id, issue_id: issue_id, identifier: identifier)
-        end
+        bust_keys(integration: @integration, team_id: team_id, issue_id: issue_id, identifier: identifier)
       end
 
       def bust_keys(integration:, team_id:, issue_id:, identifier:)
         Rails.cache.delete("jait:#{integration.id}:t#{team_id}:issue:#{issue_id}")
         Rails.cache.delete("jait:#{integration.id}:t#{team_id}:issue:ident:#{identifier}") if identifier.present?
+      end
+
+      def integration_usable?
+        @integration.present? && @integration.enabled? && @integration.jait?
+      end
+
+      def foreign_team_error(team_id)
+        error("team #{team_id} not in integration #{@integration.id}")
       end
 
       def error(message)

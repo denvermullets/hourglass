@@ -40,6 +40,7 @@ module Webhooks
       assert_equal delivery_id, delivery.delivery_id
       assert_equal 'link.created', delivery.event_type
       assert_equal 'project_channel', delivery.payload.dig('data', 'link_type')
+      assert_equal @integration, delivery.server_integration
     end
 
     test '404 when integration_id is unknown' do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_03_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -298,10 +298,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_120000) do
     t.jsonb "payload", default: {}, null: false
     t.datetime "processed_at"
     t.datetime "received_at", null: false
+    t.bigint "server_integration_id"
     t.string "source", null: false
     t.datetime "updated_at", null: false
     t.index ["event_type"], name: "index_webhook_deliveries_on_event_type"
     t.index ["processed_at"], name: "index_webhook_deliveries_on_processed_at"
+    t.index ["server_integration_id"], name: "index_webhook_deliveries_on_server_integration_id"
     t.index ["source", "delivery_id"], name: "index_webhook_deliveries_on_source_and_delivery_id", unique: true
   end
 
@@ -333,4 +335,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_120000) do
   add_foreign_key "server_integrations", "servers"
   add_foreign_key "servers", "users", column: "owner_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "webhook_deliveries", "server_integrations", on_delete: :nullify
 end

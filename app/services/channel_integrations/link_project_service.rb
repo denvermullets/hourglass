@@ -12,6 +12,7 @@ module ChannelIntegrations
 
     def call
       return error('integration not configured') unless @integration&.configured?
+      return error('channel not on this integration\'s server') unless @channel.server_id == @integration.server_id
       return error('team not in this integration') unless @integration.team_for(@team_id)
 
       project = Jait::Fetcher.call(integration: @integration, kind: 'project',

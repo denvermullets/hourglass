@@ -1,16 +1,16 @@
 source "https://rubygems.org"
 
-gem "rails", "~> 8.1.3.1"
+gem "rails", "~> 8.1.4"
 
 gem "aws-sdk-s3", require: false
 gem "bcrypt", "~> 3.1.22"
 gem "bootsnap", require: false
 gem "commonmarker"
-gem "image_processing", "~> 2.0.2"
+gem "image_processing", "~> 2.2.0"
 gem "importmap-rails"
 gem "mission_control-jobs"
 gem "pagy"
-gem "pg", "~> 1.6.3"
+gem "pg", "~> 1.7.0"
 gem "propshaft"
 gem "puma", ">= 8.0.2"
 gem "rouge"

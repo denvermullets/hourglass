@@ -62,7 +62,7 @@ module Api
       private
 
       def load_channel
-        @channel = Channel.visible_to(current_user).find_by(id: params[:channel_id] || params[:id])
+        @channel = accessible_channels.find_by(id: params[:channel_id] || params[:id])
         return if @channel
 
         render json: { error: 'Not Found', message: 'Channel not found' }, status: :not_found
@@ -72,7 +72,7 @@ module Api
         @parent = Message.not_deleted.find_by(id: params[:id])
         return render_message_not_found unless @parent
 
-        render_message_not_found unless Channel.visible_to(current_user).exists?(id: @parent.channel_id)
+        render_message_not_found unless accessible_channels.exists?(id: @parent.channel_id)
       end
 
       def render_message_not_found

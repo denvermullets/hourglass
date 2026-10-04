@@ -1,4 +1,4 @@
-<%# locals: server, channel, integration %>
+<%# locals: (server:, channel:, integration:) %>
 <% input_classes = "w-full rounded px-3 py-2.5 font-dm-mono text-xs outline-none transition-colors duration-150 bg-bunker-875 border border-bunker-775 text-bunker-300 placeholder:text-bunker-600 focus:border-granny-smith-apple-600" %>
 <% teams = Array(integration.discovered_teams) %>
 
@@ -20,8 +20,8 @@
         <select data-project-picker-target="team"
                 data-action="change->project-picker#search"
                 class="<%= input_classes %>">
-          <% teams.each do |t| %>
-            <option value="<%= t['id'] %>"><%= t['identifier'] %> &middot; <%= t['name'] %></option>
+          <% teams.each do |team| %>
+            <option value="<%= team['id'] %>"><%= team['identifier'] %> &middot; <%= team['name'] %></option>
           <% end %>
         </select>
       <% else %>
@@ -44,7 +44,7 @@
     </div>
 
     <%= form_with url: link_project_server_channel_settings_path(server, channel),
-          method: :post, scope: nil, data: { project_picker_target: "form" } do |f| %>
+          method: :post, scope: nil, data: { project_picker_target: "form" } do %>
       <%= hidden_field_tag :team_id, '', data: { project_picker_target: "teamInput" } %>
       <%= hidden_field_tag :project_id, '', data: { project_picker_target: "projectInput" } %>
     <% end %>

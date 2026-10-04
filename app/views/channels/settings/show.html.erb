@@ -41,7 +41,7 @@ end %>
             <%= render "channels/settings/privacy_panel", server: @server, channel: @channel %>
           <% end %>
           <%= render "channels/settings/jait_link_panel",
-                server: @server, channel: @channel, integration: @integration,
+                server: @server, channel: @channel,
                 link: @link, link_state: @link_state, linked_project: @linked_project %>
 
           <%= render "channels/settings/mtasks_messages_panel", server: @server, channel: @channel %>
