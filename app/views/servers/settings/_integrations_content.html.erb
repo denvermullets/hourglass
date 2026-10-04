@@ -1,4 +1,4 @@
-<%# locals: server, integration %>
+<%# locals: (server:, integration:) %>
 <div class="max-w-[480px]">
   <%= render "shared/auth_flash" %>
 
@@ -18,9 +18,9 @@
 
     <% if integration.discovered_teams.is_a?(Array) && integration.discovered_teams.any? %>
       <div class="mb-3 flex flex-wrap gap-1.5">
-        <% integration.discovered_teams.each do |t| %>
+        <% integration.discovered_teams.each do |team| %>
           <span class="text-[11px] px-1.5 py-0.5 rounded border border-bunker-775 text-bunker-300 font-dm-mono">
-            <%= t['identifier'] %><% if t['name'].present? %> · <%= t['name'] %><% end %>
+            <%= team['identifier'] %><% if team['name'].present? %> · <%= team['name'] %><% end %>
           </span>
         <% end %>
       </div>

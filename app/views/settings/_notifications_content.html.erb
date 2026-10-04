@@ -12,9 +12,9 @@
         ["mentions", "Mentions"],
         ["thread_replies", "Thread replies"],
         ["reactions", "Reactions to your messages"]
-      ].each do |key, label| %>
+      ].each do |key, option_label| %>
         <label class="flex items-center justify-between py-2 cursor-pointer group">
-          <span class="text-xs text-bunker-300"><%= label %></span>
+          <span class="text-xs text-bunker-300"><%= option_label %></span>
           <div class="relative">
             <%= f.check_box key,
               { checked: user.notification_setting(key), class: "sr-only peer" },
@@ -37,12 +37,12 @@
           ["daily", "Daily"],
           ["weekly", "Weekly"],
           ["real_time", "Real-time"]
-        ].each do |value, label| %>
+        ].each do |value, option_label| %>
           <label class="flex items-center gap-3 py-1.5 cursor-pointer">
             <%= f.radio_button :email_digest, value,
               checked: user.notification_setting("email_digest") == value,
               class: "w-3.5 h-3.5 appearance-none rounded-full border border-bunker-775 bg-bunker-875 checked:border-granny-smith-apple-600 checked:bg-granny-smith-apple-600 cursor-pointer" %>
-            <span class="text-xs text-bunker-300"><%= label %></span>
+            <span class="text-xs text-bunker-300"><%= option_label %></span>
           </label>
         <% end %>
       </div>

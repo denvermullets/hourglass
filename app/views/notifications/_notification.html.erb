@@ -9,11 +9,10 @@
            notifications_path
          end %>
 
+<% link_classes = "flex items-start gap-2.5 px-3 py-2.5 no-underline transition-colors hover:bg-bunker-875 #{'opacity-60' if notification.read?}" %>
+
 <div id="<%= dom_id(notification) %>" class="group">
-  <a href="<%= url %>"
-     data-notification-link
-     data-notification-id="<%= notification.id %>"
-     class="flex items-start gap-2.5 px-3 py-2.5 no-underline transition-colors hover:bg-bunker-875 <%= 'opacity-60' if notification.read? %>">
+  <%= link_to url, class: link_classes, data: { notification_link: "", notification_id: notification.id } do %>
 
     <%# Unread indicator %>
     <div class="flex-shrink-0 mt-1.5">
@@ -52,5 +51,5 @@
         <%= format_timestamp(notification.created_at, style: :notification) %>
       </time>
     </div>
-  </a>
+  <% end %>
 </div>

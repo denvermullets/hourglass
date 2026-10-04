@@ -11,7 +11,8 @@
 # GitHub Repo: https://github.com/marcoroth/herb
 #
 
-version: 0.9.3
+version: 0.11.0
+framework: actionview
 
 # files:
 #   # Additional patterns beyond the defaults (**.html, **.rhtml, **.html.erb, etc.)
@@ -48,6 +49,12 @@ linter:
   rules:
     html-no-unescaped-entities:
       enabled: false
+    # Settings panels and mtasks event bodies pick their partial at runtime by design.
+    actionview-no-dynamic-partial-path:
+      exclude:
+        - 'app/views/settings/_tabs_and_panel.html.erb'
+        - 'app/views/servers/settings/_tabs_and_panel.html.erb'
+        - 'app/views/messages/_mtasks_event.html.erb'
   # rules:
   #   erb-no-extra-newline:
   #     enabled: false
@@ -73,7 +80,6 @@ formatter:
   enabled: false
   indentWidth: 2
   maxLineLength: 80
-
   # # Additional patterns beyond the defaults for formatting
   # include:
   #   - '**/*.xml.erb'

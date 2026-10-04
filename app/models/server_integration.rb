@@ -52,6 +52,28 @@ class ServerIntegration < ApplicationRecord
     Array(discovered_teams).find { |t| t['identifier'].to_s == identifier.to_s }
   end
 
+  # Re-fetch the teams this integration's token can see. Returns false (and
+  # leaves discovered_teams untouched) when mtasks is unreachable or empty.
+  def refresh_discovered_teams!
+    teams = Jait::ApiClient.new(self).discover_teams!
+    return false if teams.blank?
+
+    update!(discovered_teams: teams, last_verified_at: Time.current)
+    true
+  rescue Jait::ApiClient::Error => e
+    Rails.logger.warn("ServerIntegration#refresh_discovered_teams! failed: #{e.class} #{e.message}")
+    false
+  end
+
+  # True when team_id belongs to this integration, refreshing discovered_teams
+  # once if it isn't known yet (mtasks may have added it since the last load).
+  def knows_team?(team_id)
+    return false if team_id.blank?
+    return true if team_for(team_id)
+
+    refresh_discovered_teams! && team_for(team_id).present?
+  end
+
   def client
     @client ||= Jait::ApiClient.new(self)
   end

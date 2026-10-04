@@ -1,4 +1,4 @@
-<%# locals: data, integration, team_id, frame_id %>
+<%# locals: (data:, integration:, team_id:, frame_id:) %>
 <% frame_id ||= "jait-roadmap-#{team_id}" %>
 <% url = "#{integration.base_url}/teams/#{team_id}/roadmap" %>
 <% projects = data['projects'] || [] %>

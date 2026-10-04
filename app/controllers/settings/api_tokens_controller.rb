@@ -34,7 +34,7 @@ class Settings::ApiTokensController < ApplicationController
   private
 
   def current_user_tokens
-    Current.user.api_tokens.active.order(created_at: :desc)
+    Current.user.api_tokens.active.includes(:server).order(created_at: :desc)
   end
 
   def render_tab(status: :ok)
@@ -52,6 +52,6 @@ class Settings::ApiTokensController < ApplicationController
   end
 
   def token_params
-    params.require(:api_token).permit(:name)
+    params.require(:api_token).permit(:name, :server_id)
   end
 end

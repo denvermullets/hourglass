@@ -12,13 +12,33 @@ module Webhooks
         @integration.update!(discovered_teams: [{ 'id' => 21, 'identifier' => 'HOUR', 'name' => 'Hourglass' }])
       end
 
-      def build_delivery(event:, data:)
+      def build_delivery(event:, data:, integration: @integration)
         WebhookDelivery.create!(
           source: WebhookDelivery::SOURCE_MTASKS,
+          server_integration: integration,
           delivery_id: SecureRandom.uuid,
           event_type: event,
           received_at: Time.current,
           payload: { 'event' => event, 'data' => data }
+        )
+      end
+
+      # A second tenant: its own server, JAIT integration, channel and thread
+      # root. Deliveries signed by @integration must never touch any of it.
+      def build_other_server
+        @other_server = servers(:two)
+        @other_integration = ServerIntegration.create!(
+          server: @other_server, kind: ServerIntegration::KIND_JAIT, enabled: true,
+          api_token: 'test-token-2', base_url: 'https://justanotherissuetracker.com',
+          discovered_teams: [{ 'id' => 31, 'identifier' => 'OTH', 'name' => 'Other' }]
+        )
+        @other_channel = @other_server.channels.create!(name: 'elsewhere')
+        @other_message = @other_channel.messages.create!(body: 'root', user: users(:two))
+        @other_project_link = MtasksLink.create!(
+          link_type: MtasksLink::PROJECT_CHANNEL,
+          server_integration: @other_integration, channel: @other_channel,
+          mtasks_team_id: 31, mtasks_project_id: 8,
+          created_by_user: users(:two)
         )
       end
 
@@ -350,6 +370,123 @@ module Webhooks
 
         ProcessLink.call(delivery: delivery)
         assert_nil @channel.reload.mtasks_project_link
+      end
+
+      # ---- cross-server isolation ----
+
+      test 'rejects delivery with no signing integration' do
+        delivery = build_delivery(integration: nil, event: 'link.created', data: {
+                                    'link_type' => 'project_channel',
+                                    'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 21,
+                                    'hourglass_channel_id' => @channel.id
+                                  })
+
+        assert_no_difference 'MtasksLink.count' do
+          result = ProcessLink.call(delivery: delivery)
+          assert_not result.ok
+          assert_match(/no enabled integration/, result.error)
+        end
+      end
+
+      test 'project_channel link.created rejects a channel on another server' do
+        build_other_server
+        @other_project_link.destroy!
+
+        delivery = build_delivery(event: 'link.created', data: {
+                                    'link_type' => 'project_channel',
+                                    'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 21,
+                                    'hourglass_channel_id' => @other_channel.id
+                                  })
+
+        assert_no_difference 'MtasksLink.count' do
+          result = ProcessLink.call(delivery: delivery)
+          assert_not result.ok
+          assert_match(/channel not found/, result.error)
+        end
+      end
+
+      test 'project_channel link.created rejects a team outside the signing integration without probing' do
+        build_other_server
+
+        delivery = build_delivery(event: 'link.created', data: {
+                                    'link_type' => 'project_channel',
+                                    'mtasks_project_id' => 7,
+                                    'mtasks_team_id' => 31, # belongs to @other_integration
+                                    'hourglass_channel_id' => @channel.id
+                                  })
+
+        # Refresh still doesn't surface team 31, and a probe would "find" the
+        # project — the payload team must be rejected rather than probed around.
+        with_stubbed_instance_method(Jait::ApiClient, :discover_teams!,
+                                     [{ 'id' => 21, 'identifier' => 'HOUR', 'name' => 'Hourglass' }]) do
+          with_stubbed_class_method(Jait::Fetcher, :call, { 'id' => 7 }) do
+            assert_no_difference 'MtasksLink.count' do
+              result = ProcessLink.call(delivery: delivery)
+              assert_not result.ok
+              assert_match(/team 31 not in integration/, result.error)
+            end
+          end
+        end
+      end
+
+      test 'project_channel link.removed leaves another server\'s link alone' do
+        build_other_server
+
+        delivery = build_delivery(event: 'link.removed', data: {
+                                    'link_type' => 'project_channel',
+                                    'mtasks_project_id' => 8,
+                                    'hourglass_channel_id' => @other_channel.id
+                                  })
+
+        assert_no_difference 'MtasksLink.count' do
+          result = ProcessLink.call(delivery: delivery)
+          assert_not result.ok
+          assert_match(/channel not found/, result.error)
+        end
+        assert @other_project_link.reload
+      end
+
+      test 'issue_thread link.created rejects a thread on another server' do
+        build_other_server
+
+        delivery = build_delivery(event: 'link.created', data: {
+                                    'link_type' => 'issue_thread',
+                                    'mtasks_issue_id' => 91,
+                                    'hourglass_thread_id' => @other_message.id
+                                  })
+
+        with_stubbed_class_method(Jait::Fetcher, :call, { 'id' => 91, 'project_id' => 8 }) do
+          assert_no_difference 'MtasksLink.count' do
+            result = ProcessLink.call(delivery: delivery)
+            assert_not result.ok
+            assert_match(/thread root message not found/, result.error)
+          end
+        end
+      end
+
+      test 'issue_thread link.removed leaves another server\'s link alone' do
+        build_other_server
+        other_thread_link = MtasksLink.create!(
+          link_type: MtasksLink::ISSUE_THREAD,
+          server_integration: @other_integration, thread: @other_message,
+          mtasks_team_id: 31, mtasks_issue_id: 91,
+          created_by_user: users(:two)
+        )
+
+        delivery = build_delivery(event: 'link.removed', data: {
+                                    'link_type' => 'issue_thread',
+                                    'mtasks_issue_id' => 91,
+                                    'hourglass_thread_id' => @other_message.id
+                                  })
+
+        assert_no_difference 'MtasksLink.count' do
+          result = ProcessLink.call(delivery: delivery)
+          assert_not result.ok
+          assert_match(/thread root message not found/, result.error)
+        end
+        assert other_thread_link.reload
       end
     end
   end

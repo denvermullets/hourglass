@@ -1,4 +1,5 @@
 <% scope_badge_classes = "inline-flex items-center gap-1 rounded border border-bunker-775 bg-bunker-925 px-2 py-0.5 font-dm-mono text-[10px] tracking-[0.1em] uppercase text-bunker-400" %>
+<% server_badge_classes = "inline-flex items-center gap-1 rounded border border-granny-smith-apple-700 bg-bunker-925 px-2 py-0.5 font-dm-mono text-[10px] tracking-[0.06em] text-granny-smith-apple-300 truncate max-w-full" %>
 <% revoke_classes = "rounded px-2.5 py-1.5 font-dm-mono text-[11px] tracking-[0.06em] cursor-pointer transition-colors duration-150 bg-transparent border border-red-800 text-red-400 hover:bg-red-900 hover:text-red-200" %>
 
 <div id="<%= dom_id(token) %>" class="rounded border border-bunker-825 bg-bunker-925 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -8,6 +9,7 @@
       <span class="font-dm-mono text-[10px] text-bunker-600">•••<%= token.digest_preview %></span>
     </div>
     <div class="flex items-center gap-2 flex-wrap">
+      <span class="<%= server_badge_classes %>"><%= token.server&.name || 'all servers' %></span>
       <% token.scopes.each do |s| %>
         <span class="<%= scope_badge_classes %>"><%= s %></span>
       <% end %>

@@ -1,10 +1,10 @@
-<%# locals: data, integration, team_id, frame_id %>
+<%# locals: (data:, integration:, team_id:, frame_id: nil) %>
 <% frame_id ||= "jait-issue-#{team_id}-#{data['id']}" %>
 <% url = "#{integration.base_url}/teams/#{team_id}/issues/#{data['id']}" %>
 <% lane = data['lane'] || {} %>
 <% labels = data['labels'] || [] %>
 <% priority = data['priority'].to_s %>
-<%= turbo_frame_tag frame_id, data: { turbo_permanent: true } do %>
+<turbo-frame id="<%= frame_id %>" data-turbo-permanent>
   <%= link_to url, target: "_blank", rel: "noopener noreferrer",
         class: "jait-card not-prose block max-w-md rounded-lg border border-granny-smith-apple-600 bg-bunker-875 hover:bg-bunker-825 transition px-3 py-2.5 my-1 no-underline" do %>
     <div class="flex items-center justify-between mb-1">
@@ -22,8 +22,8 @@
         <% if priority.present? && priority != 'no_priority' %>
           <span class="px-1.5 py-0.5 rounded border border-bunker-775"><%= priority.tr('_', ' ') %></span>
         <% end %>
-        <% labels.first(3).each do |l| %>
-          <span class="px-1.5 py-0.5 rounded border border-bunker-775"><%= l['name'] %></span>
+        <% labels.first(3).each do |issue_label| %>
+          <span class="px-1.5 py-0.5 rounded border border-bunker-775"><%= issue_label['name'] %></span>
         <% end %>
         <% if data['assignee'] && data['assignee']['name'].present? %>
           <span class="ml-auto inline-flex items-center justify-center w-5 h-5 rounded-full bg-bunker-825 text-bunker-50 text-[10px] font-bold" title="<%= data['assignee']['name'] %>">
@@ -33,4 +33,4 @@
       </div>
     <% end %>
   <% end %>
-<% end %>
+</turbo-frame>

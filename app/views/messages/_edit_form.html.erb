@@ -4,7 +4,7 @@
     and selection) is left intact. Save/cancel still swap it out because those go through
     explicit turbo_stream.replace actions, which ignore turbo-permanent. Mirrors the composer
     in messages/_form.html.erb. %>
-<%= tag.div id: dom_id(message), class: "group flex gap-3 px-2 py-1.5", data: { turbo_permanent: true } do %>
+<div id="<%= dom_id(message) %>" class="group flex gap-3 px-2 py-1.5" data-turbo-permanent>
   <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bunker-825 flex items-center justify-center">
     <span class="text-xs font-syne font-bold text-bunker-300 uppercase"><%= message.user.username[0] %></span>
   </div>
@@ -101,4 +101,4 @@
       </div>
     <% end %>
   </div>
-<% end %>
+</div>

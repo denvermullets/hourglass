@@ -1,4 +1,3 @@
-<% data = message.data || {} %>
 <% timestamp = message.created_at.strftime('%-m/%-d · %H:%M') %>
 <%= tag.div id: dom_id(message), class: "group px-2 py-1 my-0.5", data: { message_user_id: message.user_id, message_created_at: message.created_at.iso8601 } do %>
   <div class="border-l-2 border-granny-smith-apple-600 bg-bunker-925 px-3 py-2 rounded-r font-dm-mono">

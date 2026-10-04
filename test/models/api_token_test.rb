@@ -99,4 +99,23 @@ class ApiTokenTest < ActiveSupport::TestCase
     assert_includes active_ids, fixture_active.id
     assert_not_includes active_ids, fixture_revoked.id
   end
+
+  test 'generate_for binds the token to a server the user belongs to' do
+    token, _raw = ApiToken.generate_for(@user, name: 'bound', server: servers(:one))
+
+    assert_equal servers(:one), token.reload.server
+  end
+
+  test 'cannot bind a token to a server the user is not a member of' do
+    assert_raises(ActiveRecord::RecordInvalid) do
+      ApiToken.generate_for(@user, name: 'foreign', server: servers(:two))
+    end
+  end
+
+  test 'destroying a server destroys its bound tokens instead of unbinding them' do
+    token, _raw = ApiToken.generate_for(@user, name: 'bound', server: servers(:one))
+
+    servers(:one).destroy!
+    assert_not ApiToken.exists?(token.id)
+  end
 end

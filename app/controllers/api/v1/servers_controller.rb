@@ -2,12 +2,12 @@ module Api
   module V1
     class ServersController < BaseController
       def index
-        servers = current_user.servers.order(:name)
+        servers = accessible_servers.order(:name)
         render json: servers.map { |s| ServerSerializer.new(s).as_json }
       end
 
       def show
-        server = current_user.servers.find_by(id: params[:id])
+        server = accessible_servers.find_by(id: params[:id])
         return render_not_found unless server
 
         render json: ServerSerializer.new(server).as_json
