@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "rails", "~> 8.1.4"
+gem "rails", "~> 8.1.4.1"
 
 gem "aws-sdk-s3", require: false
 gem "bcrypt", "~> 3.1.22"
@@ -12,7 +12,7 @@ gem "mission_control-jobs"
 gem "pagy"
 gem "pg", "~> 1.7.0"
 gem "propshaft"
-gem "puma", ">= 8.0.2"
+gem "puma", ">= 8.1.2"
 gem "rouge"
 gem "ruby-vips", "~> 2.3.0"
 gem "solid_cache"
